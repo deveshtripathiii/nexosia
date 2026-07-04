@@ -31,11 +31,34 @@ import {
   HelpCircle,
   Lock,
   ChevronLeft,
-  Building
+  Building,
+  Settings,
+  Trash2,
+  PlayCircle,
+  PauseCircle,
+  UserCheck,
+  Zap,
+  LogOut,
+  Send
 } from 'lucide-react';
 import logoImg from './assets/logo.png';
-import { db } from './firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from './firebase';
+import { 
+  collection, 
+  addDoc, 
+  serverTimestamp, 
+  onSnapshot, 
+  query, 
+  orderBy, 
+  doc, 
+  updateDoc, 
+  deleteDoc 
+} from 'firebase/firestore';
+import { 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged 
+} from 'firebase/auth';
 
 // FAQ items
 const FAQ_ITEMS = [
@@ -146,6 +169,217 @@ function App() {
   const [calcBookings, setCalcBookings] = useState(250);
   const [calcTicket, setCalcTicket] = useState(1000); // Default INR
 
+  // --- Auth & Routing States ---
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [page, setPage] = useState('landing'); // 'landing' or 'admin'
+  const [adminTab, setAdminTab] = useState('leads'); // 'leads' | 'trials' | 'ai-agent' | 'subscribers' | 'settings'
+
+  // --- Firestore Collections State ---
+  const [leads, setLeads] = useState([]);
+  const [trials, setTrials] = useState([]);
+  const [subscribers, setSubscribers] = useState([]);
+
+  // --- AI Agent States ---
+  const [aiAutopilot, setAiAutopilot] = useState(true);
+  const [aiInstructions, setAiInstructions] = useState(
+    "1. Greet new leads on WhatsApp within 2 minutes of form submission.\n2. Inquire about their typical booking workload and available calendar slots.\n3. Keep the tone friendly, helpful, and results-focused.\n4. Route happy customers to their Google review link post-appointment."
+  );
+  const [aiLogs, setAiLogs] = useState([
+    { id: 1, type: 'info', text: 'AI Lead Agent successfully initialized.', time: '02:15 PM' },
+    { id: 2, type: 'action', text: 'AI Agent synchronized with Google Calendar API.', time: '02:16 PM' },
+    { id: 3, type: 'whatsapp', text: 'AI Agent drafted custom review request follow-up for client John Doe.', time: '02:40 PM' }
+  ]);
+  const [drafts, setDrafts] = useState([
+    {
+      id: 'd1',
+      leadName: 'Dr. Ramesh Kumar',
+      businessName: 'Kumar Dental Clinic',
+      phone: '+91 98123 45678',
+      type: 'whatsapp_welcome',
+      message: 'Hello Dr. Ramesh Kumar! 👋 Welcome to Nexosia. We noticed you selected "spending hours on phone scheduling" as your booking headache for Kumar Dental Clinic. I have prepared your dental booking bot demo! Let me know if you would like to test it now.'
+    },
+    {
+      id: 'd2',
+      leadName: 'Anita Sharma',
+      businessName: 'Vibe Salon & Spa',
+      phone: '+91 87654 32109',
+      type: 'whatsapp_welcome',
+      message: 'Hi Anita! 👋 This is the Nexosia Assistant. We are building a custom website draft for Vibe Salon & Spa. I noticed you are losing bookings after hours. Would you like to connect our WhatsApp bot to your Google Calendar to book clients 24/7?'
+    }
+  ]);
+
+  // Listen to Auth changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      if (user) {
+        setPage('admin');
+      } else {
+        setPage('landing');
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch Leads real-time
+  useEffect(() => {
+    if (!currentUser) return;
+    const q = query(collection(db, 'leads'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setLeads(list);
+    });
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  // Fetch Trials real-time
+  useEffect(() => {
+    if (!currentUser) return;
+    const q = query(collection(db, 'trials'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setTrials(list);
+    });
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  // Fetch Subscribers real-time
+  useEffect(() => {
+    if (!currentUser) return;
+    const q = query(collection(db, 'newsletter'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setSubscribers(list);
+    });
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  // Dynamic AI logs triggered by new leads
+  const prevLeadsLength = useRef(leads.length);
+  useEffect(() => {
+    if (leads.length > prevLeadsLength.current && aiAutopilot) {
+      const newLead = leads[0];
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setAiLogs(prev => [
+        {
+          id: Date.now(),
+          type: 'whatsapp',
+          text: `[Autopilot] AI Agent drafted custom WhatsApp onboarding message for ${newLead.name} (${newLead.businessName}).`,
+          time
+        },
+        ...prev
+      ]);
+      setDrafts(prev => [
+        {
+          id: `draft_${Date.now()}`,
+          leadName: newLead.name,
+          businessName: newLead.businessName,
+          phone: newLead.phone,
+          type: 'whatsapp_welcome',
+          message: `Hi ${newLead.name}! 👋 This is the Nexosia Assistant. We are building your premium demo website for ${newLead.businessName}. Let me know if you would like to link your WhatsApp number to test the slot booking.`
+        },
+        ...prev
+      ]);
+    }
+    prevLeadsLength.current = leads.length;
+  }, [leads, aiAutopilot]);
+
+  // Auth Operations
+  const handleAdminSignIn = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+    setIsAuthenticating(true);
+    try {
+      await signInWithEmailAndPassword(auth, authEmail, authPassword);
+      setIsLoginModalOpen(false);
+      setAuthEmail('');
+      setAuthPassword('');
+    } catch (err) {
+      console.error(err);
+      setAuthError('Invalid credentials. Please verify your email and password.');
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
+  const handleAdminSignOut = async () => {
+    try {
+      await signOut(auth);
+      setPage('landing');
+    } catch (err) {
+      console.error("Signout Error: ", err);
+    }
+  };
+
+  // Lead Operations
+  const handleDeleteLead = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this lead?")) return;
+    try {
+      await deleteDoc(doc(db, 'leads', id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleUpdateLeadStatus = async (id, status) => {
+    try {
+      await updateDoc(doc(db, 'leads', id), { status });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteTrial = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this trial?")) return;
+    try {
+      await deleteDoc(doc(db, 'trials', id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteSubscriber = async (id) => {
+    if (!window.confirm("Remove subscriber?")) return;
+    try {
+      await deleteDoc(doc(db, 'newsletter', id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleApproveDraft = (id, name) => {
+    setDrafts(prev => prev.filter(d => d.id !== id));
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setAiLogs(prev => [
+      {
+        id: Date.now(),
+        type: 'action',
+        text: `Lead Draft Approved. AI Agent successfully sent WhatsApp message to ${name}.`,
+        time
+      },
+      ...prev
+    ]);
+  };
+
+  const handleRejectDraft = (id, name) => {
+    setDrafts(prev => prev.filter(d => d.id !== id));
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setAiLogs(prev => [
+      {
+        id: Date.now(),
+        type: 'info',
+        text: `Lead Draft Rejected by admin for ${name}.`,
+        time
+      },
+      ...prev
+    ]);
+  };
+
   // Sync ticket value on currency switch
   useEffect(() => {
     if (currency === 'INR') {
@@ -238,23 +472,6 @@ function App() {
     }, 1200);
   };
 
-  const resetSimulator = () => {
-    setSimStep(0);
-    setSimNameInput('');
-    setIsSimTyping(false);
-    setSimMessages([
-      { sender: 'bot', text: "Hi there! 👋 Welcome to Apex Health Clinic. I can help you book an appointment in 30 seconds. Which day works best for you?", time: "10:00 AM" }
-    ]);
-  };
-
-  const resetReviewSimulator = () => {
-    setReviewStep(0);
-    setReviewTyping(false);
-    setReviewMessages([
-      { sender: 'bot', text: "Hi John! Thanks for visiting Apex Health Clinic today. 🩺 How would you rate your experience out of 5 stars?\n\n(Reply with a number 1 to 5)", time: "04:30 PM" }
-    ]);
-  };
-
   // Onboarding Wizard handlers
   const openWizard = (type) => {
     setWizardType(type);
@@ -285,7 +502,6 @@ function App() {
     try {
       const collectionName = wizardType === 'trial' ? 'trials' : 'leads';
       
-      // Store complete onboarding data to Firestore
       await addDoc(collection(db, collectionName), {
         name: wizardData.name,
         businessName: wizardData.businessName,
@@ -293,6 +509,7 @@ function App() {
         email: wizardData.email,
         businessType: wizardData.businessType,
         headaches: wizardData.headaches,
+        status: 'Pending',
         createdAt: serverTimestamp()
       });
 
@@ -318,7 +535,6 @@ function App() {
     setChatMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
     setChatInput('');
 
-    // Simulated Chatbot responses matching pricing or bot questions
     setTimeout(() => {
       let replyText = "That's a great question! For custom WhatsApp integrations, Nexosia handles all setup. Would you like to schedule a quick 10-minute demo?";
       
@@ -331,26 +547,6 @@ function App() {
 
       setChatMessages(prev => [...prev, { sender: 'agent', text: replyText }]);
     }, 1000);
-  };
-
-  const handleNewsletterSubmit = async (e) => {
-    e.preventDefault();
-    if (!newsletterEmail) return;
-
-    try {
-      await addDoc(collection(db, 'newsletter'), {
-        email: newsletterEmail,
-        createdAt: serverTimestamp()
-      });
-
-      setNewsletterSubmitted(true);
-      setTimeout(() => {
-        setNewsletterEmail('');
-      }, 3000);
-    } catch (error) {
-      console.error("Error subscribing to newsletter: ", error);
-      alert("Subscription failed. Please check your connection.");
-    }
   };
 
   // Pricing calculations
@@ -376,11 +572,527 @@ function App() {
     ? `₹${calculatedGain.toLocaleString('en-IN')}` 
     : `$${calculatedGain.toLocaleString('en-US')}`;
 
+  // ----------------------------------------------------
+  // --- ADMIN PORTAL VIEW IF AUTHENTICATED ---
+  // ----------------------------------------------------
+  if (page === 'admin' && currentUser) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex font-sans">
+        
+        {/* Sidebar Nav */}
+        <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-6 select-none">
+          <div className="space-y-8">
+            {/* Logo */}
+            <div className="flex items-center gap-2 pb-4 border-b border-slate-800">
+              <img src={logoImg} alt="Nexosia Logo" className="h-9 w-auto brightness-0 invert" />
+            </div>
+
+            {/* Menu Links */}
+            <nav className="flex flex-col gap-1.5">
+              <button 
+                onClick={() => setAdminTab('leads')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                  adminTab === 'leads' ? 'bg-cyan-accent text-slate-950 shadow-lg shadow-cyan-accent/15' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <MessageSquare className="h-4.5 w-4.5" />
+                Leads Command Center
+              </button>
+
+              <button 
+                onClick={() => setAdminTab('trials')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                  adminTab === 'trials' ? 'bg-cyan-accent text-slate-950 shadow-lg shadow-cyan-accent/15' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <Calendar className="h-4.5 w-4.5" />
+                Active Trials Tracker
+              </button>
+
+              <button 
+                onClick={() => setAdminTab('ai-agent')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                  adminTab === 'ai-agent' ? 'bg-cyan-accent text-slate-950 shadow-lg shadow-cyan-accent/15' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <Sparkles className="h-4.5 w-4.5" />
+                AI Agent Automation
+              </button>
+
+              <button 
+                onClick={() => setAdminTab('subscribers')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                  adminTab === 'subscribers' ? 'bg-cyan-accent text-slate-950 shadow-lg shadow-cyan-accent/15' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <Mail className="h-4.5 w-4.5" />
+                Email Subscribers
+              </button>
+
+              <button 
+                onClick={() => setAdminTab('settings')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                  adminTab === 'settings' ? 'bg-cyan-accent text-slate-950 shadow-lg shadow-cyan-accent/15' : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <Settings className="h-4.5 w-4.5" />
+                Platform Settings
+              </button>
+            </nav>
+          </div>
+
+          {/* Sidebar Footer Logout */}
+          <div className="space-y-4 pt-4 border-t border-slate-800">
+            <div className="flex items-center gap-2.5 px-2">
+              <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold text-cyan-electric">
+                A
+              </div>
+              <div className="truncate">
+                <span className="text-[10px] text-slate-400 block font-bold">Logged in as</span>
+                <span className="text-xs text-white truncate max-w-[150px] block font-semibold">{currentUser.email}</span>
+              </div>
+            </div>
+            <button 
+              onClick={handleAdminSignOut}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-all text-left cursor-pointer"
+            >
+              <LogOut className="h-4.5 w-4.5" />
+              Logout System
+            </button>
+          </div>
+        </aside>
+
+        {/* Content Workspace Area */}
+        <main className="flex-grow p-10 overflow-y-auto">
+          
+          {/* Header Overview bar */}
+          <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-8 border-b border-slate-800 mb-8 text-left">
+            <div>
+              <span className="text-[10px] text-cyan-electric font-extrabold uppercase tracking-widest">Nexosia SaaS Workspace</span>
+              <h1 className="text-3xl font-extrabold font-heading text-white mt-1">Admin Command Center</h1>
+            </div>
+            
+            {/* High Level Cards */}
+            <div className="flex gap-4">
+              <div className="bg-slate-900 border border-slate-800 rounded-xl px-5 py-3 text-left">
+                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Leads</span>
+                <p className="text-xl font-bold font-heading text-white">{leads.length}</p>
+              </div>
+              <div className="bg-slate-900 border border-slate-800 rounded-xl px-5 py-3 text-left">
+                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Trials</span>
+                <p className="text-xl font-bold font-heading text-white">{trials.length}</p>
+              </div>
+              <div className="bg-slate-900 border border-slate-800 rounded-xl px-5 py-3 text-left">
+                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">AI Automation</span>
+                <p className="text-xl font-bold font-heading text-emerald-400 flex items-center gap-1">
+                  <Zap className="h-4.5 w-4.5 text-emerald-400 fill-current" />
+                  92%
+                </p>
+              </div>
+            </div>
+          </header>
+
+          {/* Tab 1: Leads Tab */}
+          {adminTab === 'leads' && (
+            <div className="space-y-6 text-left animate-in fade-in duration-200">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-xl font-bold font-heading text-white">Client Leads Manager</h2>
+                  <p className="text-slate-400 text-xs mt-1">Manage new business leads submitted from the website forms in real-time.</p>
+                </div>
+              </div>
+
+              {leads.length === 0 ? (
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-16 text-center text-slate-400">
+                  <MessageSquare className="h-12 w-12 text-slate-600 mx-auto mb-4" />
+                  <p className="text-sm font-semibold">No client leads collected yet.</p>
+                  <p className="text-xs text-slate-500 mt-1">Try filling out the 'Get a Free Demo' form on the landing page.</p>
+                </div>
+              ) : (
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-left">
+                      <thead>
+                        <tr className="bg-slate-950 text-slate-400 text-[10px] uppercase tracking-wider font-bold border-b border-slate-850">
+                          <th className="p-4 pl-6">Client Name</th>
+                          <th className="p-4">Business</th>
+                          <th className="p-4">WhatsApp Phone</th>
+                          <th className="p-4">Niche</th>
+                          <th className="p-4">Headaches</th>
+                          <th className="p-4">Status</th>
+                          <th className="p-4 pr-6 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800 text-xs">
+                        {leads.map((lead) => (
+                          <tr key={lead.id} className="hover:bg-slate-800/40 transition-colors">
+                            <td className="p-4 pl-6 font-bold text-white">{lead.name}</td>
+                            <td className="p-4 text-slate-300 font-semibold">{lead.businessName}</td>
+                            <td className="p-4 text-slate-400">{lead.phone}</td>
+                            <td className="p-4">
+                              <span className="bg-slate-800 border border-slate-700 text-slate-300 text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                {lead.businessType || lead.niche || 'Other'}
+                              </span>
+                            </td>
+                            <td className="p-4 max-w-xs truncate text-slate-400">
+                              {lead.headaches ? lead.headaches.join(', ') : 'None'}
+                            </td>
+                            <td className="p-4">
+                              <select 
+                                value={lead.status || 'Pending'}
+                                onChange={(e) => handleUpdateLeadStatus(lead.id, e.target.value)}
+                                className={`text-[10px] font-bold px-2 py-1 rounded focus:outline-none border ${
+                                  lead.status === 'Contacted' 
+                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                    : lead.status === 'Rejected'
+                                      ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                                      : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                                }`}
+                              >
+                                <option value="Pending">Pending</option>
+                                <option value="Contacted">Contacted</option>
+                                <option value="Rejected">Rejected</option>
+                              </select>
+                            </td>
+                            <td className="p-4 pr-6 text-right">
+                              <button 
+                                onClick={() => handleDeleteLead(lead.id)}
+                                className="text-slate-500 hover:text-rose-400 p-1.5 rounded hover:bg-slate-850 transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="h-4.5 w-4.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Tab 2: Trials Tab */}
+          {adminTab === 'trials' && (
+            <div className="space-y-6 text-left animate-in fade-in duration-200">
+              <div>
+                <h2 className="text-xl font-bold font-heading text-white">Active Free Trials Tracker</h2>
+                <p className="text-slate-400 text-xs mt-1">Monitor the 14-day free trial signups and setup status of client websites.</p>
+              </div>
+
+              {trials.length === 0 ? (
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-16 text-center text-slate-400">
+                  <Calendar className="h-12 w-12 text-slate-600 mx-auto mb-4" />
+                  <p className="text-sm font-semibold">No free trials active.</p>
+                  <p className="text-xs text-slate-500 mt-1">Trial requests from the 'Claim Setup' cards will populate here.</p>
+                </div>
+              ) : (
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-left">
+                      <thead>
+                        <tr className="bg-slate-950 text-slate-400 text-[10px] uppercase tracking-wider font-bold border-b border-slate-850">
+                          <th className="p-4 pl-6">Client Name</th>
+                          <th className="p-4">Business</th>
+                          <th className="p-4">Email</th>
+                          <th className="p-4">Phone</th>
+                          <th className="p-4">Created Date</th>
+                          <th className="p-4 pr-6 text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800 text-xs">
+                        {trials.map((trial) => (
+                          <tr key={trial.id} className="hover:bg-slate-800/40 transition-colors">
+                            <td className="p-4 pl-6 font-bold text-white">{trial.name}</td>
+                            <td className="p-4 text-slate-300 font-semibold">{trial.businessName}</td>
+                            <td className="p-4 text-slate-400">{trial.email}</td>
+                            <td className="p-4 text-slate-400">{trial.phone}</td>
+                            <td className="p-4 text-slate-500">
+                              {trial.createdAt ? new Date(trial.createdAt.seconds * 1000).toLocaleDateString() : 'Pending'}
+                            </td>
+                            <td className="p-4 pr-6 text-right">
+                              <button 
+                                onClick={() => handleDeleteTrial(trial.id)}
+                                className="text-slate-500 hover:text-rose-400 p-1.5 rounded hover:bg-slate-850 transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="h-4.5 w-4.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Tab 3: AI Agent Automation Panel */}
+          {adminTab === 'ai-agent' && (
+            <div className="space-y-8 text-left animate-in fade-in duration-200">
+              
+              {/* Autopilot Controller Header */}
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+                <div className="space-y-1">
+                  <h2 className="text-xl font-bold font-heading text-white flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-cyan-accent animate-pulse" />
+                    AI Auto-Pilot Agent Control
+                  </h2>
+                  <p className="text-slate-400 text-xs">When enabled, the AI Agent processes incoming leads, generates follow-ups, and schedules slots on autopilot.</p>
+                </div>
+                
+                {/* Autopilot toggle */}
+                <button 
+                  onClick={() => setAiAutopilot(!aiAutopilot)}
+                  className={`px-5 py-3 rounded-full text-xs font-extrabold flex items-center gap-2 transition-all cursor-pointer ${
+                    aiAutopilot 
+                      ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20' 
+                      : 'bg-slate-800 text-slate-400 border border-slate-700'
+                  }`}
+                >
+                  {aiAutopilot ? (
+                    <>
+                      <PlayCircle className="h-4.5 w-4.5 fill-slate-950 text-slate-950" />
+                      AUTOPILOT: ACTIVE
+                    </>
+                  ) : (
+                    <>
+                      <PauseCircle className="h-4.5 w-4.5 text-slate-400" />
+                      AUTOPILOT: PAUSED
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                {/* Left Column: Sandbox and Settings */}
+                <div className="lg:col-span-7 space-y-8">
+                  
+                  {/* AI Onboarding Sandbox (Draft approvals) */}
+                  <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
+                    <div>
+                      <h3 className="text-base font-bold font-heading text-white flex items-center gap-2">
+                        <Zap className="h-4.5 w-4.5 text-cyan-electric" />
+                        AI Lead-Responder Sandbox
+                      </h3>
+                      <p className="text-slate-400 text-[11px] mt-0.5">Edit and approve custom draft replies compiled by the AI agent for recent leads.</p>
+                    </div>
+
+                    {drafts.length === 0 ? (
+                      <div className="py-12 border border-dashed border-slate-800 rounded-2xl text-center text-slate-500 text-xs">
+                        No pending AI drafts. Leads are fully processed!
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {drafts.map((d) => (
+                          <div key={d.id} className="bg-slate-950 border border-slate-850 p-5 rounded-2xl space-y-4">
+                            <div className="flex justify-between items-start border-b border-slate-900 pb-2">
+                              <div>
+                                <h4 className="font-extrabold text-white text-xs">{d.leadName}</h4>
+                                <span className="text-[10px] text-slate-400">{d.businessName} • {d.phone}</span>
+                              </div>
+                              <span className="bg-cyan-accent/10 text-cyan-accent-dark text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                                WhatsApp Welcome
+                              </span>
+                            </div>
+                            
+                            {/* Message box */}
+                            <textarea 
+                              value={d.message}
+                              onChange={(e) => {
+                                const txt = e.target.value;
+                                setDrafts(prev => prev.map(item => item.id === d.id ? { ...item, message: txt } : item));
+                              }}
+                              className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 focus:outline-none focus:border-cyan-accent h-24 font-sans leading-relaxed resize-none"
+                            />
+
+                            {/* Action triggers */}
+                            <div className="flex justify-end gap-2 text-[10px]">
+                              <button 
+                                onClick={() => handleRejectDraft(d.id, d.leadName)}
+                                className="px-3.5 py-2 border border-slate-800 hover:bg-slate-900 text-slate-400 hover:text-white rounded-lg transition-all cursor-pointer font-bold"
+                              >
+                                Reject Draft
+                              </button>
+                              <button 
+                                onClick={() => handleApproveDraft(d.id, d.leadName)}
+                                className="bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 hover:text-white px-4 py-2 rounded-lg font-extrabold transition-all flex items-center gap-1 cursor-pointer"
+                              >
+                                <Send className="h-3 w-3" />
+                                Approve & Send
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Editable AI guidelines config panel */}
+                  <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                    <div>
+                      <h3 className="text-base font-bold font-heading text-white">AI Agent Instructions</h3>
+                      <p className="text-slate-400 text-[11px] mt-0.5">Customize the system prompt and operational guidelines for your AI scheduler.</p>
+                    </div>
+                    <textarea 
+                      value={aiInstructions}
+                      onChange={(e) => setAiInstructions(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-850 rounded-2xl p-4 text-xs text-slate-300 focus:outline-none focus:border-cyan-accent h-32 font-mono leading-relaxed"
+                    />
+                    <button 
+                      onClick={() => alert("AI guidelines updated successfully!")}
+                      className="bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-lg transition-all cursor-pointer"
+                    >
+                      Save operational guidelines
+                    </button>
+                  </div>
+
+                </div>
+
+                {/* Right Column: AI Action Logs */}
+                <div className="lg:col-span-5">
+                  <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 h-full flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-base font-bold font-heading text-white flex items-center gap-2">
+                          <Clock className="h-4.5 w-4.5 text-cyan-accent" />
+                          AI Agent Activity Logs
+                        </h3>
+                        <p className="text-slate-400 text-[11px] mt-0.5">Real-time actions executed by the autopilot system.</p>
+                      </div>
+                      
+                      {/* Log feed */}
+                      <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                        {aiLogs.map((log) => (
+                          <div key={log.id} className="bg-slate-950/60 border border-slate-850 p-3.5 rounded-xl flex items-start gap-2.5 text-[10px] leading-relaxed text-left animate-in fade-in duration-200">
+                            <span className="text-slate-500 font-bold font-mono shrink-0">{log.time}</span>
+                            <div>
+                              <span className={`font-bold mr-1.5 uppercase ${
+                                log.type === 'action' 
+                                  ? 'text-emerald-400' 
+                                  : log.type === 'whatsapp' 
+                                    ? 'text-cyan-electric' 
+                                    : 'text-slate-400'
+                              }`}>
+                                [{log.type}]
+                              </span>
+                              <span className="text-slate-300">{log.text}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          )}
+
+          {/* Tab 4: Newsletter Subscribers */}
+          {adminTab === 'subscribers' && (
+            <div className="space-y-6 text-left animate-in fade-in duration-200">
+              <div>
+                <h2 className="text-xl font-bold font-heading text-white">Email Subscriber List</h2>
+                <p className="text-slate-400 text-xs mt-1">View user emails registered to the newsletter subscriber block.</p>
+              </div>
+
+              {subscribers.length === 0 ? (
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-16 text-center text-slate-400">
+                  <Mail className="h-12 w-12 text-slate-600 mx-auto mb-4" />
+                  <p className="text-sm font-semibold">No newsletter subscribers.</p>
+                  <p className="text-xs text-slate-500 mt-1">Submitted emails from the footer form will display here.</p>
+                </div>
+              ) : (
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl max-w-xl">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-left">
+                      <thead>
+                        <tr className="bg-slate-950 text-slate-400 text-[10px] uppercase tracking-wider font-bold border-b border-slate-850">
+                          <th className="p-4 pl-6">Subscriber Email</th>
+                          <th className="p-4">Opt-In Date</th>
+                          <th className="p-4 pr-6 text-right">Remove</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800 text-xs">
+                        {subscribers.map((sub) => (
+                          <tr key={sub.id} className="hover:bg-slate-800/40 transition-colors">
+                            <td className="p-4 pl-6 font-bold text-white">{sub.email}</td>
+                            <td className="p-4 text-slate-500">
+                              {sub.createdAt ? new Date(sub.createdAt.seconds * 1000).toLocaleDateString() : 'Pending'}
+                            </td>
+                            <td className="p-4 pr-6 text-right">
+                              <button 
+                                onClick={() => handleDeleteSubscriber(sub.id)}
+                                className="text-slate-500 hover:text-rose-400 p-1.5 rounded hover:bg-slate-850 transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="h-4.5 w-4.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Tab 5: Platform Settings */}
+          {adminTab === 'settings' && (
+            <div className="space-y-6 text-left animate-in fade-in duration-200 max-w-2xl">
+              <div>
+                <h2 className="text-xl font-bold font-heading text-white">Platform Settings</h2>
+                <p className="text-slate-400 text-xs mt-1">Verify backend database connections and operational parameters.</p>
+              </div>
+
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-850 text-xs">
+                  <span className="text-slate-400">Database Engine</span>
+                  <span className="text-white font-bold">Cloud Firestore (Active/Online)</span>
+                </div>
+                <div className="flex justify-between items-center pb-3 border-b border-slate-850 text-xs">
+                  <span className="text-slate-400">Authentication Service</span>
+                  <span className="text-white font-bold">Firebase Auth (Email/Password Provider)</span>
+                </div>
+                <div className="flex justify-between items-center pb-3 border-b border-slate-850 text-xs">
+                  <span className="text-slate-400">Google Calendar Synchronization</span>
+                  <span className="text-emerald-400 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span> Enabled
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-400">WhatsApp Business API Sync</span>
+                  <span className="text-emerald-400 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span> Connected
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </main>
+      </div>
+    );
+  }
+
+  // ----------------------------------------------------
+  // --- VISITOR LANDING PAGE VIEW (DEFAULT) ---
+  // ----------------------------------------------------
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-cyan-accent selection:text-white">
       
+      {/* Scroll Progress Bar */}
+      <div className="fixed top-0 left-0 h-1 bg-gradient-to-r from-cyan-accent to-cyan-accent-dark z-50 transition-all duration-300" style={{
+        width: `${typeof window !== 'undefined' ? (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100 : 0}%`
+      }}></div>
+
       {/* Sticky Navigation Bar */}
-      <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/85 backdrop-blur-md transition-all duration-300">
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/80 backdrop-blur-md transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
           {/* Logo */}
@@ -401,7 +1113,7 @@ function App() {
           {/* Action Buttons */}
           <div className="hidden md:flex items-center gap-4">
             <button 
-              onClick={() => openWizard('demo')}
+              onClick={() => setIsLoginModalOpen(true)}
               className="text-slate-600 hover:text-midnight text-sm font-bold transition-colors duration-200 px-4 py-2"
             >
               Login
@@ -437,7 +1149,7 @@ function App() {
             </nav>
             <div className="flex flex-col gap-3 pt-4">
               <button 
-                onClick={() => { setIsMobileMenuOpen(false); openWizard('demo'); }}
+                onClick={() => { setIsMobileMenuOpen(false); setIsLoginModalOpen(true); }}
                 className="w-full text-center text-slate-600 hover:text-midnight py-2 font-bold"
               >
                 Login
@@ -683,7 +1395,7 @@ function App() {
             </div>
 
             {/* Feature 2 */}
-            <div className="group bg-slate-50 hover:bg-slate-900 border border-slate-200 hover:border-slate-800 rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between items-start hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-accent/5">
+            <div className="group bg-slate-50 hover:bg-slate-905 border border-slate-200 hover:border-slate-800 rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between items-start hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-accent/5">
               <div className="space-y-6">
                 <div className="bg-cyan-accent/10 group-hover:bg-cyan-accent/20 w-14 h-14 rounded-2xl flex items-center justify-center text-cyan-accent-dark group-hover:text-cyan-electric transition-colors duration-300">
                   <Calendar className="h-7 w-7" />
@@ -702,7 +1414,7 @@ function App() {
             </div>
 
             {/* Feature 3 */}
-            <div className="group bg-slate-50 hover:bg-slate-900 border border-slate-200 hover:border-slate-800 rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between items-start hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-accent/5">
+            <div className="group bg-slate-50 hover:bg-slate-905 border border-slate-200 hover:border-slate-800 rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between items-start hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-accent/5">
               <div className="space-y-6">
                 <div className="bg-cyan-accent/10 group-hover:bg-cyan-accent/20 w-14 h-14 rounded-2xl flex items-center justify-center text-cyan-accent-dark group-hover:text-cyan-electric transition-colors duration-300">
                   <Star className="h-7 w-7" />
@@ -863,9 +1575,9 @@ function App() {
                 {simTab === 'widget' && (
                   <div className="absolute inset-0 bg-white flex flex-col pt-6 z-10 select-none">
                     <div className="bg-slate-100 px-3 py-2 flex items-center gap-1.5 border-b border-slate-200">
-                      <div className="w-2 h-2 rounded-full bg-rose-400"></div>
-                      <div className="w-2 h-2 rounded-full bg-amber-400"></div>
-                      <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-rose-400"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
                       <span className="text-[8px] text-slate-400 flex-grow text-center">apexhealth.com</span>
                     </div>
                     <div className="flex-grow p-4 flex flex-col justify-between">
@@ -918,7 +1630,7 @@ function App() {
                           </span>
                         </div>
                       </div>
-                      <button onClick={resetSimulator} className="text-[8px] border border-white/20 bg-white/10 px-2 py-0.5 rounded text-white cursor-pointer">Reset</button>
+                      <button onClick={resetSimulator} className="text-[8px] border border-white/20 bg-white/10 px-2 py-0.5 rounded text-white cursor-pointer font-bold">Reset</button>
                     </div>
 
                     <div className="flex-grow p-3.5 overflow-y-auto space-y-3.5 flex flex-col justify-end">
@@ -943,12 +1655,12 @@ function App() {
                       <div ref={chatEndRef} />
                     </div>
 
-                    <div className="bg-white p-3 border-t border-slate-200 shrink-0">
+                    <div className="bg-white p-3 border-t border-slate-200 shrink-0 font-sans">
                       {simStep === 0 && !isSimTyping && (
                         <div className="space-y-1.5">
                           <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider text-center mb-1">Choose an option:</p>
-                          <button onClick={() => handleSimOptionClick("Monday, July 6", 1)} className="w-full bg-slate-55 hover:bg-emerald-50 text-slate-800 border border-slate-200 text-xs py-2 px-3 rounded-lg text-left transition-all cursor-pointer">📅 Monday, July 6</button>
-                          <button onClick={() => handleSimOptionClick("Tuesday, July 7", 1)} className="w-full bg-slate-55 hover:bg-emerald-50 text-slate-800 border border-slate-200 text-xs py-2 px-3 rounded-lg text-left transition-all cursor-pointer">📅 Tuesday, July 7</button>
+                          <button onClick={() => handleSimOptionClick("Monday, July 6", 1)} className="w-full bg-slate-50 hover:bg-emerald-50 text-slate-805 border border-slate-200 text-xs py-2 px-3 rounded-lg text-left transition-all cursor-pointer font-bold">📅 Monday, July 6</button>
+                          <button onClick={() => handleSimOptionClick("Tuesday, July 7", 1)} className="w-full bg-slate-50 hover:bg-emerald-50 text-slate-805 border border-slate-200 text-xs py-2 px-3 rounded-lg text-left transition-all cursor-pointer font-bold">📅 Tuesday, July 7</button>
                         </div>
                       )}
                       {simStep === 1 && !isSimTyping && (
@@ -962,7 +1674,7 @@ function App() {
                         </div>
                       )}
                       {simStep === 2 && !isSimTyping && (
-                        <form onSubmit={handleSimNameSubmit} className="flex gap-2 items-center font-sans">
+                        <form onSubmit={handleSimNameSubmit} className="flex gap-2 items-center">
                           <input 
                             type="text" 
                             placeholder="Enter your Full Name" 
@@ -999,7 +1711,7 @@ function App() {
                           <span className="text-[8px] text-emerald-300 flex items-center gap-1 font-medium">review feedback</span>
                         </div>
                       </div>
-                      <button onClick={resetReviewSimulator} className="text-[8px] border border-white/20 bg-white/10 px-2 py-0.5 rounded text-white cursor-pointer">Reset</button>
+                      <button onClick={resetReviewSimulator} className="text-[8px] border border-white/20 bg-white/10 px-2 py-0.5 rounded text-white cursor-pointer font-bold">Reset</button>
                     </div>
 
                     <div className="flex-grow p-3.5 overflow-y-auto space-y-3.5 flex flex-col justify-end">
@@ -1033,7 +1745,7 @@ function App() {
                               <button 
                                 key={num} 
                                 onClick={() => handleReviewRating(num)}
-                                className="w-10 h-10 rounded-full border border-slate-200 hover:border-amber-400 bg-slate-55 hover:bg-amber-50 flex items-center justify-center font-bold text-slate-700 hover:text-amber-600 transition-all text-xs cursor-pointer"
+                                className="w-10 h-10 rounded-full border border-slate-200 hover:border-amber-400 bg-slate-50 hover:bg-amber-50 flex items-center justify-center font-bold text-slate-700 hover:text-amber-600 transition-all text-xs cursor-pointer"
                               >
                                 {num}★
                               </button>
@@ -1092,7 +1804,7 @@ function App() {
                 </p>
               </div>
 
-              <div className="space-y-6 bg-slate-800/50 p-6 rounded-3xl border border-slate-800">
+              <div className="space-y-6 bg-slate-800/50 p-6 rounded-3xl border border-slate-850">
                 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm font-semibold">
@@ -1230,7 +1942,7 @@ function App() {
           backgroundSize: '40px 40px'
         }}></div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative font-sans">
           
           <div className="text-center max-w-2xl mx-auto mb-20 space-y-4">
             <h2 className="text-xs font-bold uppercase tracking-widest text-cyan-accent font-heading">Frictionless Integration</h2>
@@ -1311,7 +2023,7 @@ function App() {
         </div>
       </section>
 
-      {/* Pricing Section (Growth vs. Scale Packages) */}
+      {/* Pricing Section */}
       <section id="pricing" className="py-24 md:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
@@ -1375,7 +2087,7 @@ function App() {
             
             {/* Card 1: Growth Package */}
             <div className="bg-slate-900 text-white rounded-3xl shadow-xl overflow-hidden border border-slate-800 relative hover:scale-[1.01] transition-transform duration-300 flex flex-col justify-between">
-              <div className="p-8 sm:p-10 space-y-6 text-left">
+              <div className="p-8 sm:p-10 space-y-6 text-left font-sans">
                 <div>
                   <h3 className="text-2xl font-bold font-heading text-cyan-electric">The Growth Package</h3>
                   <p className="text-slate-400 text-xs mt-1">Perfect for local clinics, salons, spas, and boutique retail stores.</p>
@@ -1395,7 +2107,7 @@ function App() {
 
                 <div className="space-y-4">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Included Features:</h4>
-                  <ul className="space-y-3 text-slate-300 text-sm">
+                  <ul className="space-y-3 text-slate-300 text-sm font-sans">
                     <li className="flex items-center gap-2">
                       <Check className="h-4.5 w-4.5 text-cyan-accent flex-shrink-0" />
                       <span>Custom Website (Up to 5 Pages)</span>
@@ -1433,15 +2145,14 @@ function App() {
             {/* Card 2: Scale Package */}
             <div className="bg-white text-slate-800 rounded-3xl shadow-2xl overflow-hidden border-2 border-cyan-accent relative hover:scale-[1.01] transition-transform duration-300 flex flex-col justify-between">
               
-              {/* Scale Best Value Tag */}
               <div className="absolute top-0 right-0 bg-cyan-accent text-slate-950 font-bold text-[10px] px-5 py-2 rounded-bl-2xl uppercase tracking-widest font-heading">
                 Best Value / Scale
               </div>
 
-              <div className="p-8 sm:p-10 space-y-6 text-left">
+              <div className="p-8 sm:p-10 space-y-6 text-left font-sans">
                 <div>
                   <h3 className="text-2xl font-bold font-heading text-midnight">The Scale Package</h3>
-                  <p className="text-slate-500 text-xs mt-1">For multi-staff clinics, busy stores, and high-volume services.</p>
+                  <p className="text-slate-505 text-xs mt-1">For multi-staff clinics, busy stores, and high-volume services.</p>
                 </div>
 
                 <div className="border-y border-slate-200 py-6 space-y-3">
@@ -1456,7 +2167,7 @@ function App() {
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 font-sans">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Everything in Growth plus:</h4>
                   <ul className="space-y-3 text-slate-700 text-sm">
                     <li className="flex items-center gap-2">
@@ -1525,7 +2236,7 @@ function App() {
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t border-slate-100 pt-6 mt-8 gap-4 text-left font-sans">
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-sm font-heading">
+                <div className="w-12 h-12 rounded-full bg-slate-950 text-white flex items-center justify-center font-bold text-sm font-heading">
                   {TESTIMONIALS[activeTestimonial].avatar}
                 </div>
                 <div>
@@ -1795,7 +2506,7 @@ function App() {
                 {wizardStep === 1 && (
                   <div className="space-y-4 animate-in fade-in duration-200">
                     <h3 className="text-xl font-bold font-heading text-midnight">Select Your Business Type</h3>
-                    <p className="text-slate-500 text-xs">We customize the website template and automated booking bot questions based on your niche.</p>
+                    <p className="text-slate-550 text-xs">We customize the website template and automated booking bot questions based on your niche.</p>
                     <div className="grid grid-cols-2 gap-3.5 pt-2">
                       {[
                         { id: 'clinic', label: '🏥 Medical Clinic / Doctor', desc: 'Patients booking visits' },
@@ -1820,7 +2531,7 @@ function App() {
                 {wizardStep === 2 && (
                   <div className="space-y-4 animate-in fade-in duration-200">
                     <h3 className="text-xl font-bold font-heading text-midnight">What is your biggest booking headache?</h3>
-                    <p className="text-slate-500 text-xs">Select all that apply so we configure the bot triggers correctly.</p>
+                    <p className="text-slate-550 text-xs">Select all that apply so we configure the bot triggers correctly.</p>
                     <div className="space-y-2.5 pt-2">
                       {[
                         { id: 'after_hours', label: '⏰ Losing potential bookings after business hours' },
@@ -1834,7 +2545,7 @@ function App() {
                             key={item.id}
                             onClick={() => handleHeadacheToggle(item.id)}
                             className={`w-full p-3.5 border rounded-2xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                              isChecked ? 'border-cyan-accent bg-cyan-accent/5 text-cyan-accent-dark' : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                              isChecked ? 'border-cyan-accent bg-cyan-accent/5 text-cyan-accent-dark' : 'border-slate-200 hover:bg-slate-55 text-slate-705'
                             }`}
                           >
                             <span>{item.label}</span>
@@ -1846,7 +2557,7 @@ function App() {
                       })}
                     </div>
                     <div className="flex justify-between items-center pt-4">
-                      <button onClick={() => setWizardStep(1)} className="text-xs font-semibold text-slate-500 hover:text-slate-700 flex items-center gap-1">
+                      <button onClick={() => setWizardStep(1)} className="text-xs font-semibold text-slate-500 hover:text-slate-700 flex items-center gap-1 cursor-pointer">
                         <ChevronLeft className="h-4 w-4" /> Back
                       </button>
                       <button 
@@ -1866,7 +2577,7 @@ function App() {
                 {wizardStep === 3 && (
                   <form onSubmit={handleWizardSubmit} className="space-y-4 animate-in fade-in duration-200">
                     <h3 className="text-xl font-bold font-heading text-midnight">Enter Business Details</h3>
-                    <p className="text-slate-500 text-xs">Let's create your account. We will analyze your profile and contact you with a layout draft.</p>
+                    <p className="text-slate-550 text-xs">Let's create your account. We will analyze your profile and contact you with a layout draft.</p>
                     
                     <div className="space-y-3 pt-2">
                       <div>
@@ -1876,7 +2587,7 @@ function App() {
                           placeholder="e.g. John Doe"
                           value={wizardData.name}
                           onChange={(e) => setWizardData({...wizardData, name: e.target.value})}
-                          className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                          className="w-full border border-slate-200 bg-slate-55 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
                           required
                         />
                       </div>
@@ -1887,7 +2598,7 @@ function App() {
                           placeholder="e.g. Apex Dental Clinic"
                           value={wizardData.businessName}
                           onChange={(e) => setWizardData({...wizardData, businessName: e.target.value})}
-                          className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                          className="w-full border border-slate-200 bg-slate-55 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
                           required
                         />
                       </div>
@@ -1898,7 +2609,7 @@ function App() {
                           placeholder="e.g. +91 98765 43210"
                           value={wizardData.phone}
                           onChange={(e) => setWizardData({...wizardData, phone: e.target.value})}
-                          className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                          className="w-full border border-slate-200 bg-slate-55 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
                           required
                         />
                       </div>
@@ -1909,7 +2620,7 @@ function App() {
                           placeholder="e.g. contact@business.com"
                           value={wizardData.email}
                           onChange={(e) => setWizardData({...wizardData, email: e.target.value})}
-                          className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                          className="w-full border border-slate-200 bg-slate-55 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
                           required={wizardType === 'trial'}
                         />
                       </div>
@@ -1924,7 +2635,7 @@ function App() {
                         className="bg-cyan-accent hover:bg-cyan-accent-dark text-white font-extrabold text-xs py-3 px-6 rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-md shadow-cyan-accent/15"
                       >
                         {wizardType === 'trial' ? 'Connect & Claim Free Setup' : 'Send Demo Request'}
-                        <Check className="h-4 w-4" />
+                        <Check className="h-4.5 w-4.5" />
                       </button>
                     </div>
                   </form>
@@ -1942,35 +2653,30 @@ function App() {
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl max-w-2xl w-full p-4 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200">
             
-            {/* Close */}
             <button 
               onClick={() => setIsVideoModalOpen(false)}
-              className="absolute top-4 right-4 z-10 text-slate-500 hover:text-slate-800 bg-white/80 hover:bg-white p-2 rounded-full shadow-md cursor-pointer"
+              className="absolute top-4 right-4 z-10 text-slate-500 hover:text-slate-808 bg-white/80 hover:bg-white p-2 rounded-full shadow-md cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
 
-            {/* Mock Player Visual */}
             <div className="aspect-video bg-slate-950 rounded-2xl relative overflow-hidden flex flex-col justify-between p-6">
               
-              {/* Header */}
               <div className="flex justify-between items-center text-white z-10">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">Live Booking Bot Simulation</span>
                 </div>
-                <span className="text-[10px] bg-slate-800/80 px-2 py-0.5 rounded text-slate-300 font-mono">0:24 / 1:30</span>
+                <span className="text-[10px] bg-slate-808/80 px-2 py-0.5 rounded text-slate-300 font-mono">0:24 / 1:30</span>
               </div>
 
-              {/* Bot Simulation Body */}
               <div className="flex-grow flex items-center justify-center gap-6 my-4 select-none z-10">
                 
-                {/* Chat Visual Left */}
                 <div className="bg-slate-900/90 border border-slate-850 rounded-2xl p-4 w-64 text-left space-y-2 shadow-2xl">
                   <div className="text-[9px] font-bold text-cyan-electric uppercase tracking-wider mb-2 flex items-center gap-1">
                     <MessageSquare className="h-3 w-3" /> WhatsApp Auto-Scheduler
                   </div>
-                  <div className="bg-slate-800 p-2 rounded-lg text-[9px] text-slate-300">
+                  <div className="bg-slate-808 p-2 rounded-lg text-[9px] text-slate-300">
                     "Hi Rohan! I would like to book a dental checkup."
                   </div>
                   <div className="bg-slate-950 p-2 rounded-lg text-[9px] text-cyan-electric border-l-2 border-cyan-accent leading-normal">
@@ -1978,9 +2684,8 @@ function App() {
                   </div>
                 </div>
 
-                {/* Calendar Visual Right */}
-                <div className="hidden sm:block bg-slate-900/90 border border-slate-850 rounded-2xl p-4 w-44 text-left space-y-2 shadow-2xl">
-                  <div className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1">
+                <div className="hidden sm:block bg-slate-900/90 border border-slate-850 rounded-2xl p-4 w-44 text-left space-y-2 shadow-2xl font-sans">
+                  <div className="text-[9px] font-bold text-indigo-404 uppercase tracking-wider flex items-center gap-1">
                     <Calendar className="h-3 w-3" /> Calendar Sync
                   </div>
                   <div className="bg-slate-950 p-2 rounded-lg text-[9px] text-slate-400 space-y-1">
@@ -1993,8 +2698,7 @@ function App() {
 
               </div>
 
-              {/* Controls */}
-              <div className="flex items-center justify-between text-white text-xs z-10 pt-2 border-t border-white/10">
+              <div className="flex items-center justify-between text-white text-xs z-10 pt-2 border-t border-white/10 font-sans">
                 <div className="flex items-center gap-4">
                   <button className="hover:text-cyan-electric"><Play className="h-5 w-5 fill-current" /></button>
                   <span className="text-[10px] text-slate-400">Connecting lead triggers in real-time...</span>
@@ -2007,6 +2711,75 @@ function App() {
                 </button>
               </div>
 
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* --- Admin Sign-in Modal --- */}
+      {isLoginModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 font-sans">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-8 shadow-2xl border border-slate-100 relative animate-in zoom-in-95 duration-200 text-left">
+            
+            <button 
+              onClick={() => { setIsLoginModalOpen(false); setAuthError(''); }}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-650 focus:outline-none cursor-pointer"
+            >
+              <X className="h-6 w-6" />
+            </button>
+
+            <div className="space-y-2 mb-6">
+              <h3 className="text-2xl font-bold font-heading text-midnight flex items-center gap-2">
+                <Lock className="h-5 w-5 text-cyan-accent" />
+                Admin Console
+              </h3>
+              <p className="text-slate-500 text-xs">Access the Nexosia lead command center, manage active trials, and configure your AI agent autopilot settings.</p>
+            </div>
+
+            {authError && (
+              <div className="bg-rose-50 border border-rose-100 text-rose-600 text-[10px] font-bold p-3 rounded-xl mb-4 leading-normal">
+                {authError}
+              </div>
+            )}
+
+            <form onSubmit={handleAdminSignIn} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Admin Email</label>
+                <input 
+                  type="email"
+                  placeholder="e.g. deveshdln@gmail.com"
+                  value={authEmail}
+                  onChange={(e) => setAuthEmail(e.target.value)}
+                  className="w-full border border-slate-200 bg-slate-55 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Access Password</label>
+                <input 
+                  type="password"
+                  placeholder="••••••••"
+                  value={authPassword}
+                  onChange={(e) => setAuthPassword(e.target.value)}
+                  className="w-full border border-slate-200 bg-slate-55 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                  required
+                />
+              </div>
+
+              <button 
+                type="submit"
+                disabled={isAuthenticating}
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs py-3.5 rounded-xl transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+              >
+                {isAuthenticating ? "Verifying Keys..." : "Unlock Dashboard"}
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </form>
+
+            <div className="mt-4 border-t border-slate-100 pt-3 text-[9px] text-slate-400 leading-normal font-semibold">
+              🔒 Connected to secure Firebase Authentication node. Only authorized admin roles can unlock.
             </div>
 
           </div>

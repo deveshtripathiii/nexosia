@@ -2,6 +2,11 @@
   "firestore": {
     "rules": "firestore.rules"
   },
+  "auth": {
+    "providers": {
+      "emailPassword": true
+    }
+  },
   "hosting": {
     "public": "dist",
     "ignore": [
