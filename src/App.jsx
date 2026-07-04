@@ -27,9 +27,15 @@ import {
   DollarSign,
   Layers,
   ArrowRightLeft,
-  ArrowRightCircle
+  ArrowRightCircle,
+  HelpCircle,
+  Lock,
+  ChevronLeft,
+  Building
 } from 'lucide-react';
 import logoImg from './assets/logo.png';
+import { db } from './firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // FAQ items
 const FAQ_ITEMS = [
@@ -86,6 +92,17 @@ const TESTIMONIALS = [
   }
 ];
 
+// Comparison Data
+const COMPARISON_ROWS = [
+  { feature: "Setup Time", nexosia: "3 - 5 Days", agency: "4 - 8 Weeks", diy: "Weeks of trial & error" },
+  { feature: "Upfront Cost", nexosia: "Flat ₹15,000 / $200", agency: "₹50,000 - ₹1,50,000+", diy: "Free setup, but your own time" },
+  { feature: "WhatsApp Auto-Booking", nexosia: "Yes, pre-configured", agency: "Requires separate expensive API integration", diy: "Not supported natively" },
+  { feature: "Google Review Automation", nexosia: "Included", agency: "Extra monthly charge", diy: "Requires manual plugins setup" },
+  { feature: "Technical Knowledge Needed", nexosia: "Zero (We handle all setup)", agency: "Must manage developers", diy: "You have to configure everything yourself" },
+  { feature: "Hosting & SSL Security", nexosia: "Included in retainer", agency: "₹5,000+ yearly hosting bills", diy: "₹1,200 - ₹3,000/mo subscription" },
+  { feature: "Customer Support", nexosia: "24/7 Dedicated Support", agency: "Charges per maintenance ticket", diy: "Help docs & chat bots only" }
+];
+
 function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState(null);
@@ -93,10 +110,30 @@ function App() {
   const [billingPeriod, setBillingPeriod] = useState('monthly'); // 'monthly' or 'yearly'
   
   // Modals state
-  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
-  const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
-  const [modalFormSubmitted, setModalFormSubmitted] = useState(false);
-  const [formData, setFormData] = useState({ name: '', businessName: '', email: '', phone: '', niche: 'clinic' });
+  const [isWizardModalOpen, setIsWizardModalOpen] = useState(false);
+  const [wizardType, setWizardType] = useState('demo'); // 'demo' or 'trial'
+  const [wizardStep, setWizardStep] = useState(1);
+  const [wizardSubmitted, setWizardSubmitted] = useState(false);
+  
+  // Onboarding Wizard Form Data
+  const [wizardData, setWizardData] = useState({
+    businessType: '',
+    headaches: [],
+    name: '',
+    businessName: '',
+    email: '',
+    phone: ''
+  });
+
+  // Hero Video Demo Modal
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
+  // Floating Chat Widget state
+  const [isChatWidgetOpen, setIsChatWidgetOpen] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState([
+    { sender: 'agent', text: "Hi there! 👋 Interested in automating bookings for your business? Ask me anything!" }
+  ]);
 
   // Newsletter state
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -131,7 +168,7 @@ function App() {
   const chatEndRef = useRef(null);
 
   // Review Simulator State (Tab 3)
-  const [reviewStep, setReviewStep] = useState(0); // 0: rating request, 1: rated 5, 2: link sent
+  const [reviewStep, setReviewStep] = useState(0);
   const [reviewMessages, setReviewMessages] = useState([
     { sender: 'bot', text: "Hi John! Thanks for visiting Apex Health Clinic today. 🩺 How would you rate your experience out of 5 stars?\n\n(Reply with a number 1 to 5)", time: "04:30 PM" }
   ]);
@@ -140,7 +177,7 @@ function App() {
   // Scroll simulator to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [simMessages, isSimTyping, reviewMessages, reviewTyping, simTab]);
+  }, [simMessages, isSimTyping, reviewMessages, reviewTyping, simTab, chatMessages]);
 
   const handleSimOptionClick = (optionText, nextStep) => {
     const userTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -184,7 +221,7 @@ function App() {
     }, 1200);
   };
 
-  // Review simulation flow
+  // Review simulation
   const handleReviewRating = (rating) => {
     const userTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     setReviewMessages(prev => [...prev, { sender: 'user', text: `⭐ ${rating} Stars`, time: userTime }]);
@@ -218,39 +255,122 @@ function App() {
     ]);
   };
 
-  // Form Submissions
-  const handleModalSubmit = (e) => {
-    e.preventDefault();
-    setModalFormSubmitted(true);
-    setTimeout(() => {
-      setIsDemoModalOpen(false);
-      setIsTrialModalOpen(false);
-      setModalFormSubmitted(false);
-      alert(`Success! Thank you ${formData.name}. We will reach out to you on WhatsApp within 15 minutes at ${formData.phone}.`);
-      setFormData({ name: '', businessName: '', email: '', phone: '', niche: 'clinic' });
-    }, 1500);
+  // Onboarding Wizard handlers
+  const openWizard = (type) => {
+    setWizardType(type);
+    setWizardStep(1);
+    setWizardSubmitted(false);
+    setIsWizardModalOpen(true);
   };
 
-  const handleNewsletterSubmit = (e) => {
+  const handleNicheSelection = (niche) => {
+    setWizardData(prev => ({ ...prev, businessType: niche }));
+    setWizardStep(2);
+  };
+
+  const handleHeadacheToggle = (headache) => {
+    setWizardData(prev => {
+      const exists = prev.headaches.includes(headache);
+      const list = exists 
+        ? prev.headaches.filter(item => item !== headache)
+        : [...prev.headaches, headache];
+      return { ...prev, headaches: list };
+    });
+  };
+
+  const handleWizardSubmit = async (e) => {
+    e.preventDefault();
+    setWizardSubmitted(true);
+
+    try {
+      const collectionName = wizardType === 'trial' ? 'trials' : 'leads';
+      
+      // Store complete onboarding data to Firestore
+      await addDoc(collection(db, collectionName), {
+        name: wizardData.name,
+        businessName: wizardData.businessName,
+        phone: wizardData.phone,
+        email: wizardData.email,
+        businessType: wizardData.businessType,
+        headaches: wizardData.headaches,
+        createdAt: serverTimestamp()
+      });
+
+      setTimeout(() => {
+        setIsWizardModalOpen(false);
+        setWizardSubmitted(false);
+        alert(`Awesome! Thank you ${wizardData.name}. We will audit your answers and reach out to you on WhatsApp at ${wizardData.phone} in 15 minutes!`);
+        setWizardData({ businessType: '', headaches: [], name: '', businessName: '', email: '', phone: '' });
+      }, 1500);
+    } catch (error) {
+      console.error("Firestore Save Error: ", error);
+      setWizardSubmitted(false);
+      alert("Submission error. Please check your network and try again.");
+    }
+  };
+
+  // Chat Widget actions
+  const handleWidgetChatSubmit = (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+
+    const userMsg = chatInput.trim();
+    setChatMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
+    setChatInput('');
+
+    // Simulated Chatbot responses matching pricing or bot questions
+    setTimeout(() => {
+      let replyText = "That's a great question! For custom WhatsApp integrations, Nexosia handles all setup. Would you like to schedule a quick 10-minute demo?";
+      
+      const textLower = userMsg.toLowerCase();
+      if (textLower.includes('pricing') || textLower.includes('cost') || textLower.includes('package')) {
+        replyText = `Our pricing is transparent. We have a flat setup fee of ${currency === 'INR' ? '₹15,000' : '$200'} one-time, and a retainer starting at ${currency === 'INR' ? '₹999/mo' : '$15/mo'}. No setup charges apply during your 14-day trial!`;
+      } else if (textLower.includes('setup') || textLower.includes('how long')) {
+        replyText = "We configure everything and deliver your premium website + WhatsApp booking API ready to use in just 3 to 5 business days!";
+      }
+
+      setChatMessages(prev => [...prev, { sender: 'agent', text: replyText }]);
+    }, 1000);
+  };
+
+  const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
     if (!newsletterEmail) return;
-    setNewsletterSubmitted(true);
-    setTimeout(() => {
-      setNewsletterEmail('');
-    }, 3000);
+
+    try {
+      await addDoc(collection(db, 'newsletter'), {
+        email: newsletterEmail,
+        createdAt: serverTimestamp()
+      });
+
+      setNewsletterSubmitted(true);
+      setTimeout(() => {
+        setNewsletterEmail('');
+      }, 3000);
+    } catch (error) {
+      console.error("Error subscribing to newsletter: ", error);
+      alert("Subscription failed. Please check your connection.");
+    }
   };
 
   // Pricing calculations
   const setupFee = currency === 'INR' ? '₹15,000' : '$200';
+  const scaleSetupFee = currency === 'INR' ? '₹25,000' : '$350';
+  
   const monthlyRetainer = currency === 'INR' 
     ? (billingPeriod === 'monthly' ? '₹999' : '₹799') 
     : (billingPeriod === 'monthly' ? '$15' : '$12');
-  const billPeriodLabel = billingPeriod === 'monthly' ? '/mo' : '/mo';
+
+  const scaleMonthlyRetainer = currency === 'INR'
+    ? (billingPeriod === 'monthly' ? '₹1,999' : '₹1,599')
+    : (billingPeriod === 'monthly' ? '$30' : '$24');
+
+  const billPeriodLabel = '/mo';
   const billingCycleLabel = billingPeriod === 'monthly' ? 'Billed monthly' : 'Billed annually (Save 20%)';
 
-  // ROI Calculator Logic
-  const timeSavedHours = Math.round((calcBookings * 8) / 60); // 8 mins saved per booking
-  const extraBookingsVal = Math.round(calcBookings * 0.25); // 25% increase
+  // ROI Calculator Calculations
+  const timeSavedHours = Math.round((calcBookings * 8) / 60);
+  const extraBookingsVal = Math.round(calcBookings * 0.25);
   const calculatedGain = extraBookingsVal * calcTicket;
   const formattedRevenue = currency === 'INR' 
     ? `₹${calculatedGain.toLocaleString('en-IN')}` 
@@ -259,13 +379,8 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-cyan-accent selection:text-white">
       
-      {/* Scroll Progress Bar */}
-      <div className="fixed top-0 left-0 h-1 bg-gradient-to-r from-cyan-accent to-cyan-accent-dark z-50 transition-all duration-300" style={{
-        width: `${typeof window !== 'undefined' ? (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100 : 0}%`
-      }}></div>
-
       {/* Sticky Navigation Bar */}
-      <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/80 backdrop-blur-md transition-all duration-300">
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/85 backdrop-blur-md transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
           {/* Logo */}
@@ -277,6 +392,7 @@ function App() {
           <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
             <a href="#features" className="hover:text-midnight transition-colors duration-200">Features</a>
             <a href="#demo" className="hover:text-midnight transition-colors duration-200">Interactive Demo</a>
+            <a href="#compare" className="hover:text-midnight transition-colors duration-200">Compare</a>
             <a href="#roi-calculator" className="hover:text-midnight transition-colors duration-200">ROI Calculator</a>
             <a href="#pricing" className="hover:text-midnight transition-colors duration-200">Pricing</a>
             <a href="#faq" className="hover:text-midnight transition-colors duration-200">FAQ</a>
@@ -285,13 +401,13 @@ function App() {
           {/* Action Buttons */}
           <div className="hidden md:flex items-center gap-4">
             <button 
-              onClick={() => setIsDemoModalOpen(true)}
+              onClick={() => openWizard('demo')}
               className="text-slate-600 hover:text-midnight text-sm font-bold transition-colors duration-200 px-4 py-2"
             >
               Login
             </button>
             <button 
-              onClick={() => setIsDemoModalOpen(true)}
+              onClick={() => openWizard('demo')}
               className="bg-cyan-accent hover:bg-cyan-accent-dark text-white text-sm font-bold px-6 py-2.5 rounded-full transition-all duration-300 shadow-lg shadow-cyan-accent/20 hover:shadow-cyan-accent/40 hover:-translate-y-0.5 cyan-glow-button cursor-pointer"
             >
               Get a Free Demo
@@ -314,19 +430,20 @@ function App() {
             <nav className="flex flex-col gap-4 text-base font-semibold text-slate-700">
               <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">Features</a>
               <a href="#demo" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">Interactive Demo</a>
+              <a href="#compare" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">Compare</a>
               <a href="#roi-calculator" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">ROI Calculator</a>
               <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">Pricing</a>
               <a href="#faq" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">FAQ</a>
             </nav>
             <div className="flex flex-col gap-3 pt-4">
               <button 
-                onClick={() => { setIsMobileMenuOpen(false); setIsDemoModalOpen(true); }}
+                onClick={() => { setIsMobileMenuOpen(false); openWizard('demo'); }}
                 className="w-full text-center text-slate-600 hover:text-midnight py-2 font-bold"
               >
                 Login
               </button>
               <button 
-                onClick={() => { setIsMobileMenuOpen(false); setIsDemoModalOpen(true); }}
+                onClick={() => { setIsMobileMenuOpen(false); openWizard('demo'); }}
                 className="w-full bg-cyan-accent hover:bg-cyan-accent-dark text-white text-center font-bold py-3 rounded-xl transition-all duration-300"
               >
                 Get a Free Demo
@@ -336,7 +453,7 @@ function App() {
         )}
       </header>
 
-      {/* Hero Section (Weave-Style High Impact) */}
+      {/* Hero Section */}
       <section className="relative pt-12 pb-24 md:py-32 overflow-hidden bg-gradient-to-b from-slate-100 via-white to-slate-50">
         
         {/* Background Grid */}
@@ -348,44 +465,40 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
             
-            {/* Left Content Column */}
+            {/* Left Column */}
             <div className="lg:col-span-7 flex flex-col items-start text-left space-y-8">
               
-              {/* Product Badge */}
               <div className="inline-flex items-center gap-2 bg-slate-200/60 backdrop-blur-sm border border-slate-300/50 rounded-full px-4 py-1.5 text-xs sm:text-sm font-semibold text-slate-700">
                 <Sparkles className="h-4 w-4 text-cyan-accent animate-pulse" />
-                <span>Premium Web Presence & Automations for Local SMBs</span>
+                <span>Next-Gen Booking Automations for Clinics & Local Stores</span>
               </div>
 
-              {/* Main Headline */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-midnight font-heading tracking-tight leading-tight">
                 Automate Your Local Business. <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-accent to-cyan-accent-dark">Turn Visitors into Bookings</span> via WhatsApp.
               </h1>
 
-              {/* Sub-headline */}
               <p className="text-lg sm:text-xl text-slate-600 max-w-2xl font-normal leading-relaxed">
                 Get a premium website and an automated booking system that works 24/7. Built specifically for independent clinics, local stores, and salons. Let customers book appointments in under 30 seconds.
               </p>
 
-              {/* CTA Area */}
+              {/* CTAs */}
               <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
                 <button 
-                  onClick={() => setIsTrialModalOpen(true)}
+                  onClick={() => openWizard('trial')}
                   className="bg-cyan-accent hover:bg-cyan-accent-dark text-white font-bold text-lg px-8 py-4 rounded-full transition-all duration-300 shadow-xl shadow-cyan-accent/25 hover:shadow-cyan-accent/40 hover:-translate-y-0.5 text-center flex items-center justify-center gap-2 cyan-glow-button cursor-pointer"
                 >
                   Start Your Free 14-Day Trial
                   <ArrowRight className="h-5 w-5" />
                 </button>
-                <a 
-                  href="#demo"
-                  className="flex items-center justify-center gap-2 text-slate-700 hover:text-midnight font-semibold py-3 px-6 rounded-full transition-all duration-200 border border-slate-300 hover:bg-slate-100 text-center"
+                <button 
+                  onClick={() => setIsVideoModalOpen(true)}
+                  className="flex items-center justify-center gap-2 text-slate-700 hover:text-midnight font-semibold py-3 px-6 rounded-full transition-all duration-200 border border-slate-300 hover:bg-slate-100 text-center cursor-pointer"
                 >
                   <Play className="h-4 w-4 fill-slate-700 text-slate-700" />
                   See How It Works
-                </a>
+                </button>
               </div>
 
-              {/* Highlight points */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-200/80 w-full">
                 <div className="flex items-center gap-2 text-slate-600 text-sm">
                   <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0" />
@@ -393,13 +506,13 @@ function App() {
                 </div>
                 <div className="flex items-center gap-2 text-slate-600 text-sm">
                   <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0" />
-                  <span>Ready in 3-5 business days</span>
+                  <span>Setup ready in 3-5 business days</span>
                 </div>
               </div>
 
             </div>
 
-            {/* Right Visual Column */}
+            {/* Right Column */}
             <div className="lg:col-span-5 relative flex justify-center">
               <div className="absolute w-72 h-72 rounded-full bg-cyan-accent/20 blur-3xl -top-10 -right-10 pointer-events-none"></div>
               <div className="absolute w-72 h-72 rounded-full bg-slate-300/30 blur-3xl -bottom-10 -left-10 pointer-events-none"></div>
@@ -503,7 +616,7 @@ function App() {
 
       </section>
 
-      {/* Social Proof Section (GoHighLevel Style) */}
+      {/* Social Proof Section */}
       <section className="bg-slate-100 py-10 border-y border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-xs sm:text-sm font-semibold tracking-wider text-slate-500 uppercase mb-8">
@@ -534,7 +647,7 @@ function App() {
         </div>
       </section>
 
-      {/* Features Grid ("All-in-One" Value Grid) */}
+      {/* Features Grid */}
       <section id="features" className="py-24 md:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
@@ -612,8 +725,50 @@ function App() {
         </div>
       </section>
 
-      {/* Advanced Feature tabbed Showcase & Chat Simulator ("WOW" Interactive Element) */}
-      <section id="demo" className="py-24 bg-gradient-to-b from-slate-50 to-white border-t border-slate-200">
+      {/* Advanced Feature: Comparison Table */}
+      <section id="compare" className="py-24 md:py-32 bg-slate-50 border-t border-b border-slate-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-cyan-accent font-heading">Smart Comparison</h2>
+            <p className="text-3xl sm:text-4xl font-extrabold text-midnight font-heading tracking-tight">
+              Why Local Businesses Choose Nexosia
+            </p>
+            <p className="text-slate-600">
+              See how we stack up against traditional development agencies and generic DIY website builders.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-900 text-white text-xs uppercase tracking-wider font-bold">
+                    <th className="p-6">Feature / Metric</th>
+                    <th className="p-6 text-cyan-electric">🚀 Nexosia</th>
+                    <th className="p-6 opacity-80">Traditional Agency</th>
+                    <th className="p-6 opacity-80">DIY Builders (Wix/WPS)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 text-sm">
+                  {COMPARISON_ROWS.map((row, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="p-6 font-bold text-midnight">{row.feature}</td>
+                      <td className="p-6 bg-cyan-accent/5 font-semibold text-cyan-accent-dark">{row.nexosia}</td>
+                      <td className="p-6 text-slate-500">{row.agency}</td>
+                      <td className="p-6 text-slate-500">{row.diy}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* Interactive Showcase & Chat Simulator */}
+      <section id="demo" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
@@ -665,25 +820,25 @@ function App() {
               {/* Tab Description Cards */}
               <div className="bg-slate-100/50 rounded-2xl p-6 border border-slate-200">
                 {simTab === 'widget' && (
-                  <div className="space-y-2 animate-in fade-in duration-300 text-sm">
+                  <div className="space-y-2 text-sm">
                     <h4 className="font-extrabold text-midnight">Step 1: The Clean Web Trigger</h4>
                     <p className="text-slate-500">When visitors land on your website, a floating WhatsApp bubble prompts them to chat. Clicking the button automatically redirects them to WhatsApp with a pre-filled welcome text, achieving zero lead friction.</p>
                     <button 
                       onClick={() => setSimTab('bot')} 
-                      className="mt-3 text-cyan-accent-dark font-bold hover:underline flex items-center gap-1"
+                      className="mt-3 text-cyan-accent-dark font-bold hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       Continue to Bot Flow <ArrowRight className="h-4 w-4" />
                     </button>
                   </div>
                 )}
                 {simTab === 'bot' && (
-                  <div className="space-y-2 animate-in fade-in duration-300 text-sm">
+                  <div className="space-y-2 text-sm">
                     <h4 className="font-extrabold text-midnight">Step 2: AI Bot Consultation & Slot Lock</h4>
                     <p className="text-slate-500">The bot greets them instantly, presents open days and slots directly in WhatsApp, takes their name, books the session, and triggers calendar synching. Try booking an appointment on the simulator phone mockup!</p>
                   </div>
                 )}
                 {simTab === 'reviews' && (
-                  <div className="space-y-2 animate-in fade-in duration-300 text-sm">
+                  <div className="space-y-2 text-sm">
                     <h4 className="font-extrabold text-midnight">Step 3: The Google Review Multiplier</h4>
                     <p className="text-slate-500">After appointments conclude, our script requests feedback via WhatsApp. Happy clients get direct links to write a 5-star Google review. Test it by clicking the rating buttons inside the simulator screen!</p>
                   </div>
@@ -704,18 +859,15 @@ function App() {
                   </div>
                 </div>
 
-                {/* Phone screen inner content by Tab */}
-
                 {/* 1. Website Booking Widget Page */}
                 {simTab === 'widget' && (
-                  <div className="absolute inset-0 bg-white flex flex-col pt-6 animate-in fade-in duration-300 z-10 select-none">
+                  <div className="absolute inset-0 bg-white flex flex-col pt-6 z-10 select-none">
                     <div className="bg-slate-100 px-3 py-2 flex items-center gap-1.5 border-b border-slate-200">
                       <div className="w-2 h-2 rounded-full bg-rose-400"></div>
                       <div className="w-2 h-2 rounded-full bg-amber-400"></div>
                       <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
                       <span className="text-[8px] text-slate-400 flex-grow text-center">apexhealth.com</span>
                     </div>
-                    {/* Website page mock */}
                     <div className="flex-grow p-4 flex flex-col justify-between">
                       <div className="space-y-4">
                         <div className="flex items-center justify-between border-b border-slate-100 pb-2">
@@ -738,12 +890,11 @@ function App() {
                         </div>
                       </div>
                       
-                      {/* Floating booking badge */}
                       <div className="space-y-2">
                         <p className="text-[8px] text-center text-slate-400 font-semibold">Ready to book your session?</p>
                         <button 
                           onClick={() => setSimTab('bot')}
-                          className="w-full bg-[#25d366] hover:bg-[#128c7e] text-white text-xs font-extrabold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 cursor-pointer animate-bounce"
+                          className="w-full bg-[#25d366] hover:bg-[#128c7e] text-white text-xs font-extrabold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 cursor-pointer"
                         >
                           <MessageSquare className="h-4 w-4 fill-white" />
                           Book via WhatsApp
@@ -755,9 +906,8 @@ function App() {
 
                 {/* 2. WhatsApp Bot Flow Page */}
                 {simTab === 'bot' && (
-                  <div className="absolute inset-0 flex flex-col pt-6 animate-in fade-in duration-300 z-10 bg-[#e5ddd5]">
+                  <div className="absolute inset-0 flex flex-col pt-6 z-10 bg-[#e5ddd5]">
                     
-                    {/* Header */}
                     <div className="bg-[#075e54] text-white p-3 pb-2.5 flex items-center justify-between shrink-0 shadow-md">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-slate-200/90 flex items-center justify-center text-[#075e54] font-bold text-xs">AH</div>
@@ -768,10 +918,9 @@ function App() {
                           </span>
                         </div>
                       </div>
-                      <button onClick={resetSimulator} className="text-[8px] border border-white/20 bg-white/10 px-2 py-0.5 rounded text-white">Reset</button>
+                      <button onClick={resetSimulator} className="text-[8px] border border-white/20 bg-white/10 px-2 py-0.5 rounded text-white cursor-pointer">Reset</button>
                     </div>
 
-                    {/* Messages */}
                     <div className="flex-grow p-3.5 overflow-y-auto space-y-3.5 flex flex-col justify-end">
                       {simMessages.map((msg, idx) => (
                         <div 
@@ -794,27 +943,26 @@ function App() {
                       <div ref={chatEndRef} />
                     </div>
 
-                    {/* Footer Options input */}
                     <div className="bg-white p-3 border-t border-slate-200 shrink-0">
                       {simStep === 0 && !isSimTyping && (
                         <div className="space-y-1.5">
                           <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider text-center mb-1">Choose an option:</p>
-                          <button onClick={() => handleSimOptionClick("Monday, July 6", 1)} className="w-full bg-slate-50 hover:bg-emerald-50 text-slate-800 border border-slate-200 text-xs py-2 px-3 rounded-lg text-left transition-all">📅 Monday, July 6</button>
-                          <button onClick={() => handleSimOptionClick("Tuesday, July 7", 1)} className="w-full bg-slate-50 hover:bg-emerald-50 text-slate-800 border border-slate-200 text-xs py-2 px-3 rounded-lg text-left transition-all">📅 Tuesday, July 7</button>
+                          <button onClick={() => handleSimOptionClick("Monday, July 6", 1)} className="w-full bg-slate-55 hover:bg-emerald-50 text-slate-800 border border-slate-200 text-xs py-2 px-3 rounded-lg text-left transition-all cursor-pointer">📅 Monday, July 6</button>
+                          <button onClick={() => handleSimOptionClick("Tuesday, July 7", 1)} className="w-full bg-slate-55 hover:bg-emerald-50 text-slate-800 border border-slate-200 text-xs py-2 px-3 rounded-lg text-left transition-all cursor-pointer">📅 Tuesday, July 7</button>
                         </div>
                       )}
                       {simStep === 1 && !isSimTyping && (
                         <div className="space-y-1.5">
                           <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider text-center mb-1">Choose a Time Slot:</p>
                           <div className="grid grid-cols-3 gap-1.5">
-                            <button onClick={() => handleSimOptionClick("10:00 AM", 2)} className="bg-slate-100 text-xs py-2 rounded-lg text-center font-bold">10:00 AM</button>
-                            <button onClick={() => handleSimOptionClick("2:30 PM", 2)} className="bg-slate-100 text-xs py-2 rounded-lg text-center font-bold">2:30 PM</button>
-                            <button onClick={() => handleSimOptionClick("4:15 PM", 2)} className="bg-slate-100 text-xs py-2 rounded-lg text-center font-bold">4:15 PM</button>
+                            <button onClick={() => handleSimOptionClick("10:00 AM", 2)} className="bg-slate-100 text-xs py-2 rounded-lg text-center font-bold cursor-pointer">10:00 AM</button>
+                            <button onClick={() => handleSimOptionClick("2:30 PM", 2)} className="bg-slate-100 text-xs py-2 rounded-lg text-center font-bold cursor-pointer">2:30 PM</button>
+                            <button onClick={() => handleSimOptionClick("4:15 PM", 2)} className="bg-slate-100 text-xs py-2 rounded-lg text-center font-bold cursor-pointer">4:15 PM</button>
                           </div>
                         </div>
                       )}
                       {simStep === 2 && !isSimTyping && (
-                        <form onSubmit={handleSimNameSubmit} className="flex gap-2 items-center">
+                        <form onSubmit={handleSimNameSubmit} className="flex gap-2 items-center font-sans">
                           <input 
                             type="text" 
                             placeholder="Enter your Full Name" 
@@ -824,7 +972,7 @@ function App() {
                             required
                             autoFocus
                           />
-                          <button type="submit" className="bg-[#075e54] text-white px-3 py-2 rounded-lg text-xs font-bold">Send</button>
+                          <button type="submit" className="bg-[#075e54] text-white px-3 py-2 rounded-lg text-xs font-bold cursor-pointer">Send</button>
                         </form>
                       )}
                       {simStep === 3 && !isSimTyping && (
@@ -832,7 +980,7 @@ function App() {
                           <p className="text-xs text-emerald-600 font-bold flex items-center justify-center gap-1 mb-1">
                             <CheckCircle2 className="h-4 w-4" /> Booked!
                           </p>
-                          <button onClick={() => setSimTab('reviews')} className="text-[9px] text-cyan-accent-dark hover:underline font-bold">Continue to Review flow</button>
+                          <button onClick={() => setSimTab('reviews')} className="text-[9px] text-cyan-accent-dark hover:underline font-bold cursor-pointer">Continue to Review flow</button>
                         </div>
                       )}
                     </div>
@@ -841,9 +989,8 @@ function App() {
 
                 {/* 3. Review Request Page */}
                 {simTab === 'reviews' && (
-                  <div className="absolute inset-0 flex flex-col pt-6 animate-in fade-in duration-300 z-10 bg-[#e5ddd5]">
+                  <div className="absolute inset-0 flex flex-col pt-6 z-10 bg-[#e5ddd5]">
                     
-                    {/* Header */}
                     <div className="bg-[#075e54] text-white p-3 pb-2.5 flex items-center justify-between shrink-0 shadow-md">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-slate-200/90 flex items-center justify-center text-[#075e54] font-bold text-xs">AH</div>
@@ -852,10 +999,9 @@ function App() {
                           <span className="text-[8px] text-emerald-300 flex items-center gap-1 font-medium">review feedback</span>
                         </div>
                       </div>
-                      <button onClick={resetReviewSimulator} className="text-[8px] border border-white/20 bg-white/10 px-2 py-0.5 rounded text-white">Reset</button>
+                      <button onClick={resetReviewSimulator} className="text-[8px] border border-white/20 bg-white/10 px-2 py-0.5 rounded text-white cursor-pointer">Reset</button>
                     </div>
 
-                    {/* Messages */}
                     <div className="flex-grow p-3.5 overflow-y-auto space-y-3.5 flex flex-col justify-end">
                       {reviewMessages.map((msg, idx) => (
                         <div 
@@ -878,8 +1024,7 @@ function App() {
                       <div ref={chatEndRef} />
                     </div>
 
-                    {/* Footer Options */}
-                    <div className="bg-white p-3 border-t border-slate-200 shrink-0">
+                    <div className="bg-white p-3 border-t border-slate-200 shrink-0 font-sans">
                       {reviewStep === 0 && (
                         <div>
                           <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider text-center mb-1.5">Tap a rating option:</p>
@@ -888,7 +1033,7 @@ function App() {
                               <button 
                                 key={num} 
                                 onClick={() => handleReviewRating(num)}
-                                className="w-10 h-10 rounded-full border border-slate-200 hover:border-amber-400 bg-slate-50 hover:bg-amber-50 flex items-center justify-center font-bold text-slate-700 hover:text-amber-600 transition-all text-xs"
+                                className="w-10 h-10 rounded-full border border-slate-200 hover:border-amber-400 bg-slate-55 hover:bg-amber-50 flex items-center justify-center font-bold text-slate-700 hover:text-amber-600 transition-all text-xs cursor-pointer"
                               >
                                 {num}★
                               </button>
@@ -923,18 +1068,16 @@ function App() {
         </div>
       </section>
 
-      {/* Advanced Feature: Interactive ROI Calculator */}
+      {/* Interactive ROI Calculator */}
       <section id="roi-calculator" className="py-24 md:py-32 bg-slate-900 text-white relative overflow-hidden border-t border-slate-800">
-        
-        {/* Glow Effects */}
         <div className="absolute w-[500px] h-[500px] rounded-full bg-cyan-accent/10 blur-3xl -top-20 -left-20 pointer-events-none"></div>
         <div className="absolute w-[500px] h-[500px] rounded-full bg-indigo-500/5 blur-3xl -bottom-20 -right-20 pointer-events-none"></div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative font-sans">
           
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
             
-            {/* Calculator Inputs */}
+            {/* Inputs */}
             <div className="lg:col-span-6 text-left space-y-8">
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-1 bg-cyan-electric/10 border border-cyan-electric/20 rounded-full px-3.5 py-1 text-xs font-bold text-cyan-electric">
@@ -949,10 +1092,8 @@ function App() {
                 </p>
               </div>
 
-              {/* Sliders Container */}
               <div className="space-y-6 bg-slate-800/50 p-6 rounded-3xl border border-slate-800">
                 
-                {/* Input 1: Monthly Bookings */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm font-semibold">
                     <span className="text-slate-300">Estimated Bookings / Month</span>
@@ -974,7 +1115,6 @@ function App() {
                   </div>
                 </div>
 
-                {/* Input 2: Ticket Value */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm font-semibold">
                     <span className="text-slate-300">Average Booking Ticket Value</span>
@@ -1002,18 +1142,16 @@ function App() {
 
             </div>
 
-            {/* Calculator Outputs */}
+            {/* Outputs */}
             <div className="lg:col-span-6">
               <div className="bg-slate-800 border border-slate-700/80 rounded-3xl p-8 text-left space-y-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-cyan-accent text-slate-950 font-bold text-[9px] px-3.5 py-1 rounded-bl-xl uppercase tracking-wider">
-                  Nexosia Value Projections
+                  Nexosia Projections
                 </div>
                 
                 <h3 className="font-heading font-extrabold text-lg text-white">Your Monthly Return</h3>
 
                 <div className="grid grid-cols-2 gap-4">
-                  
-                  {/* Metric 1 */}
                   <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-700/30 space-y-1">
                     <div className="text-slate-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                       <Clock className="h-3.5 w-3.5 text-cyan-accent" />
@@ -1023,19 +1161,16 @@ function App() {
                     <p className="text-[9px] text-slate-500 font-semibold">Saved from phone tasks</p>
                   </div>
 
-                  {/* Metric 2 */}
                   <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-700/30 space-y-1">
                     <div className="text-slate-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                       <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
                       <span>New Bookings</span>
                     </div>
                     <p className="text-2xl sm:text-3xl font-extrabold font-heading text-emerald-400">+{extraBookingsVal}</p>
-                    <p className="text-[9px] text-slate-500 font-semibold">25% increase from fast replies</p>
+                    <p className="text-[9px] text-slate-500 font-semibold">25% reply rate growth</p>
                   </div>
-
                 </div>
 
-                {/* Major Metric */}
                 <div className="bg-gradient-to-r from-cyan-accent/20 to-indigo-900/20 p-6 rounded-2xl border border-cyan-accent/20 space-y-2">
                   <div className="text-[10px] text-cyan-electric font-bold uppercase tracking-wider flex items-center gap-1.5">
                     <DollarSign className="h-3.5 w-3.5 text-cyan-electric" />
@@ -1049,7 +1184,7 @@ function App() {
 
                 <div className="pt-2 text-center">
                   <button 
-                    onClick={() => setIsTrialModalOpen(true)}
+                    onClick={() => openWizard('trial')}
                     className="w-full bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 hover:text-white font-extrabold py-3.5 rounded-xl transition-all duration-300 shadow-lg text-center text-sm cursor-pointer"
                   >
                     Deploy to Your Business
@@ -1064,8 +1199,8 @@ function App() {
         </div>
       </section>
 
-      {/* Advanced Feature: Integrations Logo Grid */}
-      <section className="py-16 bg-white border-y border-slate-200">
+      {/* Integrations Grid */}
+      <section className="py-16 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 text-center space-y-8">
           <div className="space-y-2 max-w-2xl mx-auto">
             <h3 className="text-xs font-bold uppercase tracking-widest text-cyan-accent font-heading">Seamless Ecosystem</h3>
@@ -1088,7 +1223,7 @@ function App() {
         </div>
       </section>
 
-      {/* How It Works (3 Simple Steps) */}
+      {/* How It Works */}
       <section id="how-it-works" className="py-24 md:py-32 bg-slate-50 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
           backgroundImage: 'radial-gradient(circle at 1px 1px, #0F172A 1px, transparent 0)',
@@ -1108,7 +1243,6 @@ function App() {
           </div>
 
           <div className="relative">
-            {/* Connector line */}
             <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-cyan-accent/20 via-cyan-accent to-cyan-accent/20 -translate-y-12"></div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 relative">
@@ -1166,7 +1300,7 @@ function App() {
 
           <div className="text-center mt-16">
             <button 
-              onClick={() => setIsTrialModalOpen(true)}
+              onClick={() => openWizard('trial')}
               className="bg-midnight hover:bg-slate-800 text-white font-bold text-base px-8 py-3.5 rounded-full transition-all duration-300 shadow-xl inline-flex items-center gap-2 cursor-pointer"
             >
               Get Started Risk Free
@@ -1177,14 +1311,14 @@ function App() {
         </div>
       </section>
 
-      {/* Pricing Section (Transparent & Simple) */}
+      {/* Pricing Section (Growth vs. Scale Packages) */}
       <section id="pricing" className="py-24 md:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
             <h2 className="text-xs font-bold uppercase tracking-widest text-cyan-accent font-heading">Transparent Pricing</h2>
             <p className="text-3xl sm:text-4xl font-extrabold text-midnight font-heading tracking-tight">
-              One Package. Everything Included.
+              Simple Packages. Everything Included.
             </p>
             <p className="text-slate-600 text-base">
               Flat, low upfront fee for custom website development and chatbot configuration, followed by a minor SaaS retainer to maintain hosting and bot infrastructure.
@@ -1236,95 +1370,135 @@ function App() {
 
           </div>
 
-          {/* Pricing Card */}
-          <div className="max-w-xl mx-auto">
-            <div className="bg-slate-900 text-white rounded-3xl shadow-2xl overflow-hidden border border-slate-800 relative hover:scale-[1.01] transition-transform duration-300">
-              
-              <div className="absolute top-0 right-0 bg-cyan-accent text-slate-950 font-bold text-xs px-5 py-1.5 rounded-bl-2xl uppercase tracking-wider">
-                Full-Service Setup
-              </div>
-
+          {/* Side-by-Side Cards (Growth vs Scale Package) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            
+            {/* Card 1: Growth Package */}
+            <div className="bg-slate-900 text-white rounded-3xl shadow-xl overflow-hidden border border-slate-800 relative hover:scale-[1.01] transition-transform duration-300 flex flex-col justify-between">
               <div className="p-8 sm:p-10 space-y-6 text-left">
-                
                 <div>
                   <h3 className="text-2xl font-bold font-heading text-cyan-electric">The Growth Package</h3>
-                  <p className="text-slate-400 text-sm mt-1">Perfect for clinics, salons, spas, and boutique retail stores.</p>
+                  <p className="text-slate-400 text-xs mt-1">Perfect for local clinics, salons, spas, and boutique retail stores.</p>
                 </div>
 
                 <div className="border-y border-slate-800 py-6 space-y-3">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl sm:text-5xl font-extrabold font-heading text-white">{setupFee}</span>
-                    <span className="text-slate-400 text-xs font-medium uppercase tracking-wider">One-time setup fee</span>
+                    <span className="text-4xl font-extrabold font-heading text-white">{setupFee}</span>
+                    <span className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Setup fee</span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-300 text-sm">
                     <span>+</span>
                     <span className="text-2xl font-bold font-heading text-white">{monthlyRetainer}</span>
-                    <span className="text-slate-400 text-sm">{billPeriodLabel} retainer</span>
+                    <span className="text-slate-400 text-xs">{billPeriodLabel} retainer</span>
                   </div>
-                  <p className="text-[10px] text-cyan-electric/80 font-bold uppercase tracking-wider">
-                    {billingCycleLabel}
-                  </p>
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">What's Included:</h4>
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-slate-300 text-sm">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Included Features:</h4>
+                  <ul className="space-y-3 text-slate-300 text-sm">
                     <li className="flex items-center gap-2">
                       <Check className="h-4.5 w-4.5 text-cyan-accent flex-shrink-0" />
-                      <span>Custom Website Design</span>
+                      <span>Custom Website (Up to 5 Pages)</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="h-4.5 w-4.5 text-cyan-accent flex-shrink-0" />
-                      <span>WhatsApp Bot Setup</span>
+                      <span>WhatsApp Automated Booking Bot</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="h-4.5 w-4.5 text-cyan-accent flex-shrink-0" />
-                      <span>Official API Connection</span>
+                      <span>1 Staff Member Calendar Integration</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="h-4.5 w-4.5 text-cyan-accent flex-shrink-0" />
-                      <span>Calendar Integration</span>
+                      <span>Google Reviews Automation</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="h-4.5 w-4.5 text-cyan-accent flex-shrink-0" />
-                      <span>Analytics Dashboard</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4.5 w-4.5 text-cyan-accent flex-shrink-0" />
-                      <span>Secure Web Hosting</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4.5 w-4.5 text-cyan-accent flex-shrink-0" />
-                      <span>Free SSL Certificate</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4.5 w-4.5 text-cyan-accent flex-shrink-0" />
-                      <span>24/7 Priority Support</span>
+                      <span>Secure Web Hosting & Free SSL</span>
                     </li>
                   </ul>
                 </div>
-
-                <div className="pt-4">
-                  <button 
-                    onClick={() => setIsTrialModalOpen(true)}
-                    className="w-full bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 hover:text-white font-extrabold text-base py-4 rounded-xl transition-all duration-300 shadow-lg shadow-cyan-accent/15 cursor-pointer text-center"
-                  >
-                    Claim Your Setup Now
-                  </button>
-                  <p className="text-center text-[10px] text-slate-500 mt-3 font-semibold">
-                    100% Risk Free. Cancel anytime. 14-day trial applies to the retainer.
-                  </p>
-                </div>
-
               </div>
 
+              <div className="p-8 sm:p-10 pt-0 text-left">
+                <button 
+                  onClick={() => openWizard('trial')}
+                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-sm py-4 rounded-xl transition-all cursor-pointer text-center"
+                >
+                  Start 14-Day Free Trial
+                </button>
+              </div>
             </div>
+
+            {/* Card 2: Scale Package */}
+            <div className="bg-white text-slate-800 rounded-3xl shadow-2xl overflow-hidden border-2 border-cyan-accent relative hover:scale-[1.01] transition-transform duration-300 flex flex-col justify-between">
+              
+              {/* Scale Best Value Tag */}
+              <div className="absolute top-0 right-0 bg-cyan-accent text-slate-950 font-bold text-[10px] px-5 py-2 rounded-bl-2xl uppercase tracking-widest font-heading">
+                Best Value / Scale
+              </div>
+
+              <div className="p-8 sm:p-10 space-y-6 text-left">
+                <div>
+                  <h3 className="text-2xl font-bold font-heading text-midnight">The Scale Package</h3>
+                  <p className="text-slate-500 text-xs mt-1">For multi-staff clinics, busy stores, and high-volume services.</p>
+                </div>
+
+                <div className="border-y border-slate-200 py-6 space-y-3">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-extrabold font-heading text-midnight">{scaleSetupFee}</span>
+                    <span className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Setup fee</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-600 text-sm">
+                    <span>+</span>
+                    <span className="text-2xl font-bold font-heading text-midnight">{scaleMonthlyRetainer}</span>
+                    <span className="text-slate-400 text-xs">{billPeriodLabel} retainer</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Everything in Growth plus:</h4>
+                  <ul className="space-y-3 text-slate-700 text-sm">
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4.5 w-4.5 text-cyan-accent-dark flex-shrink-0" />
+                      <span className="font-semibold text-midnight">Multi-Staff Scheduling (Up to 10 staff)</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4.5 w-4.5 text-cyan-accent-dark flex-shrink-0" />
+                      <span className="font-semibold text-midnight">Multi-Location Booking Support</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4.5 w-4.5 text-cyan-accent-dark flex-shrink-0" />
+                      <span>Custom CRM or API Integrations</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4.5 w-4.5 text-cyan-accent-dark flex-shrink-0" />
+                      <span>Stripe Payment Links in WhatsApp</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4.5 w-4.5 text-cyan-accent-dark flex-shrink-0" />
+                      <span>Priority 24/7 Dedicated Manager</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="p-8 sm:p-10 pt-0 text-left">
+                <button 
+                  onClick={() => openWizard('trial')}
+                  className="w-full bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 font-extrabold text-sm py-4 rounded-xl transition-all cursor-pointer text-center"
+                >
+                  Claim Scale Package
+                </button>
+              </div>
+            </div>
+
           </div>
 
         </div>
       </section>
 
-      {/* Advanced Feature: Testimonials Carousel */}
+      {/* Testimonials */}
       <section className="py-24 bg-slate-50 border-t border-slate-200">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           
@@ -1335,30 +1509,21 @@ function App() {
             </p>
           </div>
 
-          {/* Carousel Card Container */}
           <div className="bg-white border border-slate-200/80 rounded-3xl p-8 sm:p-12 shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[350px]">
-            
-            {/* Visual Quotes Icon */}
-            <div className="absolute top-6 right-8 text-slate-100 text-8xl font-serif font-bold pointer-events-none select-none">
-              “
-            </div>
+            <div className="absolute top-6 right-8 text-slate-100 text-8xl font-serif font-bold pointer-events-none select-none">“</div>
 
             <div className="space-y-6 text-left">
-              {/* Stars */}
               <div className="flex gap-1 text-amber-400">
                 {[...Array(TESTIMONIALS[activeTestimonial].rating)].map((_, i) => (
                   <Star key={i} className="h-5 w-5 fill-current" />
                 ))}
               </div>
-
-              {/* Quote text */}
               <p className="text-lg sm:text-xl text-slate-700 italic font-medium leading-relaxed font-sans">
                 "{TESTIMONIALS[activeTestimonial].quote}"
               </p>
             </div>
 
-            {/* Author Profile */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t border-slate-100 pt-6 mt-8 gap-4 text-left">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t border-slate-100 pt-6 mt-8 gap-4 text-left font-sans">
               <div className="flex items-center gap-3.5">
                 <div className="w-12 h-12 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-sm font-heading">
                   {TESTIMONIALS[activeTestimonial].avatar}
@@ -1371,22 +1536,18 @@ function App() {
                 </div>
               </div>
 
-              {/* Badges / Navigation */}
               <div className="flex items-center justify-between sm:justify-end gap-6">
                 <span className="bg-cyan-accent/10 text-cyan-accent-dark font-extrabold text-[10px] px-3.5 py-1.5 rounded-full uppercase tracking-wider">
                   {TESTIMONIALS[activeTestimonial].badge}
                 </span>
-
-                {/* Slider Nav Buttons */}
                 <div className="flex gap-2">
                   {TESTIMONIALS.map((_, idx) => (
                     <button 
                       key={idx}
                       onClick={() => setActiveTestimonial(idx)}
-                      className={`w-3 h-3 rounded-full transition-all ${
+                      className={`w-3 h-3 rounded-full transition-all cursor-pointer ${
                         activeTestimonial === idx ? 'bg-cyan-accent w-6' : 'bg-slate-200 hover:bg-slate-300'
                       }`}
-                      aria-label={`Go to slide ${idx + 1}`}
                     ></button>
                   ))}
                 </div>
@@ -1398,7 +1559,7 @@ function App() {
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* FAQ */}
       <section id="faq" className="py-24 md:py-32 bg-white border-t border-slate-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           
@@ -1451,7 +1612,7 @@ function App() {
               <a href="#" className="flex items-center gap-2">
                 <img src={logoImg} alt="Nexosia Logo" className="h-10 w-auto object-contain brightness-0 invert" />
               </a>
-              <p className="text-slate-400 text-sm max-w-sm leading-relaxed">
+              <p className="text-slate-400 text-sm max-w-sm leading-relaxed font-sans">
                 Nexosia is a premium digital ecosystem helping local clinics, salons, stores, and small businesses automate customer capture and booking pipelines via WhatsApp.
               </p>
               <div className="flex items-center gap-4 text-xs text-slate-400 font-semibold uppercase tracking-wider">
@@ -1471,7 +1632,7 @@ function App() {
               <ul className="space-y-3 text-slate-400 text-sm">
                 <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
                 <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
-                <li><a href="#pricing" className="hover:text-white transition-colors">Pricing Package</a></li>
+                <li><a href="#pricing" className="hover:text-white transition-colors">Pricing Packages</a></li>
                 <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
               </ul>
             </div>
@@ -1479,17 +1640,17 @@ function App() {
             {/* Column 3: Newsletter signup block */}
             <div className="md:col-span-4 space-y-4">
               <h4 className="font-bold font-heading text-cyan-electric text-sm uppercase tracking-wider">Stay Updated</h4>
-              <p className="text-slate-400 text-xs leading-relaxed">
+              <p className="text-slate-400 text-xs leading-relaxed font-sans">
                 Join our newsletter list to receive modern automation tips, case studies, and business growth strategies.
               </p>
               
               {newsletterSubmitted ? (
-                <div className="bg-slate-800/80 border border-slate-700/50 p-4 rounded-xl text-xs font-bold text-cyan-electric flex items-center gap-2 animate-in fade-in duration-300">
+                <div className="bg-slate-800/80 border border-slate-700/50 p-4 rounded-xl text-xs font-bold text-cyan-electric flex items-center gap-2 animate-in fade-in duration-300 font-sans">
                   <CheckCircle2 className="h-4.5 w-4.5 text-emerald-400" />
                   <span>Subscribed! Check your inbox soon.</span>
                 </div>
               ) : (
-                <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
+                <form onSubmit={handleNewsletterSubmit} className="flex gap-2 font-sans">
                   <input 
                     type="email" 
                     placeholder="Enter email address" 
@@ -1522,174 +1683,331 @@ function App() {
         </div>
       </footer>
 
-      {/* Demo Modal ("Get a Free Demo" Popup) */}
-      {isDemoModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 relative animate-in zoom-in-95 duration-200">
+      {/* Floating WhatsApp Chat Widget Icon & Popup */}
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 font-sans">
+        
+        {/* Chat window popup */}
+        {isChatWidgetOpen && (
+          <div className="bg-white w-[310px] h-[380px] rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-200">
             
+            {/* Header */}
+            <div className="bg-[#075e54] text-white p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[#075e54] font-bold text-xs">N</div>
+                <div>
+                  <h4 className="text-xs font-bold leading-tight">Nexosia Assistant</h4>
+                  <span className="text-[8px] opacity-80 block">Typically replies instantly</span>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsChatWidgetOpen(false)}
+                className="text-white opacity-80 hover:opacity-100 cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Chat Body */}
+            <div className="flex-grow p-4 bg-[#e5ddd5] overflow-y-auto space-y-3.5 flex flex-col justify-end">
+              {chatMessages.map((msg, idx) => (
+                <div 
+                  key={idx} 
+                  className={`text-[11px] p-2.5 rounded-xl max-w-[85%] leading-relaxed shadow-sm ${
+                    msg.sender === 'user' 
+                      ? 'bg-[#dcf8c6] text-slate-800 self-end rounded-tr-none' 
+                      : 'bg-white text-slate-800 self-start rounded-tl-none'
+                  }`}
+                >
+                  <p>{msg.text}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Chat Footer Input */}
+            <form onSubmit={handleWidgetChatSubmit} className="bg-slate-50 p-2 flex items-center gap-2 border-t border-slate-200">
+              <input 
+                type="text" 
+                placeholder="Ask about setup or pricing..." 
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                className="flex-grow border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#075e54] bg-white"
+                required
+              />
+              <button 
+                type="submit" 
+                className="bg-[#075e54] text-white p-2 rounded-lg text-xs font-bold cursor-pointer"
+              >
+                Send
+              </button>
+            </form>
+
+          </div>
+        )}
+
+        {/* Floating Bubble Button */}
+        <button 
+          onClick={() => setIsChatWidgetOpen(!isChatWidgetOpen)}
+          className="bg-[#25d366] hover:bg-[#128c7e] text-white p-4 rounded-full shadow-2xl transition-all hover:scale-105 cursor-pointer flex items-center justify-center"
+          aria-label="Contact support"
+        >
+          {isChatWidgetOpen ? <X className="h-6 w-6" /> : <MessageSquare className="h-6 w-6 fill-white" />}
+        </button>
+
+      </div>
+
+      {/* Onboarding Wizard Modal */}
+      {isWizardModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 font-sans">
+          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 relative animate-in zoom-in-95 duration-200 text-left">
+            
+            {/* Close */}
             <button 
-              onClick={() => setIsDemoModalOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 focus:outline-none"
+              onClick={() => setIsWizardModalOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
             >
               <X className="h-6 w-6" />
             </button>
 
-            <div className="space-y-2 text-left mb-6">
-              <h3 className="text-2xl font-bold font-heading text-midnight">Get a Live Free Demo</h3>
-              <p className="text-slate-500 text-sm">Fill in your details and our automation expert will demonstrate how Nexosia can increase your business bookings.</p>
-            </div>
+            {/* Stepper progress indicator */}
+            {!wizardSubmitted && (
+              <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-6 border-b border-slate-100 pb-3">
+                <span className={wizardStep >= 1 ? 'text-cyan-accent-dark' : ''}>1. Niche</span>
+                <span>•</span>
+                <span className={wizardStep >= 2 ? 'text-cyan-accent-dark' : ''}>2. Obstacles</span>
+                <span>•</span>
+                <span className={wizardStep >= 3 ? 'text-cyan-accent-dark' : ''}>3. Details</span>
+              </div>
+            )}
 
-            {modalFormSubmitted ? (
+            {/* Content by Step */}
+            {wizardSubmitted ? (
               <div className="py-12 text-center space-y-4">
                 <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mx-auto">
                   <CheckCircle2 className="h-10 w-10 animate-bounce" />
                 </div>
-                <h4 className="text-lg font-bold text-midnight">Submitting Details...</h4>
-                <p className="text-xs text-slate-400">Connecting to automated onboarding desk.</p>
+                <h4 className="text-lg font-bold text-midnight">Analyzing Business Profile...</h4>
+                <p className="text-xs text-slate-400">Deploying customized onboarding credentials.</p>
               </div>
             ) : (
-              <form onSubmit={handleModalSubmit} className="space-y-4 text-left">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Your Name</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. John Doe"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-accent focus:bg-white transition-all"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Business Name</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. Apex Dental Clinic"
-                    value={formData.businessName}
-                    onChange={(e) => setFormData({...formData, businessName: e.target.value})}
-                    className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-accent focus:bg-white transition-all"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">WhatsApp Mobile Number</label>
-                  <input 
-                    type="tel" 
-                    placeholder="e.g. +91 98765 43210"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-accent focus:bg-white transition-all"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Business Niche</label>
-                  <select 
-                    value={formData.niche}
-                    onChange={(e) => setFormData({...formData, niche: e.target.value})}
-                    className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-accent focus:bg-white transition-all"
-                  >
-                    <option value="clinic">🏥 Clinic / Medical Office</option>
-                    <option value="salon">✂️ Hair Salon / Spa</option>
-                    <option value="store">🛍️ Retail Store / Shop</option>
-                    <option value="other">💼 Other SMB / Services</option>
-                  </select>
-                </div>
+              <div>
                 
-                <button 
-                  type="submit"
-                  className="w-full bg-cyan-accent hover:bg-cyan-accent-dark text-white font-extrabold text-base py-3.5 rounded-xl transition-all shadow-md shadow-cyan-accent/15 cursor-pointer text-center"
-                >
-                  Send Demo Request
-                </button>
-              </form>
+                {/* Step 1: Choose Niche */}
+                {wizardStep === 1 && (
+                  <div className="space-y-4 animate-in fade-in duration-200">
+                    <h3 className="text-xl font-bold font-heading text-midnight">Select Your Business Type</h3>
+                    <p className="text-slate-500 text-xs">We customize the website template and automated booking bot questions based on your niche.</p>
+                    <div className="grid grid-cols-2 gap-3.5 pt-2">
+                      {[
+                        { id: 'clinic', label: '🏥 Medical Clinic / Doctor', desc: 'Patients booking visits' },
+                        { id: 'salon', label: '✂️ Salon, Spa & Beauty', desc: 'Clients booking services' },
+                        { id: 'store', label: '🛍️ Retail Store / Shop', desc: 'Ordering & slot collections' },
+                        { id: 'other', label: '💼 Professional Services', desc: 'Consultations & calls' }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => handleNicheSelection(item.id)}
+                          className="p-4 border border-slate-200 hover:border-cyan-accent rounded-2xl hover:bg-cyan-accent/5 text-left transition-all cursor-pointer flex flex-col justify-between"
+                        >
+                          <span className="font-bold text-slate-800 text-xs">{item.label}</span>
+                          <span className="text-[9px] text-slate-400 mt-2 block">{item.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 2: Obstacles */}
+                {wizardStep === 2 && (
+                  <div className="space-y-4 animate-in fade-in duration-200">
+                    <h3 className="text-xl font-bold font-heading text-midnight">What is your biggest booking headache?</h3>
+                    <p className="text-slate-500 text-xs">Select all that apply so we configure the bot triggers correctly.</p>
+                    <div className="space-y-2.5 pt-2">
+                      {[
+                        { id: 'after_hours', label: '⏰ Losing potential bookings after business hours' },
+                        { id: 'manual_calls', label: '📞 Spending hours on phone scheduling' },
+                        { id: 'no_shows', label: '❌ High appointment no-show rates' },
+                        { id: 'bad_reviews', label: '⭐ Struggling to accumulate Google Reviews' }
+                      ].map((item) => {
+                        const isChecked = wizardData.headaches.includes(item.id);
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => handleHeadacheToggle(item.id)}
+                            className={`w-full p-3.5 border rounded-2xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                              isChecked ? 'border-cyan-accent bg-cyan-accent/5 text-cyan-accent-dark' : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                            }`}
+                          >
+                            <span>{item.label}</span>
+                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isChecked ? 'border-cyan-accent bg-cyan-accent text-white' : 'border-slate-300'}`}>
+                              {isChecked && <Check className="w-3 h-3" />}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="flex justify-between items-center pt-4">
+                      <button onClick={() => setWizardStep(1)} className="text-xs font-semibold text-slate-500 hover:text-slate-700 flex items-center gap-1">
+                        <ChevronLeft className="h-4 w-4" /> Back
+                      </button>
+                      <button 
+                        onClick={() => setWizardStep(3)} 
+                        disabled={wizardData.headaches.length === 0}
+                        className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          wizardData.headaches.length > 0 ? 'bg-slate-900 text-white hover:bg-slate-800' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                        }`}
+                      >
+                        Next Step
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 3: Contact details */}
+                {wizardStep === 3 && (
+                  <form onSubmit={handleWizardSubmit} className="space-y-4 animate-in fade-in duration-200">
+                    <h3 className="text-xl font-bold font-heading text-midnight">Enter Business Details</h3>
+                    <p className="text-slate-500 text-xs">Let's create your account. We will analyze your profile and contact you with a layout draft.</p>
+                    
+                    <div className="space-y-3 pt-2">
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Your Name</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g. John Doe"
+                          value={wizardData.name}
+                          onChange={(e) => setWizardData({...wizardData, name: e.target.value})}
+                          className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Business Name</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g. Apex Dental Clinic"
+                          value={wizardData.businessName}
+                          onChange={(e) => setWizardData({...wizardData, businessName: e.target.value})}
+                          className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">WhatsApp Number</label>
+                        <input 
+                          type="tel" 
+                          placeholder="e.g. +91 98765 43210"
+                          value={wizardData.phone}
+                          onChange={(e) => setWizardData({...wizardData, phone: e.target.value})}
+                          className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Email Address</label>
+                        <input 
+                          type="email" 
+                          placeholder="e.g. contact@business.com"
+                          value={wizardData.email}
+                          onChange={(e) => setWizardData({...wizardData, email: e.target.value})}
+                          className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                          required={wizardType === 'trial'}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-4">
+                      <button type="button" onClick={() => setWizardStep(2)} className="text-xs font-semibold text-slate-500 hover:text-slate-700 flex items-center gap-1 cursor-pointer">
+                        <ChevronLeft className="h-4 w-4" /> Back
+                      </button>
+                      <button 
+                        type="submit"
+                        className="bg-cyan-accent hover:bg-cyan-accent-dark text-white font-extrabold text-xs py-3 px-6 rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-md shadow-cyan-accent/15"
+                      >
+                        {wizardType === 'trial' ? 'Connect & Claim Free Setup' : 'Send Demo Request'}
+                        <Check className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+              </div>
             )}
 
           </div>
         </div>
       )}
 
-      {/* Trial Modal ("Start Your Free 14-Day Trial" Popup) */}
-      {isTrialModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 relative animate-in zoom-in-95 duration-200">
+      {/* Hero Video Demo Modal */}
+      {isVideoModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-4 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200">
             
+            {/* Close */}
             <button 
-              onClick={() => setIsTrialModalOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 focus:outline-none"
+              onClick={() => setIsVideoModalOpen(false)}
+              className="absolute top-4 right-4 z-10 text-slate-500 hover:text-slate-800 bg-white/80 hover:bg-white p-2 rounded-full shadow-md cursor-pointer"
             >
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5" />
             </button>
 
-            <div className="space-y-2 text-left mb-6">
-              <h3 className="text-2xl font-bold font-heading text-midnight">Start Your Free 14-Day Trial</h3>
-              <p className="text-slate-500 text-sm">Zero upfront charges. Let's create your website preview and connect the WhatsApp booking bot for your store or clinic.</p>
-            </div>
-
-            {modalFormSubmitted ? (
-              <div className="py-12 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mx-auto">
-                  <CheckCircle2 className="h-10 w-10 animate-bounce" />
+            {/* Mock Player Visual */}
+            <div className="aspect-video bg-slate-950 rounded-2xl relative overflow-hidden flex flex-col justify-between p-6">
+              
+              {/* Header */}
+              <div className="flex justify-between items-center text-white z-10">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">Live Booking Bot Simulation</span>
                 </div>
-                <h4 className="text-lg font-bold text-midnight">Setting Up Account...</h4>
-                <p className="text-xs text-slate-400">Loading trial components.</p>
+                <span className="text-[10px] bg-slate-800/80 px-2 py-0.5 rounded text-slate-300 font-mono">0:24 / 1:30</span>
               </div>
-            ) : (
-              <form onSubmit={handleModalSubmit} className="space-y-4 text-left">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Your Name</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. John Doe"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-accent focus:bg-white transition-all"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Business Name</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. Apex Health Clinic"
-                    value={formData.businessName}
-                    onChange={(e) => setFormData({...formData, businessName: e.target.value})}
-                    className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-accent focus:bg-white transition-all"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">WhatsApp Number</label>
-                  <input 
-                    type="tel" 
-                    placeholder="e.g. +91 98765 43210"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-accent focus:bg-white transition-all"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Email Address</label>
-                  <input 
-                    type="email" 
-                    placeholder="e.g. contact@business.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-accent focus:bg-white transition-all"
-                    required
-                  />
-                </div>
+
+              {/* Bot Simulation Body */}
+              <div className="flex-grow flex items-center justify-center gap-6 my-4 select-none z-10">
                 
+                {/* Chat Visual Left */}
+                <div className="bg-slate-900/90 border border-slate-850 rounded-2xl p-4 w-64 text-left space-y-2 shadow-2xl">
+                  <div className="text-[9px] font-bold text-cyan-electric uppercase tracking-wider mb-2 flex items-center gap-1">
+                    <MessageSquare className="h-3 w-3" /> WhatsApp Auto-Scheduler
+                  </div>
+                  <div className="bg-slate-800 p-2 rounded-lg text-[9px] text-slate-300">
+                    "Hi Rohan! I would like to book a dental checkup."
+                  </div>
+                  <div className="bg-slate-950 p-2 rounded-lg text-[9px] text-cyan-electric border-l-2 border-cyan-accent leading-normal">
+                    "Instantly! 🦷 We have Monday, 10:00 AM available. Reply 'CONFIRM' to lock it."
+                  </div>
+                </div>
+
+                {/* Calendar Visual Right */}
+                <div className="hidden sm:block bg-slate-900/90 border border-slate-850 rounded-2xl p-4 w-44 text-left space-y-2 shadow-2xl">
+                  <div className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1">
+                    <Calendar className="h-3 w-3" /> Calendar Sync
+                  </div>
+                  <div className="bg-slate-950 p-2 rounded-lg text-[9px] text-slate-400 space-y-1">
+                    <p className="text-[8px] font-bold text-white">Monday, July 6</p>
+                    <div className="bg-indigo-950/50 border border-indigo-900 p-1 rounded text-[7px] text-indigo-300">
+                      📅 10:00 AM - Rohan (Dental)
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Controls */}
+              <div className="flex items-center justify-between text-white text-xs z-10 pt-2 border-t border-white/10">
+                <div className="flex items-center gap-4">
+                  <button className="hover:text-cyan-electric"><Play className="h-5 w-5 fill-current" /></button>
+                  <span className="text-[10px] text-slate-400">Connecting lead triggers in real-time...</span>
+                </div>
                 <button 
-                  type="submit"
-                  className="w-full bg-[#25d366] hover:bg-[#128c7e] text-white font-extrabold text-base py-3.5 rounded-xl transition-all shadow-md shadow-emerald-500/15 cursor-pointer text-center flex items-center justify-center gap-2"
+                  onClick={() => { setIsVideoModalOpen(false); openWizard('trial'); }} 
+                  className="bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 hover:text-white font-extrabold text-[10px] py-1.5 px-4 rounded-lg cursor-pointer"
                 >
-                  <MessageCircle className="h-5 w-5 fill-white" />
-                  Connect & Claim Free Setup
+                  Start My Trial
                 </button>
-              </form>
-            )}
+              </div>
+
+            </div>
 
           </div>
         </div>
