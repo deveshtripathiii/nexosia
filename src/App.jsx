@@ -2621,6 +2621,135 @@ function App() {
         </div>
       </section>
 
+      {/* Specialized Doctor Clinic & EHR System (Added from Tech Department) */}
+      <section className="py-24 md:py-32 bg-slate-900 text-white relative overflow-hidden border-t border-slate-800">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(6,182,212,0.15),transparent_50%)]"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <span className="bg-cyan-500/10 text-cyan-accent text-[11px] font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">
+              🏥 Specialized Vertical Suite
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading tracking-tight text-white pt-2">
+              Ready-to-Deploy Clinic EHR & Patient System
+            </h2>
+            <p className="text-slate-400 text-base max-w-2xl mx-auto leading-relaxed">
+              Apne clinic ko paperless aur smart banayein! We offer ready-to-deploy, fully customizable software packages for doctors, clinics, and health professionals with <strong className="text-white">zero monthly subscription fees</strong>.
+            </p>
+          </div>
+
+          <div className="bg-slate-800/50 border border-slate-700/80 rounded-3xl p-8 sm:p-12 shadow-2xl backdrop-blur-sm grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center max-w-6xl mx-auto">
+            
+            {/* Visual Column */}
+            <div className="lg:col-span-5 space-y-6 flex flex-col justify-center items-center text-center">
+              <div className="w-full aspect-video bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden relative group shadow-inner">
+                <img 
+                  src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80" 
+                  alt="Doctor Clinic EHR System Layout" 
+                  className="w-full h-full object-cover opacity-80 group-hover:scale-[1.03] transition-transform duration-500" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent flex items-end justify-center p-4">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-cyan-accent">Interactive Telehealth Demo Included</span>
+                </div>
+              </div>
+              
+              <div className="bg-slate-950/85 border border-slate-800 rounded-2xl p-6 w-full text-center space-y-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">One-Time License Option</span>
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-3xl font-extrabold text-white">₹15,000</span>
+                  <span className="text-slate-400 text-xs">/ lifetime</span>
+                </div>
+                <p className="text-[11px] text-slate-400">Lifetime access • No subscription costs • Custom medical branding</p>
+                <div className="pt-2">
+                  <a 
+                    href="https://wa.me/917860716837?text=Hi!%20I%20am%20interested%20in%20buying%20your%20Customizable%20Doctor%20Clinic%20Software%20for%20₹15,000.%20Please%20share%20customization%20details." 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="inline-block bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 font-extrabold text-xs px-6 py-2.5 rounded-lg transition-all"
+                  >
+                    💬 Get Details on WhatsApp
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Details Column */}
+            <div className="lg:col-span-7 space-y-6">
+              <div>
+                <span className="text-xs font-bold text-cyan-accent uppercase tracking-widest">Interactive Features</span>
+                <h3 className="text-2xl font-bold font-heading text-white mt-1">EHR & Telehealth Booking Suite</h3>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
+                
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">📅</span>
+                    <h4 className="font-bold text-sm text-white">Patient Appointment Scheduler</h4>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed pl-7">
+                    Interactive calendar booking with automatic slot blocking, email confirmations, and specialty toggle.
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🩺</span>
+                    <h4 className="font-bold text-sm text-white">Secure EHR Vitals Logger</h4>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed pl-7">
+                    Track blood pressure, heart rate, temp, and weight logs. Automatically colors dangerous vitals.
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🤖</span>
+                    <h4 className="font-bold text-sm text-white">AI Medical Help Assistant</h4>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed pl-7">
+                    Smart assistant answering customer queries about fees, timings, checkup details, and availability.
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🧠</span>
+                    <h4 className="font-bold text-sm text-white">Clinical AI Diagnostic Helper</h4>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed pl-7">
+                    Simulates medical logs, suggesting potential tests (e.g. HbA1c) and summaries on critical values.
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">📹</span>
+                    <h4 className="font-bold text-sm text-white">Telehealth Video Consultations</h4>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed pl-7">
+                    Built-in telehealth portal with microphone/camera toggles and live consultation notes pane.
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🧾</span>
+                    <h4 className="font-bold text-sm text-white">Invoicing & PDF Generator</h4>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed pl-7">
+                    Calculate checkup costs, print prescriptions, and download clean digital PDF invoices on the fly.
+                  </p>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
       {/* Testimonials */}
       <section className="py-24 bg-slate-55 border-t border-slate-200">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
