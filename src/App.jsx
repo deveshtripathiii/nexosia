@@ -39,7 +39,8 @@ import {
   UserCheck,
   Zap,
   LogOut,
-  Send
+  Send,
+  ArrowLeft
 } from 'lucide-react';
 import logoImg from './assets/logo.png';
 import { auth, db } from './firebase';
@@ -52,7 +53,8 @@ import {
   orderBy, 
   doc, 
   updateDoc, 
-  deleteDoc 
+  deleteDoc,
+  getDoc
 } from 'firebase/firestore';
 import { 
   signInWithEmailAndPassword, 
@@ -176,8 +178,12 @@ function App() {
   const [authError, setAuthError] = useState('');
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [page, setPage] = useState('landing'); // 'landing' or 'admin'
+  const [page, setPage] = useState('landing'); // 'landing' | 'admin' | 'demo'
   const [adminTab, setAdminTab] = useState('leads'); // 'leads' | 'trials' | 'ai-agent' | 'subscribers' | 'settings'
+
+  // --- AI Generated Site Preview State ---
+  const [activeDemoData, setActiveDemoData] = useState(null);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
 
   // --- Firestore Collections State ---
   const [leads, setLeads] = useState([]);
@@ -217,13 +223,55 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
-      if (user) {
+      // Auto route to admin only if URL doesn't contain a demo parameters query
+      const params = new URLSearchParams(window.location.search);
+      if (user && !params.get('demo')) {
         setPage('admin');
-      } else {
-        setPage('landing');
       }
     });
     return () => unsubscribe();
+  }, []);
+
+  // Check URL queries on mount for direct demo links
+  useEffect(() => {
+    const fetchDemoOnMount = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const demoId = params.get('demo');
+      if (demoId) {
+        setIsDemoLoading(true);
+        setPage('demo');
+        try {
+          // Check trials collection first
+          let docRef = doc(db, 'trials', demoId);
+          let docSnap = await getDoc(docRef);
+          
+          if (!docSnap.exists()) {
+            // Check leads collection as fallback
+            docRef = doc(db, 'leads', demoId);
+            docSnap = await getDoc(docRef);
+          }
+
+          if (docSnap.exists()) {
+            setActiveDemoData({ id: docSnap.id, ...docSnap.data() });
+          } else {
+            // Fallback mock details if document not found in DB
+            setActiveDemoData({
+              id: demoId,
+              businessName: 'My Custom Business',
+              businessType: 'clinic',
+              name: 'Owner',
+              phone: '+91 98000 00000',
+              headaches: ['after_hours']
+            });
+          }
+        } catch (err) {
+          console.error("Fetch Demo Error: ", err);
+        } finally {
+          setIsDemoLoading(false);
+        }
+      }
+    };
+    fetchDemoOnMount();
   }, []);
 
   // Fetch Leads real-time
@@ -299,6 +347,7 @@ function App() {
       setIsLoginModalOpen(false);
       setAuthEmail('');
       setAuthPassword('');
+      setPage('admin');
     } catch (err) {
       console.error(err);
       setAuthError('Invalid credentials. Please verify your email and password.');
@@ -483,7 +532,7 @@ function App() {
     setTimeout(() => {
       setIsSimTyping(false);
       const botTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const botText = `🎉 Appointment Confirmed, ${name}!\n\n🏥 Clinic: Apex Health Clinic\n📅 Date: Monday, July 6\n⏰ Time: 10:00 AM\n👨‍⚕️ Specialist: Dr. Sarah Jenkins\n\nWe have saved your slot. A WhatsApp reminder will be sent to you 2 hours before your session. See you there!`;
+      const botText = `🎉 Appointment Confirmed, ${name}!\n\n🏥 Clinic: ${activeDemoData ? activeDemoData.businessName : 'Apex Health Clinic'}\n📅 Date: Monday, July 6\n⏰ Time: 10:00 AM\n👨‍⚕️ Specialist: Dr. Sarah Jenkins\n\nWe have saved your slot. A WhatsApp reminder will be sent to you 2 hours before your session. See you there!`;
       
       setSimMessages(prev => [...prev, { sender: 'bot', text: botText, time: botTime }]);
     }, 1200);
@@ -536,7 +585,7 @@ function App() {
     try {
       const collectionName = wizardType === 'trial' ? 'trials' : 'leads';
       
-      await addDoc(collection(db, collectionName), {
+      const docRef = await addDoc(collection(db, collectionName), {
         name: wizardData.name,
         businessName: wizardData.businessName,
         phone: wizardData.phone,
@@ -547,10 +596,25 @@ function App() {
         createdAt: serverTimestamp()
       });
 
+      const demoObj = {
+        id: docRef.id,
+        name: wizardData.name,
+        businessName: wizardData.businessName,
+        phone: wizardData.phone,
+        email: wizardData.email,
+        businessType: wizardData.businessType,
+        headaches: wizardData.headaches
+      };
+
       setTimeout(() => {
         setIsWizardModalOpen(false);
         setWizardSubmitted(false);
-        alert(`Awesome! Thank you ${wizardData.name}. We will audit your answers and reach out to you on WhatsApp at ${wizardData.phone} in 15 minutes!`);
+        setActiveDemoData(demoObj);
+        
+        // Push state to browser window URL query parameters for dynamic sharing
+        window.history.pushState(null, '', `?demo=${docRef.id}`);
+        setPage('demo');
+        
         setWizardData({ businessType: '', headaches: [], name: '', businessName: '', email: '', phone: '' });
       }, 1500);
     } catch (error) {
@@ -596,7 +660,6 @@ function App() {
     : (billingPeriod === 'monthly' ? '$30' : '$24');
 
   const billPeriodLabel = '/mo';
-  const billingCycleLabel = billingPeriod === 'monthly' ? 'Billed monthly' : 'Billed annually (Save 20%)';
 
   // ROI Calculator Calculations
   const timeSavedHours = Math.round((calcBookings * 8) / 60);
@@ -605,6 +668,299 @@ function App() {
   const formattedRevenue = currency === 'INR' 
     ? `₹${calculatedGain.toLocaleString('en-IN')}` 
     : `$${calculatedGain.toLocaleString('en-US')}`;
+
+  // ----------------------------------------------------
+  // --- DYNAMIC AI-GENERATED WEBSITE DEMO VIEW ---
+  // ----------------------------------------------------
+  if (page === 'demo') {
+    const isClinic = activeDemoData?.businessType === 'clinic';
+    const isSalon = activeDemoData?.businessType === 'salon';
+    const isStore = activeDemoData?.businessType === 'store';
+    
+    // Theme configurations
+    const themeColor = isClinic ? 'indigo' : isSalon ? 'rose' : 'slate';
+    const accentTextClass = isClinic ? 'text-indigo-600' : isSalon ? 'text-rose-600' : 'text-slate-800';
+    const bgBadgeClass = isClinic ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : isSalon ? 'bg-rose-50 text-rose-700 border-rose-100' : 'bg-slate-100 text-slate-700 border-slate-200';
+    const btnThemeClass = isClinic ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : isSalon ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-slate-900 hover:bg-slate-800 text-white';
+    
+    const services = isClinic 
+      ? ['Doctor Consultation', 'Dental Checkup & Scaling', 'Family Health Audit', 'Emergency Care']
+      : isSalon
+        ? ['Designer Haircut & Styling', 'Keratin & Nourishing Treatment', 'Relaxing Facial Spa', 'Gel Manicure & Nails']
+        : ['Product In-Store Pickup', 'Custom Sales Consultation', 'Pre-Order Slot Selection', 'Client Support Audit'];
+
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col justify-between">
+        
+        {/* Dynamic Header */}
+        <header className="sticky top-0 z-40 bg-white/95 border-b border-slate-200 shadow-sm backdrop-blur-md">
+          
+          {/* Top Banner Alert showing it is a simulator demo */}
+          <div className="bg-gradient-to-r from-cyan-accent to-cyan-accent-dark text-slate-950 px-4 py-2 text-center text-xs font-extrabold flex justify-center items-center gap-2">
+            <Sparkles className="h-4 w-4 animate-bounce" />
+            <span>AI ENGINE GENERATED SITE PREVIEW FOR: "{activeDemoData?.businessName || 'Your Business'}"</span>
+            <button 
+              onClick={() => {
+                // Clear state, remove URL params and reload home
+                window.history.pushState(null, '', window.location.pathname);
+                setActiveDemoData(null);
+                setPage('landing');
+              }}
+              className="underline text-[10px] ml-4 hover:text-white cursor-pointer"
+            >
+              Back to Nexosia Home
+            </button>
+          </div>
+
+          <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <span className="text-lg font-extrabold font-heading text-midnight flex items-center gap-1">
+              <Building className="h-5 w-5 text-slate-500" />
+              {activeDemoData?.businessName || 'My Custom Business'}
+            </span>
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => {
+                  // Open booking bot simulator instantly
+                  setIsChatWidgetOpen(true);
+                  setChatMessages([
+                    { sender: 'bot', text: `Hi there! Welcome to ${activeDemoData?.businessName || 'our business'} virtual assistant. 🤖 Would you like to book a session for Monday?` }
+                  ]);
+                }}
+                className={`text-xs font-bold px-5 py-2.5 rounded-full transition-all flex items-center gap-1.5 shadow-sm cursor-pointer ${btnThemeClass}`}
+              >
+                <MessageSquare className="h-4 w-4 fill-white" />
+                Book via WhatsApp
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {isDemoLoading ? (
+          <div className="flex-grow flex flex-col items-center justify-center py-24 space-y-4">
+            <div className="w-10 h-10 border-4 border-slate-200 border-t-cyan-accent rounded-full animate-spin"></div>
+            <p className="text-slate-500 font-bold text-sm">AI Generator compiling site resources...</p>
+          </div>
+        ) : (
+          <div className="flex-grow animate-in fade-in duration-300">
+            
+            {/* Hero Block */}
+            <section className="bg-gradient-to-b from-white to-slate-100 py-16 md:py-24 border-b border-slate-200 text-left">
+              <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
+                <div className="md:col-span-7 space-y-6">
+                  
+                  <span className={`inline-block border text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${bgBadgeClass}`}>
+                    {activeDemoData?.businessType || 'Services'} • Automated Scheduling
+                  </span>
+
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-midnight font-heading tracking-tight leading-tight">
+                    {isClinic && `Professional Patient Care at ${activeDemoData.businessName}.`}
+                    {isSalon && `Experience Premium Styles & Care at ${activeDemoData.businessName}.`}
+                    {isStore && `Automated Order Bookings at ${activeDemoData.businessName}.`}
+                    {!isClinic && !isSalon && !isStore && `Welcome to ${activeDemoData?.businessName || 'Our Business'}.`}
+                    <br />
+                    <span className={accentTextClass}>Book Your Appointment Online.</span>
+                  </h1>
+
+                  <p className="text-slate-600 text-base leading-relaxed max-w-xl">
+                    {activeDemoData?.headaches?.includes('after_hours') && 
+                      "Tired of missing appointments after closing? Our 24/7 WhatsApp AI assistant allows you to reserve slots at your convenience, anytime."}
+                    {activeDemoData?.headaches?.includes('manual_calls') && 
+                      "Skip the busy phone lines. Book your appointments in 30 seconds via WhatsApp and receive instant confirmation."}
+                    {(!activeDemoData?.headaches || activeDemoData.headaches.length === 0) && 
+                      "We value your time. Our online scheduler links directly to WhatsApp and secures your slot on our master calendar instantly."}
+                  </p>
+
+                  <div className="pt-2">
+                    <button 
+                      onClick={() => {
+                        setIsChatWidgetOpen(true);
+                        setChatMessages([
+                          { sender: 'bot', text: `Welcome to ${activeDemoData?.businessName || 'our business'}! I am your conversational booking assistant. Would you like to schedule an appointment for Monday?` }
+                        ]);
+                      }}
+                      className={`text-sm font-extrabold px-8 py-3.5 rounded-full transition-all shadow-lg flex items-center gap-2 cursor-pointer ${btnThemeClass}`}
+                    >
+                      Book Appointment Now
+                      <ArrowRight className="h-4.5 w-4.5" />
+                    </button>
+                  </div>
+
+                </div>
+
+                <div className="md:col-span-5 bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-4">
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                    <span className="font-bold text-xs text-midnight">Business Hours</span>
+                    <span className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Open Today
+                    </span>
+                  </div>
+                  <div className="space-y-2 text-xs text-slate-600">
+                    <div className="flex justify-between"><span>Mon - Fri</span><span>9:00 AM - 7:00 PM</span></div>
+                    <div className="flex justify-between"><span>Saturday</span><span>10:00 AM - 4:00 PM</span></div>
+                    <div className="flex justify-between text-slate-400"><span>Sunday</span><span>Closed (Bot active 24/7)</span></div>
+                  </div>
+                </div>
+
+              </div>
+            </section>
+
+            {/* Services List Grid */}
+            <section className="py-16 bg-white border-b border-slate-200 text-left">
+              <div className="max-w-6xl mx-auto px-4 space-y-8">
+                <div>
+                  <h2 className="text-xl font-bold font-heading text-midnight">Our Specialised Services</h2>
+                  <p className="text-slate-500 text-xs mt-1">Select from our expert offerings. Bookings sync instantly with our calendars.</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                  {services.map((serv, idx) => (
+                    <div key={idx} className="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-4 flex flex-col justify-between hover:border-slate-350 transition-colors">
+                      <span className="text-xs font-bold text-slate-800 block leading-tight">{serv}</span>
+                      <button 
+                        onClick={() => {
+                          setIsChatWidgetOpen(true);
+                          setChatMessages([
+                            { sender: 'bot', text: `Hi there! Ready to book a slot for "${serv}"? What day works best for you?` }
+                          ]);
+                        }}
+                        className="text-[10px] font-extrabold text-cyan-accent-dark hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        Book Service <ArrowRight className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* CTA/Pitch for Nexosia */}
+            <section className="bg-slate-900 text-white py-16 text-center relative overflow-hidden">
+              <div className="absolute w-72 h-72 rounded-full bg-cyan-accent/5 blur-3xl -top-10 -right-10 pointer-events-none"></div>
+              <div className="max-w-4xl mx-auto px-4 space-y-6">
+                <h3 className="text-2xl font-extrabold font-heading text-white">Like this automated website template?</h3>
+                <p className="text-slate-400 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
+                  This custom site and WhatsApp bot scheduler were generated automatically by Nexosia's AI engine. You can connect your own phone number and launch this page for real in 3 days!
+                </p>
+                <div className="pt-2">
+                  <button 
+                    onClick={() => {
+                      window.history.pushState(null, '', window.location.pathname);
+                      setActiveDemoData(null);
+                      setPage('landing');
+                    }}
+                    className="bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 hover:text-white font-extrabold text-xs px-8 py-3.5 rounded-full transition-all cursor-pointer inline-flex items-center gap-1 shadow-lg shadow-cyan-accent/15"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back to Nexosia Home
+                  </button>
+                </div>
+              </div>
+            </section>
+
+          </div>
+        )}
+
+        {/* Floating WhatsApp chat bubble configured for their custom demo business */}
+        <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 font-sans">
+          {isChatWidgetOpen && (
+            <div className="bg-white w-[310px] h-[380px] rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-200">
+              
+              <div className="bg-[#075e54] text-white p-4 flex items-center justify-between shadow-md">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[#075e54] font-bold text-xs">🤖</div>
+                  <div>
+                    <h4 className="text-xs font-bold leading-tight truncate max-w-[150px]">
+                      {activeDemoData?.businessName || 'Business'} Bot
+                    </h4>
+                    <span className="text-[8px] opacity-80 block flex items-center gap-1">
+                      <span className="w-1 h-1 bg-emerald-400 rounded-full animate-ping"></span>online assistant
+                    </span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsChatWidgetOpen(false)}
+                  className="text-white opacity-80 hover:opacity-100 cursor-pointer"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Messaging frame */}
+              <div className="flex-grow p-4 bg-[#e5ddd5] overflow-y-auto space-y-3.5 flex flex-col justify-end">
+                {chatMessages.map((msg, idx) => (
+                  <div 
+                    key={idx} 
+                    className={`text-[11px] p-2.5 rounded-xl max-w-[85%] leading-relaxed shadow-sm ${
+                      msg.sender === 'user' 
+                        ? 'bg-[#dcf8c6] text-slate-800 self-end rounded-tr-none' 
+                        : 'bg-white text-slate-800 self-start rounded-tl-none border-l-4 border-emerald-500'
+                    }`}
+                  >
+                    <p className="whitespace-pre-line">{msg.text}</p>
+                  </div>
+                ))}
+              </div>
+
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!chatInput.trim()) return;
+
+                  const userMsg = chatInput.trim();
+                  setChatMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
+                  setChatInput('');
+
+                  setTimeout(() => {
+                    let replyText = `Thanks for writing! We have received your query at ${activeDemoData?.businessName || 'our business'}. Click "Book Appointment Now" to simulate locking your slot!`;
+                    
+                    const textLower = userMsg.toLowerCase();
+                    if (textLower.includes('book') || textLower.includes('appointment') || textLower.includes('slot') || textLower.includes('time')) {
+                      replyText = `Instantly! 📅 We have Monday, July 6 at 10:00 AM available. \n\nReply with **"CONFIRM"** to lock this appointment.`;
+                    } else if (textLower.includes('confirm')) {
+                      replyText = `🎉 **Appointment Confirmed!**\n\n🏥 Business: ${activeDemoData?.businessName || 'My Business'}\n📅 Date: Monday, July 6\n⏰ Time: 10:00 AM\n\nWe have saved your slot. See you there!`;
+                    }
+
+                    setChatMessages(prev => [...prev, { sender: 'bot', text: replyText }]);
+                  }, 1000);
+                }}
+                className="bg-slate-50 p-2 flex items-center gap-2 border-t border-slate-200"
+              >
+                <input 
+                  type="text" 
+                  placeholder="Type 'book' or ask anything..." 
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  className="flex-grow border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#075e54] bg-white"
+                  required
+                />
+                <button 
+                  type="submit" 
+                  className="bg-[#075e54] text-white p-2 rounded-lg text-xs font-bold cursor-pointer"
+                >
+                  Send
+                </button>
+              </form>
+
+            </div>
+          )}
+
+          <button 
+            onClick={() => setIsChatWidgetOpen(!isChatWidgetOpen)}
+            className="bg-[#25d366] hover:bg-[#128c7e] text-white p-4 rounded-full shadow-2xl transition-all hover:scale-105 cursor-pointer flex items-center justify-center"
+            aria-label="Contact bot"
+          >
+            {isChatWidgetOpen ? <X className="h-6 w-6" /> : <MessageSquare className="h-6 w-6 fill-white" />}
+          </button>
+        </div>
+
+        {/* Footer */}
+        <footer className="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800">
+          <p>© {new Date().getFullYear()} {activeDemoData?.businessName || 'My Custom Business'} • Generated via Nexosia Engine</p>
+        </footer>
+
+      </div>
+    );
+  }
 
   // ----------------------------------------------------
   // --- ADMIN PORTAL VIEW IF AUTHENTICATED ---
@@ -753,6 +1109,7 @@ function App() {
                           <th className="p-4">WhatsApp Phone</th>
                           <th className="p-4">Niche</th>
                           <th className="p-4">Headaches</th>
+                          <th className="p-4">Demo Link</th>
                           <th className="p-4">Status</th>
                           <th className="p-4 pr-6 text-right">Actions</th>
                         </tr>
@@ -765,11 +1122,21 @@ function App() {
                             <td className="p-4 text-slate-400">{lead.phone}</td>
                             <td className="p-4">
                               <span className="bg-slate-800 border border-slate-700 text-slate-300 text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider">
-                                {lead.businessType || lead.niche || 'Other'}
+                                {lead.businessType || 'Other'}
                               </span>
                             </td>
                             <td className="p-4 max-w-xs truncate text-slate-400">
                               {lead.headaches ? lead.headaches.join(', ') : 'None'}
+                            </td>
+                            <td className="p-4">
+                              <a 
+                                href={`?demo=${lead.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-cyan-electric hover:underline font-bold flex items-center gap-1 text-[10px]"
+                              >
+                                View Demo <ArrowUpRight className="h-3 w-3" />
+                              </a>
                             </td>
                             <td className="p-4">
                               <select 
@@ -830,6 +1197,7 @@ function App() {
                           <th className="p-4">Business</th>
                           <th className="p-4">Email</th>
                           <th className="p-4">Phone</th>
+                          <th className="p-4">Demo Link</th>
                           <th className="p-4">Created Date</th>
                           <th className="p-4 pr-6 text-right">Action</th>
                         </tr>
@@ -841,6 +1209,16 @@ function App() {
                             <td className="p-4 text-slate-300 font-semibold">{trial.businessName}</td>
                             <td className="p-4 text-slate-400">{trial.email}</td>
                             <td className="p-4 text-slate-400">{trial.phone}</td>
+                            <td className="p-4">
+                              <a 
+                                href={`?demo=${trial.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-cyan-electric hover:underline font-bold flex items-center gap-1 text-[10px]"
+                              >
+                                View Demo <ArrowUpRight className="h-3 w-3" />
+                              </a>
+                            </td>
                             <td className="p-4 text-slate-500">
                               {trial.createdAt ? new Date(trial.createdAt.seconds * 1000).toLocaleDateString() : 'Pending'}
                             </td>
@@ -1085,15 +1463,15 @@ function App() {
               </div>
 
               <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
-                <div className="flex justify-between items-center pb-3 border-b border-slate-850 text-xs">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-855 text-xs">
                   <span className="text-slate-400">Database Engine</span>
                   <span className="text-white font-bold">Cloud Firestore (Active/Online)</span>
                 </div>
-                <div className="flex justify-between items-center pb-3 border-b border-slate-850 text-xs">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-855 text-xs">
                   <span className="text-slate-400">Authentication Service</span>
                   <span className="text-white font-bold">Firebase Auth (Email/Password Provider)</span>
                 </div>
-                <div className="flex justify-between items-center pb-3 border-b border-slate-850 text-xs">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-855 text-xs">
                   <span className="text-slate-400">Google Calendar Synchronization</span>
                   <span className="text-emerald-400 font-bold flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span> Enabled
@@ -1121,8 +1499,8 @@ function App() {
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-cyan-accent selection:text-white">
       
       {/* Scroll Progress Bar */}
-      <div className="fixed top-0 left-0 h-1 bg-gradient-to-r from-cyan-accent to-cyan-accent-dark z-50 transition-all duration-300" style={{
-        width: `${typeof window !== 'undefined' ? (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100 : 0}%`
+      <div className="fixed top-0 left-0 h-1 bg-gradient-to-r from-cyan-accent to-cyan-accent-dark z-50 transition-all duration-305" style={{
+        width: `${typeof window !== 'undefined' ? (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 105 : 0}%`
       }}></div>
 
       {/* Sticky Navigation Bar */}
@@ -1238,7 +1616,7 @@ function App() {
                 </button>
                 <button 
                   onClick={() => setIsVideoModalOpen(true)}
-                  className="flex items-center justify-center gap-2 text-slate-700 hover:text-midnight font-semibold py-3 px-6 rounded-full transition-all duration-200 border border-slate-300 hover:bg-slate-100 text-center cursor-pointer"
+                  className="flex items-center justify-center gap-2 text-slate-700 hover:text-midnight font-semibold py-3 px-6 rounded-full transition-all duration-200 border border-slate-300 hover:bg-slate-105 text-center cursor-pointer"
                 >
                   <Play className="h-4 w-4 fill-slate-700 text-slate-700" />
                   See How It Works
@@ -1371,23 +1749,23 @@ function App() {
           <div className="flex flex-wrap items-center justify-center gap-10 md:gap-16 opacity-60">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold font-heading text-xs">M</div>
-              <span className="font-extrabold text-slate-800 text-sm font-heading tracking-tight">MedCare Clinic</span>
+              <span className="font-extrabold text-slate-805 text-sm font-heading tracking-tight">MedCare Clinic</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-slate-800 text-white flex items-center justify-center font-bold font-heading text-xs">U</div>
-              <span className="font-extrabold text-slate-800 text-sm font-heading tracking-tight">UrbanStyle</span>
+              <span className="font-extrabold text-slate-805 text-sm font-heading tracking-tight">UrbanStyle</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold font-heading text-xs">P</div>
-              <span className="font-extrabold text-slate-800 text-sm font-heading tracking-tight">PetHaven</span>
+              <span className="font-extrabold text-slate-805 text-sm font-heading tracking-tight">PetHaven</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-md bg-slate-800 text-white flex items-center justify-center font-bold font-heading text-xs">B</div>
-              <span className="font-extrabold text-slate-800 text-sm font-heading tracking-tight">BrightDent</span>
+              <span className="font-extrabold text-slate-805 text-sm font-heading tracking-tight">BrightDent</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold font-heading text-xs">G</div>
-              <span className="font-extrabold text-slate-800 text-sm font-heading tracking-tight">GreenGrocer</span>
+              <span className="font-extrabold text-slate-805 text-sm font-heading tracking-tight">GreenGrocer</span>
             </div>
           </div>
         </div>
@@ -1429,7 +1807,7 @@ function App() {
             </div>
 
             {/* Feature 2 */}
-            <div className="group bg-slate-50 hover:bg-slate-905 border border-slate-200 hover:border-slate-800 rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between items-start hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-accent/5">
+            <div className="group bg-slate-50 hover:bg-slate-900 border border-slate-200 hover:border-slate-800 rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between items-start hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-accent/5">
               <div className="space-y-6">
                 <div className="bg-cyan-accent/10 group-hover:bg-cyan-accent/20 w-14 h-14 rounded-2xl flex items-center justify-center text-cyan-accent-dark group-hover:text-cyan-electric transition-colors duration-300">
                   <Calendar className="h-7 w-7" />
@@ -1448,7 +1826,7 @@ function App() {
             </div>
 
             {/* Feature 3 */}
-            <div className="group bg-slate-50 hover:bg-slate-905 border border-slate-200 hover:border-slate-800 rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between items-start hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-accent/5">
+            <div className="group bg-slate-50 hover:bg-slate-900 border border-slate-200 hover:border-slate-805 rounded-3xl p-8 transition-all duration-305 flex flex-col justify-between items-start hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-accent/5">
               <div className="space-y-6">
                 <div className="bg-cyan-accent/10 group-hover:bg-cyan-accent/20 w-14 h-14 rounded-2xl flex items-center justify-center text-cyan-accent-dark group-hover:text-cyan-electric transition-colors duration-300">
                   <Star className="h-7 w-7" />
@@ -1472,7 +1850,7 @@ function App() {
       </section>
 
       {/* Advanced Feature: Comparison Table */}
-      <section id="compare" className="py-24 md:py-32 bg-slate-50 border-t border-b border-slate-200">
+      <section id="compare" className="py-24 md:py-32 bg-slate-55 border-t border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
@@ -1501,8 +1879,8 @@ function App() {
                     <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                       <td className="p-6 font-bold text-midnight">{row.feature}</td>
                       <td className="p-6 bg-cyan-accent/5 font-semibold text-cyan-accent-dark">{row.nexosia}</td>
-                      <td className="p-6 text-slate-500">{row.agency}</td>
-                      <td className="p-6 text-slate-500">{row.diy}</td>
+                      <td className="p-6 text-slate-505">{row.agency}</td>
+                      <td className="p-6 text-slate-505">{row.diy}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1537,7 +1915,7 @@ function App() {
                 <button 
                   onClick={() => setSimTab('widget')}
                   className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                    simTab === 'widget' ? 'bg-white text-midnight shadow-md border-b-2 border-cyan-accent' : 'text-slate-500 hover:text-slate-800'
+                    simTab === 'widget' ? 'bg-white text-midnight shadow-md border-b-2 border-cyan-accent' : 'text-slate-500 hover:text-slate-808'
                   }`}
                 >
                   <Globe className="h-4 w-4" />
@@ -1546,7 +1924,7 @@ function App() {
                 <button 
                   onClick={() => setSimTab('bot')}
                   className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                    simTab === 'bot' ? 'bg-white text-midnight shadow-md border-b-2 border-cyan-accent' : 'text-slate-500 hover:text-slate-800'
+                    simTab === 'bot' ? 'bg-white text-midnight shadow-md border-b-2 border-cyan-accent' : 'text-slate-500 hover:text-slate-808'
                   }`}
                 >
                   <MessageCircle className="h-4 w-4" />
@@ -1555,7 +1933,7 @@ function App() {
                 <button 
                   onClick={() => setSimTab('reviews')}
                   className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                    simTab === 'reviews' ? 'bg-white text-midnight shadow-md border-b-2 border-cyan-accent' : 'text-slate-500 hover:text-slate-800'
+                    simTab === 'reviews' ? 'bg-white text-midnight shadow-md border-b-2 border-cyan-accent' : 'text-slate-500 hover:text-slate-808'
                   }`}
                 >
                   <Star className="h-4 w-4" />
@@ -1599,8 +1977,8 @@ function App() {
               <div className="relative border-[12px] border-slate-900 rounded-[2.5rem] shadow-2xl h-[560px] w-[340px] max-w-full bg-[#e5ddd5] overflow-hidden flex flex-col">
                 
                 {/* Notch */}
-                <div className="absolute top-0 inset-x-0 h-6 bg-slate-950 flex justify-center items-center z-30">
-                  <div className="w-24 h-4 bg-slate-950 rounded-b-xl flex justify-center items-start">
+                <div className="absolute top-0 inset-x-0 h-6 bg-slate-955 flex justify-center items-center z-30">
+                  <div className="w-24 h-4 bg-slate-955 rounded-b-xl flex justify-center items-start">
                     <div className="w-10 h-1 bg-slate-800 rounded-full mt-1.5"></div>
                   </div>
                 </div>
@@ -1618,16 +1996,16 @@ function App() {
                       <div className="space-y-4">
                         <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                           <span className="font-extrabold text-[12px] text-indigo-700">🏥 Apex Health</span>
-                          <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] text-slate-500 font-bold">☰</div>
+                          <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] text-slate-505 font-bold">☰</div>
                         </div>
                         <div className="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 text-center space-y-2">
-                          <h4 className="font-extrabold text-xs text-indigo-950 font-heading">Complete Family Medical Center</h4>
+                          <h4 className="font-extrabold text-xs text-indigo-955 font-heading">Complete Family Medical Center</h4>
                           <p className="text-[9px] text-indigo-600">Secure top-tier care instantly with our expert doctor panel.</p>
                         </div>
                         <div className="space-y-2">
                           <h5 className="font-bold text-[10px] text-slate-700">Available Doctors:</h5>
                           <div className="flex items-center gap-2 p-2 border border-slate-100 rounded-xl bg-slate-50/50">
-                            <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-500 font-heading">SJ</div>
+                            <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-505 font-heading">SJ</div>
                             <div>
                               <h6 className="text-[9px] font-bold text-slate-700">Dr. Sarah Jenkins</h6>
                               <p className="text-[7px] text-slate-400">Dentistry Specialist • 12 Yrs Exp</p>
@@ -1682,7 +2060,7 @@ function App() {
                         </div>
                       ))}
                       {isSimTyping && (
-                        <div className="bg-white text-slate-800 self-start text-[10px] rounded-xl rounded-tl-none p-2.5 shadow-sm flex items-center gap-1.5 animate-pulse max-w-[50%]">
+                        <div className="bg-white text-slate-805 self-start text-[10px] rounded-xl rounded-tl-none p-2.5 shadow-sm flex items-center gap-1.5 animate-pulse max-w-[50%]">
                           <span className="text-slate-500">typing...</span>
                         </div>
                       )}
@@ -1763,7 +2141,7 @@ function App() {
                         </div>
                       ))}
                       {reviewTyping && (
-                        <div className="bg-white text-slate-800 self-start text-[10px] rounded-xl rounded-tl-none p-2.5 shadow-sm flex items-center gap-1.5 animate-pulse max-w-[50%]">
+                        <div className="bg-white text-slate-805 self-start text-[10px] rounded-xl rounded-tl-none p-2.5 shadow-sm flex items-center gap-1.5 animate-pulse max-w-[50%]">
                           <span className="text-slate-500">typing...</span>
                         </div>
                       )}
@@ -1854,7 +2232,7 @@ function App() {
                     onChange={(e) => setCalcBookings(parseInt(e.target.value))}
                     className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-accent"
                   />
-                  <div className="flex justify-between text-[10px] text-slate-500 font-bold">
+                  <div className="flex justify-between text-[10px] text-slate-505 font-bold">
                     <span>50</span>
                     <span>500</span>
                     <span>1,000+</span>
@@ -1877,7 +2255,7 @@ function App() {
                     onChange={(e) => setCalcTicket(parseInt(e.target.value))}
                     className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-accent"
                   />
-                  <div className="flex justify-between text-[10px] text-slate-500 font-bold">
+                  <div className="flex justify-between text-[10px] text-slate-505 font-bold">
                     <span>{currency === 'INR' ? "₹200" : "$5"}</span>
                     <span>{currency === 'INR' ? "₹5,000" : "$75"}</span>
                     <span>{currency === 'INR' ? "₹10,000+" : "$150+"}</span>
@@ -1961,7 +2339,7 @@ function App() {
                 key={idx}
                 className="bg-slate-50 border border-slate-200 hover:border-cyan-accent text-slate-600 hover:text-midnight font-semibold text-xs px-4 py-2.5 rounded-full transition-all duration-200 shadow-sm flex items-center gap-2 cursor-default select-none"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-accent"></span>
+                <span className="w-1.5 h-1.5 bg-cyan-accent"></span>
                 {tool}
               </span>
             ))}
@@ -1970,7 +2348,7 @@ function App() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-24 md:py-32 bg-slate-50 relative overflow-hidden">
+      <section id="how-it-works" className="py-24 md:py-32 bg-slate-55 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
           backgroundImage: 'radial-gradient(circle at 1px 1px, #0F172A 1px, transparent 0)',
           backgroundSize: '40px 40px'
@@ -2000,7 +2378,7 @@ function App() {
                 </div>
                 <div className="space-y-4 pt-4">
                   <h3 className="text-xl font-bold font-heading text-midnight">We Build Your Premium Site</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">
+                  <p className="text-sm text-slate-505 leading-relaxed">
                     Our professional design team codes a blazing fast, SEO-optimized mobile-responsive website tailored to your business, featuring custom images, reviews, and interactive forms.
                   </p>
                 </div>
@@ -2016,7 +2394,7 @@ function App() {
                 </div>
                 <div className="space-y-4 pt-4">
                   <h3 className="text-xl font-bold font-heading text-midnight">We Connect the WhatsApp AI Bot</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">
+                  <p className="text-sm text-slate-505 leading-relaxed">
                     We link your official WhatsApp Business account to our automation bot. The bot is custom configured to answer your customers, confirm times, and save details.
                   </p>
                 </div>
@@ -2032,7 +2410,7 @@ function App() {
                 </div>
                 <div className="space-y-4 pt-4">
                   <h3 className="text-xl font-bold font-heading text-midnight">You Watch Bookings Roll In</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">
+                  <p className="text-sm text-slate-505 leading-relaxed">
                     New clients schedule automatically while you sleep. You receive scheduling notifications directly on your phone and dashboard. Watch your business grow.
                   </p>
                 </div>
@@ -2077,7 +2455,7 @@ function App() {
                 <button 
                   onClick={() => setCurrency('INR')}
                   className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                    currency === 'INR' ? 'bg-white text-midnight shadow-md' : 'text-slate-500 hover:text-slate-800'
+                    currency === 'INR' ? 'bg-white text-midnight shadow-md' : 'text-slate-500 hover:text-slate-808'
                   }`}
                 >
                   🇮🇳 INR (₹)
@@ -2085,7 +2463,7 @@ function App() {
                 <button 
                   onClick={() => setCurrency('USD')}
                   className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                    currency === 'USD' ? 'bg-white text-midnight shadow-md' : 'text-slate-500 hover:text-slate-800'
+                    currency === 'USD' ? 'bg-white text-midnight shadow-md' : 'text-slate-500 hover:text-slate-808'
                   }`}
                 >
                   🇺🇸 USD ($)
@@ -2097,7 +2475,7 @@ function App() {
                 <button 
                   onClick={() => setBillingPeriod('monthly')}
                   className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                    billingPeriod === 'monthly' ? 'bg-white text-midnight shadow-md' : 'text-slate-500 hover:text-slate-800'
+                    billingPeriod === 'monthly' ? 'bg-white text-midnight shadow-md' : 'text-slate-500 hover:text-slate-808'
                   }`}
                 >
                   Monthly
@@ -2105,7 +2483,7 @@ function App() {
                 <button 
                   onClick={() => setBillingPeriod('yearly')}
                   className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                    billingPeriod === 'yearly' ? 'bg-white text-midnight shadow-md' : 'text-slate-500 hover:text-slate-800'
+                    billingPeriod === 'yearly' ? 'bg-white text-midnight shadow-md' : 'text-slate-500 hover:text-slate-808'
                   }`}
                 >
                   Yearly (Save 20%)
@@ -2177,9 +2555,9 @@ function App() {
             </div>
 
             {/* Card 2: Scale Package */}
-            <div className="bg-white text-slate-800 rounded-3xl shadow-2xl overflow-hidden border-2 border-cyan-accent relative hover:scale-[1.01] transition-transform duration-300 flex flex-col justify-between">
+            <div className="bg-white text-slate-800 rounded-3xl shadow-2xl overflow-hidden border-2 border-cyan-accent relative hover:scale-[1.01] transition-transform duration-305 flex flex-col justify-between">
               
-              <div className="absolute top-0 right-0 bg-cyan-accent text-slate-950 font-bold text-[10px] px-5 py-2 rounded-bl-2xl uppercase tracking-widest font-heading">
+              <div className="absolute top-0 right-0 bg-cyan-accent text-slate-955 font-bold text-[10px] px-5 py-2 rounded-bl-2xl uppercase tracking-widest font-heading">
                 Best Value / Scale
               </div>
 
@@ -2202,7 +2580,7 @@ function App() {
                 </div>
 
                 <div className="space-y-4 font-sans">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Everything in Growth plus:</h4>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-505">Everything in Growth plus:</h4>
                   <ul className="space-y-3 text-slate-700 text-sm">
                     <li className="flex items-center gap-2">
                       <Check className="h-4.5 w-4.5 text-cyan-accent-dark flex-shrink-0" />
@@ -2244,7 +2622,7 @@ function App() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 bg-slate-50 border-t border-slate-200">
+      <section className="py-24 bg-slate-55 border-t border-slate-200">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center mb-16 space-y-2">
@@ -2416,7 +2794,7 @@ function App() {
 
           </div>
 
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-medium">
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-505 font-medium">
             <p>© {new Date().getFullYear()} Nexosia. All rights reserved.</p>
             <div className="flex gap-6">
               <a href="#" className="hover:text-slate-300 transition-colors">Privacy Policy</a>
@@ -2527,7 +2905,7 @@ function App() {
             {/* Content by Step */}
             {wizardSubmitted ? (
               <div className="py-12 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-505 flex items-center justify-center mx-auto">
                   <CheckCircle2 className="h-10 w-10 animate-bounce" />
                 </div>
                 <h4 className="text-lg font-bold text-midnight">Analyzing Business Profile...</h4>
@@ -2565,7 +2943,7 @@ function App() {
                 {wizardStep === 2 && (
                   <div className="space-y-4 animate-in fade-in duration-200">
                     <h3 className="text-xl font-bold font-heading text-midnight">What is your biggest booking headache?</h3>
-                    <p className="text-slate-550 text-xs">Select all that apply so we configure the bot triggers correctly.</p>
+                    <p className="text-slate-555 text-xs">Select all that apply so we configure the bot triggers correctly.</p>
                     <div className="space-y-2.5 pt-2">
                       {[
                         { id: 'after_hours', label: '⏰ Losing potential bookings after business hours' },
@@ -2611,7 +2989,7 @@ function App() {
                 {wizardStep === 3 && (
                   <form onSubmit={handleWizardSubmit} className="space-y-4 animate-in fade-in duration-200">
                     <h3 className="text-xl font-bold font-heading text-midnight">Enter Business Details</h3>
-                    <p className="text-slate-550 text-xs">Let's create your account. We will analyze your profile and contact you with a layout draft.</p>
+                    <p className="text-slate-555 text-xs">Let's create your account. We will analyze your profile and contact you with a layout draft.</p>
                     
                     <div className="space-y-3 pt-2">
                       <div>
@@ -2661,12 +3039,12 @@ function App() {
                     </div>
 
                     <div className="flex justify-between items-center pt-4">
-                      <button type="button" onClick={() => setWizardStep(2)} className="text-xs font-semibold text-slate-500 hover:text-slate-700 flex items-center gap-1 cursor-pointer">
+                      <button type="button" onClick={() => setWizardStep(2)} className="text-xs font-semibold text-slate-505 hover:text-slate-700 flex items-center gap-1 cursor-pointer">
                         <ChevronLeft className="h-4 w-4" /> Back
                       </button>
                       <button 
                         type="submit"
-                        className="bg-cyan-accent hover:bg-cyan-accent-dark text-white font-extrabold text-xs py-3 px-6 rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-md shadow-cyan-accent/15"
+                        className="bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 hover:text-white font-extrabold text-xs py-3 px-6 rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-md shadow-cyan-accent/15"
                       >
                         {wizardType === 'trial' ? 'Connect & Claim Free Setup' : 'Send Demo Request'}
                         <Check className="h-4.5 w-4.5" />
@@ -2694,7 +3072,7 @@ function App() {
               <X className="h-5 w-5" />
             </button>
 
-            <div className="aspect-video bg-slate-950 rounded-2xl relative overflow-hidden flex flex-col justify-between p-6">
+            <div className="aspect-video bg-slate-955 rounded-2xl relative overflow-hidden flex flex-col justify-between p-6">
               
               <div className="flex justify-between items-center text-white z-10">
                 <div className="flex items-center gap-2">
@@ -2722,7 +3100,7 @@ function App() {
                   <div className="text-[9px] font-bold text-indigo-404 uppercase tracking-wider flex items-center gap-1">
                     <Calendar className="h-3 w-3" /> Calendar Sync
                   </div>
-                  <div className="bg-slate-950 p-2 rounded-lg text-[9px] text-slate-400 space-y-1">
+                  <div className="bg-slate-955 p-2 rounded-lg text-[9px] text-slate-400 space-y-1">
                     <p className="text-[8px] font-bold text-white">Monday, July 6</p>
                     <div className="bg-indigo-950/50 border border-indigo-900 p-1 rounded text-[7px] text-indigo-300">
                       📅 10:00 AM - Rohan (Dental)
@@ -2768,7 +3146,7 @@ function App() {
                 <Lock className="h-5 w-5 text-cyan-accent" />
                 Admin Console
               </h3>
-              <p className="text-slate-500 text-xs">Access the Nexosia lead command center, manage active trials, and configure your AI agent autopilot settings.</p>
+              <p className="text-slate-550 text-xs">Access the Nexosia lead command center, manage active trials, and configure your AI agent autopilot settings.</p>
             </div>
 
             {authError && (
