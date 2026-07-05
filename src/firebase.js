@@ -9,12 +9,12 @@ import { getAuth } from "firebase/auth";
 // VITE_FIREBASE_AUTH_DOMAIN=xxx
 // ...
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "PLACEHOLDER_API_KEY",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "PLACEHOLDER_AUTH_DOMAIN",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "PLACEHOLDER_PROJECT_ID",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "PLACEHOLDER_STORAGE_BUCKET",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "PLACEHOLDER_MESSAGING_SENDER_ID",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "PLACEHOLDER_APP_ID"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDMbYCwfd9rophWQbYpklp6zNJ_IW3GKp4",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "nexosia-cd5ca.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "nexosia-cd5ca",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "nexosia-cd5ca.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "653315282768",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:653315282768:web:0094d9277c79c8a5fafe55"
 };
 
 // Initialize Firebase
