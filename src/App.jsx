@@ -147,8 +147,32 @@ function App() {
     name: '',
     businessName: '',
     email: '',
-    phone: ''
+    phone: '',
+    openTime: '09:00',
+    closeTime: '20:00',
+    services: [
+      { name: '', price: '' },
+      { name: '', price: '' },
+      { name: '', price: '' }
+    ],
+    themeColor: 'blue'
   });
+
+  // --- SaaS premium mock states ---
+  const [botFlowStep, setBotFlowStep] = useState('start');
+  const [tempBookingData, setTempBookingData] = useState({ name: '', service: '', slot: '' });
+  
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [checkoutPlan, setCheckoutPlan] = useState(''); // 'growth' | 'scale'
+  const [checkoutStep, setCheckoutStep] = useState('form'); // 'form' | 'processing' | 'success'
+  const [checkoutForm, setCheckoutForm] = useState({ method: 'card', cardNumber: '', cardExpiry: '', cardCvv: '', upiId: '' });
+
+  const [editingNotesLeadId, setEditingNotesLeadId] = useState(null);
+  const [notesText, setNotesText] = useState('');
+  const [editingNotesCollection, setEditingNotesCollection] = useState('leads'); // 'leads' | 'trials'
+  
+  const [isSavingCustomizer, setIsSavingCustomizer] = useState(false);
+  const [isSavedSuccess, setIsSavedSuccess] = useState(false);
 
   // Hero Video Demo Modal
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
@@ -383,6 +407,14 @@ function App() {
     }
   };
 
+  const handleUpdateTrialStatus = async (id, status) => {
+    try {
+      await updateDoc(doc(db, 'trials', id), { status });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleDeleteTrial = async (id) => {
     if (!window.confirm("Are you sure you want to delete this trial?")) return;
     try {
@@ -557,10 +589,16 @@ function App() {
 
   // Onboarding Wizard handlers
   const openWizard = (type) => {
-    setWizardType(type);
-    setWizardStep(1);
-    setWizardSubmitted(false);
-    setIsWizardModalOpen(true);
+    if (type === 'trial') {
+      setCheckoutStep('form');
+      setCheckoutForm({ method: 'card', cardNumber: '', cardExpiry: '', cardCvv: '', upiId: '' });
+      setIsCheckoutOpen(true);
+    } else {
+      setWizardType('demo');
+      setWizardStep(1);
+      setWizardSubmitted(false);
+      setIsWizardModalOpen(true);
+    }
   };
 
   const handleNicheSelection = (niche) => {
@@ -592,18 +630,30 @@ function App() {
         email: wizardData.email,
         businessType: wizardData.businessType,
         headaches: wizardData.headaches,
-        status: 'Pending',
+        openTime: wizardData.openTime || '09:00',
+        closeTime: wizardData.closeTime || '20:00',
+        services: wizardData.services || [],
+        themeColor: wizardData.themeColor || 'blue',
+        status: 'New',
+        notes: '',
         createdAt: serverTimestamp()
       });
 
       const demoObj = {
         id: docRef.id,
+        collectionType: collectionName,
         name: wizardData.name,
         businessName: wizardData.businessName,
         phone: wizardData.phone,
         email: wizardData.email,
         businessType: wizardData.businessType,
-        headaches: wizardData.headaches
+        headaches: wizardData.headaches,
+        openTime: wizardData.openTime || '09:00',
+        closeTime: wizardData.closeTime || '20:00',
+        services: wizardData.services || [],
+        themeColor: wizardData.themeColor || 'blue',
+        status: 'New',
+        notes: ''
       };
 
       setTimeout(() => {
@@ -615,7 +665,22 @@ function App() {
         window.history.pushState(null, '', `?demo=${docRef.id}`);
         setPage('demo');
         
-        setWizardData({ businessType: '', headaches: [], name: '', businessName: '', email: '', phone: '' });
+        setWizardData({
+          businessType: '',
+          headaches: [],
+          name: '',
+          businessName: '',
+          email: '',
+          phone: '',
+          openTime: '09:00',
+          closeTime: '20:00',
+          services: [
+            { name: '', price: '' },
+            { name: '', price: '' },
+            { name: '', price: '' }
+          ],
+          themeColor: 'blue'
+        });
       }, 1500);
     } catch (error) {
       console.error("Firestore Save Error: ", error);
@@ -678,16 +743,57 @@ function App() {
     const isStore = activeDemoData?.businessType === 'store';
     
     // Theme configurations
-    const themeColor = isClinic ? 'indigo' : isSalon ? 'rose' : 'slate';
-    const accentTextClass = isClinic ? 'text-indigo-600' : isSalon ? 'text-rose-600' : 'text-slate-800';
-    const bgBadgeClass = isClinic ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : isSalon ? 'bg-rose-50 text-rose-700 border-rose-100' : 'bg-slate-100 text-slate-700 border-slate-200';
-    const btnThemeClass = isClinic ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : isSalon ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-slate-900 hover:bg-slate-800 text-white';
+    const activeColor = activeDemoData?.themeColor || (isClinic ? 'blue' : isSalon ? 'rose' : 'purple');
     
-    const services = isClinic 
-      ? ['Doctor Consultation', 'Dental Checkup & Scaling', 'Family Health Audit', 'Emergency Care']
-      : isSalon
-        ? ['Designer Haircut & Styling', 'Keratin & Nourishing Treatment', 'Relaxing Facial Spa', 'Gel Manicure & Nails']
-        : ['Product In-Store Pickup', 'Custom Sales Consultation', 'Pre-Order Slot Selection', 'Client Support Audit'];
+    const themeConfig = {
+      blue: {
+        accentText: 'text-indigo-600',
+        bgBadge: 'bg-indigo-50 text-indigo-700 border-indigo-100',
+        btnTheme: 'bg-indigo-600 hover:bg-indigo-700 text-white',
+        borderAccent: 'border-indigo-500'
+      },
+      emerald: {
+        accentText: 'text-emerald-600',
+        bgBadge: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+        btnTheme: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+        borderAccent: 'border-emerald-500'
+      },
+      purple: {
+        accentText: 'text-violet-600',
+        bgBadge: 'bg-violet-50 text-violet-700 border-violet-100',
+        btnTheme: 'bg-violet-600 hover:bg-violet-700 text-white',
+        borderAccent: 'border-violet-500'
+      },
+      rose: {
+        accentText: 'text-rose-600',
+        bgBadge: 'bg-rose-50 text-rose-700 border-rose-100',
+        btnTheme: 'bg-rose-600 hover:bg-rose-700 text-white',
+        borderAccent: 'border-rose-500'
+      },
+      orange: {
+        accentText: 'text-amber-600',
+        bgBadge: 'bg-amber-50 text-amber-700 border-amber-100',
+        btnTheme: 'bg-amber-600 hover:bg-amber-700 text-white',
+        borderAccent: 'border-amber-500'
+      }
+    };
+
+    const currentTheme = themeConfig[activeColor] || themeConfig.blue;
+    const accentTextClass = currentTheme.accentText;
+    const bgBadgeClass = currentTheme.bgBadge;
+    const btnThemeClass = currentTheme.btnTheme;
+    
+    const rawServices = activeDemoData?.services || [];
+    const validRawServices = rawServices.filter(s => s && s.name && s.name.trim() !== '');
+    
+    const services = validRawServices.length > 0 
+      ? validRawServices.map(s => `${s.name} (₹${s.price || '0'})`)
+      : (isClinic 
+          ? ['Doctor Consultation', 'Dental Checkup & Scaling', 'Family Health Audit', 'Emergency Care']
+          : isSalon
+            ? ['Designer Haircut & Styling', 'Keratin & Nourishing Treatment', 'Relaxing Facial Spa', 'Gel Manicure & Nails']
+            : ['Product In-Store Pickup', 'Custom Sales Consultation', 'Pre-Order Slot Selection', 'Client Support Audit']
+        );
 
     return (
       <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col justify-between">
@@ -795,7 +901,7 @@ function App() {
                     </span>
                   </div>
                   <div className="space-y-2 text-xs text-slate-600">
-                    <div className="flex justify-between"><span>Mon - Fri</span><span>9:00 AM - 7:00 PM</span></div>
+                    <div className="flex justify-between"><span>Mon - Fri</span><span>{activeDemoData?.openTime || '09:00'} - {activeDemoData?.closeTime || '20:00'}</span></div>
                     <div className="flex justify-between"><span>Saturday</span><span>10:00 AM - 4:00 PM</span></div>
                     <div className="flex justify-between text-slate-400"><span>Sunday</span><span>Closed (Bot active 24/7)</span></div>
                   </div>
@@ -860,93 +966,327 @@ function App() {
           </div>
         )}
 
-        {/* Floating WhatsApp chat bubble configured for their custom demo business */}
-        <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 font-sans">
-          {isChatWidgetOpen && (
-            <div className="bg-white w-[310px] h-[380px] rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-200">
-              
-              <div className="bg-[#075e54] text-white p-4 flex items-center justify-between shadow-md">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[#075e54] font-bold text-xs">🤖</div>
-                  <div>
-                    <h4 className="text-xs font-bold leading-tight truncate max-w-[150px]">
-                      {activeDemoData?.businessName || 'Business'} Bot
-                    </h4>
-                    <span className="text-[8px] opacity-80 block flex items-center gap-1">
-                      <span className="w-1 h-1 bg-emerald-400 rounded-full animate-ping"></span>online assistant
-                    </span>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setIsChatWidgetOpen(false)}
-                  className="text-white opacity-80 hover:opacity-100 cursor-pointer"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
+        {/* Live Customizer Dock */}
+        <div className="fixed bottom-6 left-6 z-50 font-sans">
+          {!isSavingCustomizer && !isSavedSuccess && (
+            <button 
+              onClick={() => {
+                // Toggle customization panel
+                const customizerPanel = document.getElementById("demo-customizer-dock");
+                if (customizerPanel) {
+                  customizerPanel.classList.toggle("hidden");
+                }
+              }}
+              className="bg-slate-900 hover:bg-slate-800 text-white p-4 rounded-full shadow-2xl flex items-center justify-center cursor-pointer hover:scale-105 transition-all"
+              title="Open Site Customizer"
+            >
+              <Sliders className="h-6 w-6" />
+            </button>
+          )}
 
-              {/* Messaging frame */}
-              <div className="flex-grow p-4 bg-[#e5ddd5] overflow-y-auto space-y-3.5 flex flex-col justify-end">
-                {chatMessages.map((msg, idx) => (
-                  <div 
-                    key={idx} 
-                    className={`text-[11px] p-2.5 rounded-xl max-w-[85%] leading-relaxed shadow-sm ${
-                      msg.sender === 'user' 
-                        ? 'bg-[#dcf8c6] text-slate-800 self-end rounded-tr-none' 
-                        : 'bg-white text-slate-800 self-start rounded-tl-none border-l-4 border-emerald-500'
-                    }`}
-                  >
-                    <p className="whitespace-pre-line">{msg.text}</p>
-                  </div>
-                ))}
-              </div>
-
-              <form 
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!chatInput.trim()) return;
-
-                  const userMsg = chatInput.trim();
-                  setChatMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
-                  setChatInput('');
-
-                  setTimeout(() => {
-                    let replyText = `Thanks for writing! We have received your query at ${activeDemoData?.businessName || 'our business'}. Click "Book Appointment Now" to simulate locking your slot!`;
-                    
-                    const textLower = userMsg.toLowerCase();
-                    if (textLower.includes('book') || textLower.includes('appointment') || textLower.includes('slot') || textLower.includes('time')) {
-                      replyText = `Instantly! 📅 We have Monday, July 6 at 10:00 AM available. \n\nReply with **"CONFIRM"** to lock this appointment.`;
-                    } else if (textLower.includes('confirm')) {
-                      replyText = `🎉 **Appointment Confirmed!**\n\n🏥 Business: ${activeDemoData?.businessName || 'My Business'}\n📅 Date: Monday, July 6\n⏰ Time: 10:00 AM\n\nWe have saved your slot. See you there!`;
-                    }
-
-                    setChatMessages(prev => [...prev, { sender: 'bot', text: replyText }]);
-                  }, 1000);
-                }}
-                className="bg-slate-50 p-2 flex items-center gap-2 border-t border-slate-200"
+          <div 
+            id="demo-customizer-dock" 
+            className="hidden bg-slate-900 text-white w-[320px] rounded-3xl shadow-2xl border border-slate-800 p-5 space-y-4 animate-in slide-in-from-left-5 duration-200 text-left"
+          >
+            <div className="flex justify-between items-center pb-2 border-b border-slate-800">
+              <h4 className="font-bold text-xs flex items-center gap-1.5"><Sliders className="h-4.5 w-4.5 text-cyan-accent" /> Live Customizer</h4>
+              <button 
+                onClick={() => document.getElementById("demo-customizer-dock").classList.add("hidden")} 
+                className="text-slate-400 hover:text-white cursor-pointer"
               >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3.5 text-xs">
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Business Name</label>
                 <input 
                   type="text" 
-                  placeholder="Type 'book' or ask anything..." 
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  className="flex-grow border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#075e54] bg-white"
-                  required
+                  value={activeDemoData?.businessName || ''}
+                  onChange={(e) => setActiveDemoData({...activeDemoData, businessName: e.target.value})}
+                  className="w-full bg-slate-950 border border-slate-850 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-accent"
                 />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Theme Accent</label>
+                <div className="flex gap-2.5">
+                  {[
+                    { id: 'blue', color: 'bg-indigo-600' },
+                    { id: 'emerald', color: 'bg-emerald-600' },
+                    { id: 'purple', color: 'bg-violet-600' },
+                    { id: 'rose', color: 'bg-rose-600' },
+                    { id: 'orange', color: 'bg-amber-600' }
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setActiveDemoData({...activeDemoData, themeColor: item.id})}
+                      className={`w-6 h-6 rounded-full ${item.color} cursor-pointer relative flex items-center justify-center`}
+                    >
+                      {activeDemoData?.themeColor === item.id && <span className="absolute w-2 h-2 bg-white rounded-full"></span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Opening Hour</label>
+                  <input 
+                    type="time" 
+                    value={activeDemoData?.openTime || '09:00'}
+                    onChange={(e) => setActiveDemoData({...activeDemoData, openTime: e.target.value})}
+                    className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Closing Hour</label>
+                  <input 
+                    type="time" 
+                    value={activeDemoData?.closeTime || '20:00'}
+                    onChange={(e) => setActiveDemoData({...activeDemoData, closeTime: e.target.value})}
+                    className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Custom Services</label>
+                <div className="space-y-1.5">
+                  {[0, 1, 2].map((idx) => {
+                    const svcs = activeDemoData?.services ? [...activeDemoData.services] : [];
+                    const svc = svcs[idx] || { name: '', price: '' };
+                    return (
+                      <div key={idx} className="grid grid-cols-12 gap-1.5">
+                        <input 
+                          type="text" 
+                          placeholder={`Service ${idx + 1}`}
+                          value={svc.name}
+                          onChange={(e) => {
+                            const updated = [...svcs];
+                            updated[idx] = { ...svc, name: e.target.value };
+                            setActiveDemoData({...activeDemoData, services: updated});
+                          }}
+                          className="col-span-8 bg-slate-950 border border-slate-850 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                        />
+                        <input 
+                          type="text" 
+                          placeholder="Price"
+                          value={svc.price}
+                          onChange={(e) => {
+                            const updated = [...svcs];
+                            updated[idx] = { ...svc, price: e.target.value };
+                            setActiveDemoData({...activeDemoData, services: updated});
+                          }}
+                          className="col-span-4 bg-slate-950 border border-slate-850 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="pt-2">
                 <button 
-                  type="submit" 
-                  className="bg-[#075e54] text-white p-2 rounded-lg text-xs font-bold cursor-pointer"
+                  onClick={async () => {
+                    setIsSavingCustomizer(true);
+                    try {
+                      const coll = activeDemoData.collectionType || 'leads';
+                      const docRef = doc(db, coll, activeDemoData.id);
+                      await updateDoc(docRef, {
+                        businessName: activeDemoData.businessName,
+                        themeColor: activeDemoData.themeColor || 'blue',
+                        openTime: activeDemoData.openTime || '09:00',
+                        closeTime: activeDemoData.closeTime || '20:00',
+                        services: activeDemoData.services || []
+                      });
+                      setIsSavedSuccess(true);
+                      setTimeout(() => setIsSavedSuccess(false), 2000);
+                    } catch (err) {
+                      console.error(err);
+                      alert("Error saving configurations.");
+                    } finally {
+                      setIsSavingCustomizer(false);
+                    }
+                  }}
+                  disabled={isSavingCustomizer}
+                  className="w-full bg-cyan-accent text-slate-950 hover:bg-cyan-accent-dark font-extrabold text-xs py-2.5 rounded-xl transition-all cursor-pointer text-center flex items-center justify-center gap-1 shadow-md shadow-cyan-accent/15"
                 >
-                  Send
+                  {isSavingCustomizer ? (
+                    <span className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></span>
+                  ) : isSavedSuccess ? (
+                    <>Saved successfully! <Check className="h-4.5 w-4.5" /></>
+                  ) : (
+                    <>Save Customizations ➔</>
+                  )}
                 </button>
-              </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Floating WhatsApp chat phone shell simulator */}
+        <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 font-sans">
+          {isChatWidgetOpen && (
+            <div className="relative w-[310px] h-[525px] bg-slate-950 border-[8px] border-slate-900 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-200">
+              
+              {/* Speaker Notch */}
+              <div className="absolute top-0 inset-x-0 h-3.5 bg-slate-900 rounded-b-2xl z-50 flex justify-center items-center">
+                <div className="w-12 h-0.5 bg-slate-800 rounded-full"></div>
+              </div>
+              
+              <div className="flex-grow flex flex-col pt-3.5 overflow-hidden">
+                {/* WhatsApp Header */}
+                <div className="bg-[#075e54] text-white p-3 pt-4 flex items-center justify-between shadow-md">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[#075e54] font-bold text-xs">🤖</div>
+                    <div>
+                      <h4 className="text-[10px] font-bold leading-tight truncate max-w-[130px]">
+                        {activeDemoData?.businessName || 'Business'} Bot
+                      </h4>
+                      <span className="text-[7px] opacity-80 block flex items-center gap-1">
+                        <span className="w-1 h-1 bg-emerald-400 rounded-full animate-ping"></span>online assistant
+                      </span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setIsChatWidgetOpen(false)}
+                    className="text-white opacity-80 hover:opacity-100 cursor-pointer"
+                  >
+                    <X className="h-4.5 w-4.5" />
+                  </button>
+                </div>
+
+                {/* Messaging Frame */}
+                <div className="flex-grow p-3 bg-[#e5ddd5] overflow-y-auto space-y-3 flex flex-col justify-end">
+                  {chatMessages.map((msg, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`text-[10px] p-2 rounded-xl max-w-[85%] leading-relaxed shadow-sm ${
+                        msg.sender === 'user' 
+                          ? 'bg-[#dcf8c6] text-slate-850 self-end rounded-tr-none' 
+                          : 'bg-white text-slate-850 self-start rounded-tl-none border-l-4 border-emerald-500'
+                      }`}
+                    >
+                      <p className="whitespace-pre-line">{msg.text}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Form Input */}
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!chatInput.trim()) return;
+
+                    const userMsg = chatInput.trim();
+                    setChatMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
+                    setChatInput('');
+
+                    setTimeout(() => {
+                      let replyText = "";
+                      let nextStep = botFlowStep;
+
+                      const textLower = userMsg.toLowerCase();
+
+                      if (botFlowStep === 'start') {
+                        if (userMsg === '1' || textLower.includes('book') || textLower.includes('appoint')) {
+                          replyText = "Sure, let's book a slot! 📅\n\nPlease enter your **Full Name** to get started.";
+                          nextStep = 'awaiting_name';
+                        } else if (userMsg === '2' || textLower.includes('time') || textLower.includes('hour')) {
+                          const openTime = activeDemoData?.openTime || '09:00';
+                          const closeTime = activeDemoData?.closeTime || '20:00';
+                          replyText = `Our business hours for **${activeDemoData?.businessName || 'our business'}** are:\n\n⏰ Mon - Fri: ${openTime} to ${closeTime}\n⏰ Saturday: 10:00 AM to 04:00 PM\n\nWould you like to book an appointment now? (Type '1' or 'book')`;
+                        } else {
+                          replyText = "I didn't quite catch that. Please select an option:\n\nType **1** to: Book an Appointment\nType **2** to: Check Business Hours";
+                        }
+                      } 
+                      
+                      else if (botFlowStep === 'awaiting_name') {
+                        const clientName = userMsg;
+                        setTempBookingData(prev => ({ ...prev, name: clientName }));
+                        
+                        const svcList = validRawServices.length > 0 
+                          ? validRawServices.map((s, i) => `Type **${i+1}** for: ${s.name} (₹${s.price || '0'})`).join('\n')
+                          : (isClinic
+                              ? "Type **1** for: Doctor Consultation (₹500)\nType **2** for: Dental Checkup & Scaling (₹1000)\nType **3** for: Emergency Care (₹1500)"
+                              : "Type **1** for: Haircut & Styling (₹400)\nType **2** for: Relaxing Facial Spa (₹1200)\nType **3** for: Gel Manicure & Nails (₹600)");
+                        
+                        replyText = `Nice to meet you, **${clientName}**! Which service would you like to book?\n\nSelect a service:\n${svcList}`;
+                        nextStep = 'awaiting_service';
+                      } 
+                      
+                      else if (botFlowStep === 'awaiting_service') {
+                        let selectedService = "Standard Consultation";
+                        if (userMsg === '1') {
+                          selectedService = validRawServices[0]?.name || (isClinic ? 'Doctor Consultation' : 'Haircut & Styling');
+                        } else if (userMsg === '2') {
+                          selectedService = validRawServices[1]?.name || (isClinic ? 'Dental Checkup & Scaling' : 'Relaxing Facial Spa');
+                        } else if (userMsg === '3') {
+                          selectedService = validRawServices[2]?.name || (isClinic ? 'Emergency Care' : 'Gel Manicure & Nails');
+                        } else {
+                          selectedService = userMsg;
+                        }
+                        
+                        setTempBookingData(prev => ({ ...prev, service: selectedService }));
+                        
+                        replyText = `Great choice! We have the following slots available for **${selectedService}** on Monday:\n\n- Slot 1: **10:30 AM**\n- Slot 2: **02:00 PM**\n- Slot 3: **04:30 PM**\n\nPlease reply with the slot number (e.g. **'1'**, **'2'**, **'3'**) to lock your choice.`;
+                        nextStep = 'awaiting_slot';
+                      } 
+                      
+                      else if (botFlowStep === 'awaiting_slot') {
+                        let time = "10:30 AM";
+                        if (userMsg === '1') time = "10:30 AM";
+                        else if (userMsg === '2') time = "02:00 PM";
+                        else if (userMsg === '3') time = "04:30 PM";
+                        else time = userMsg;
+                        
+                        replyText = `🎉 **Appointment Confirmed!**\n\n🏥 Business: **${activeDemoData?.businessName || 'My Clinic'}**\n💼 Service: **${tempBookingData.service}**\n📅 Date: Monday, July 6\n⏰ Time: **${time}**\n👤 Client: **${tempBookingData.name}**\n\nWe have saved your slot! We look forward to seeing you. A WhatsApp reminder will be sent to you 2 hours before.`;
+                        nextStep = 'start'; // Reset flow
+                      }
+
+                      setChatMessages(prev => [...prev, { sender: 'bot', text: replyText.replace(/\\n/g, '\n') }]);
+                      setBotFlowStep(nextStep);
+                    }, 1000);
+                  }}
+                  className="bg-slate-50 p-2 flex items-center gap-1.5 border-t border-slate-200"
+                >
+                  <input 
+                    type="text" 
+                    placeholder="Type message..." 
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    className="flex-grow border border-slate-200 rounded-lg px-3 py-1.5 text-[9px] focus:outline-none focus:border-[#075e54] bg-white text-slate-800"
+                    required
+                  />
+                  <button 
+                    type="submit" 
+                    className="bg-[#075e54] text-white px-3 py-1.5 rounded-lg text-[9px] font-bold cursor-pointer hover:bg-[#0b4840] transition-colors"
+                  >
+                    Send
+                  </button>
+                </form>
+              </div>
+
+              {/* Bottom Speaker bar Notch */}
+              <div className="h-2.5 bg-slate-900 flex justify-center items-center">
+                <div className="w-16 h-0.5 bg-slate-800 rounded-full"></div>
+              </div>
 
             </div>
           )}
 
           <button 
-            onClick={() => setIsChatWidgetOpen(!isChatWidgetOpen)}
-            className="bg-[#25d366] hover:bg-[#128c7e] text-white p-4 rounded-full shadow-2xl transition-all hover:scale-105 cursor-pointer flex items-center justify-center"
+            onClick={() => {
+              setIsChatWidgetOpen(!isChatWidgetOpen);
+              setBotFlowStep('start');
+              setChatMessages([
+                { sender: 'bot', text: `Welcome to **${activeDemoData?.businessName || 'our business'}** assistant! 🤖\n\nType **1** to: Book an Appointment\nType **2** to: Check Business Hours`.replace(/\\n/g, '\n') }
+              ]);
+            }}
+            className="bg-[#25d366] hover:bg-[#128c7e] text-white p-4 rounded-full shadow-2xl transition-all hover:scale-105 cursor-pointer flex items-center justify-center animate-bounce"
             aria-label="Contact bot"
           >
             {isChatWidgetOpen ? <X className="h-6 w-6" /> : <MessageSquare className="h-6 w-6 fill-white" />}
@@ -1119,7 +1459,22 @@ function App() {
                           <tr key={lead.id} className="hover:bg-slate-800/40 transition-colors">
                             <td className="p-4 pl-6 font-bold text-white">{lead.name}</td>
                             <td className="p-4 text-slate-300 font-semibold">{lead.businessName}</td>
-                            <td className="p-4 text-slate-400">{lead.phone}</td>
+                            <td className="p-4 text-slate-400">
+                              <div className="flex items-center gap-1.5">
+                                <span>{lead.phone}</span>
+                                <button 
+                                  onClick={() => {
+                                    const template = `Hi ${lead.name}! 👋 This is the Nexosia Assistant. I saw your new AI Demo website for "${lead.businessName}" generated on Nexosia. Let's connect to customize it further!`;
+                                    const url = `https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(template)}`;
+                                    window.open(url, '_blank');
+                                  }}
+                                  className="text-[#25d366] hover:text-[#128c7e] p-1 rounded hover:bg-slate-800 transition-all cursor-pointer"
+                                  title="Quick Send WhatsApp Follow-up"
+                                >
+                                  <MessageSquare className="h-3.5 w-3.5 fill-[#25d366]" />
+                                </button>
+                              </div>
+                            </td>
                             <td className="p-4">
                               <span className="bg-slate-800 border border-slate-700 text-slate-300 text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider">
                                 {lead.businessType || 'Other'}
@@ -1140,25 +1495,43 @@ function App() {
                             </td>
                             <td className="p-4">
                               <select 
-                                value={lead.status || 'Pending'}
+                                value={lead.status || 'New'}
                                 onChange={(e) => handleUpdateLeadStatus(lead.id, e.target.value)}
-                                className={`text-[10px] font-bold px-2 py-1 rounded focus:outline-none border ${
-                                  lead.status === 'Contacted' 
-                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                                    : lead.status === 'Rejected'
-                                      ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-                                      : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                                className={`text-[9px] font-bold px-2 py-1 rounded focus:outline-none border ${
+                                  lead.status === 'New'
+                                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                                    : lead.status === 'Called'
+                                      ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                                      : lead.status === 'Demo Booked'
+                                        ? 'bg-violet-500/10 border-violet-500/30 text-violet-400'
+                                        : lead.status === 'Interested'
+                                          ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400'
+                                          : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                                 }`}
                               >
-                                <option value="Pending">Pending</option>
-                                <option value="Contacted">Contacted</option>
-                                <option value="Rejected">Rejected</option>
+                                <option value="New">New</option>
+                                <option value="Called">Called</option>
+                                <option value="Demo Booked">Demo Booked</option>
+                                <option value="Interested">Interested</option>
+                                <option value="Closed">Closed</option>
                               </select>
                             </td>
                             <td className="p-4 pr-6 text-right">
                               <button 
+                                onClick={() => {
+                                  setEditingNotesLeadId(lead.id);
+                                  setNotesText(lead.notes || '');
+                                  setEditingNotesCollection('leads');
+                                }}
+                                className="text-slate-500 hover:text-cyan-accent p-1.5 rounded hover:bg-slate-850 transition-colors cursor-pointer mr-1"
+                                title="Edit CRM Notes"
+                              >
+                                <Sliders className="h-4.5 w-4.5" />
+                              </button>
+                              <button 
                                 onClick={() => handleDeleteLead(lead.id)}
                                 className="text-slate-500 hover:text-rose-400 p-1.5 rounded hover:bg-slate-850 transition-colors cursor-pointer"
+                                title="Delete Lead"
                               >
                                 <Trash2 className="h-4.5 w-4.5" />
                               </button>
@@ -1199,6 +1572,7 @@ function App() {
                           <th className="p-4">Phone</th>
                           <th className="p-4">Demo Link</th>
                           <th className="p-4">Created Date</th>
+                          <th className="p-4">Status</th>
                           <th className="p-4 pr-6 text-right">Action</th>
                         </tr>
                       </thead>
@@ -1208,7 +1582,22 @@ function App() {
                             <td className="p-4 pl-6 font-bold text-white">{trial.name}</td>
                             <td className="p-4 text-slate-300 font-semibold">{trial.businessName}</td>
                             <td className="p-4 text-slate-400">{trial.email}</td>
-                            <td className="p-4 text-slate-400">{trial.phone}</td>
+                            <td className="p-4 text-slate-400">
+                              <div className="flex items-center gap-1.5">
+                                <span>{trial.phone}</span>
+                                <button 
+                                  onClick={() => {
+                                    const template = `Hi ${trial.name}! 👋 This is the Nexosia Assistant. I saw your new AI Demo website for "${trial.businessName}" generated on Nexosia. Let's connect to customize it further!`;
+                                    const url = `https://wa.me/${trial.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(template)}`;
+                                    window.open(url, '_blank');
+                                  }}
+                                  className="text-[#25d366] hover:text-[#128c7e] p-1 rounded hover:bg-slate-800 transition-all cursor-pointer"
+                                  title="Quick Send WhatsApp Follow-up"
+                                >
+                                  <MessageSquare className="h-3.5 w-3.5 fill-[#25d366]" />
+                                </button>
+                              </div>
+                            </td>
                             <td className="p-4">
                               <a 
                                 href={`?demo=${trial.id}`}
@@ -1222,10 +1611,45 @@ function App() {
                             <td className="p-4 text-slate-500">
                               {trial.createdAt ? new Date(trial.createdAt.seconds * 1000).toLocaleDateString() : 'Pending'}
                             </td>
+                            <td className="p-4">
+                              <select 
+                                value={trial.status || 'New'}
+                                onChange={(e) => handleUpdateTrialStatus(trial.id, e.target.value)}
+                                className={`text-[9px] font-bold px-2 py-1 rounded focus:outline-none border ${
+                                  trial.status === 'New'
+                                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                                    : trial.status === 'Called'
+                                      ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                                      : trial.status === 'Demo Booked'
+                                        ? 'bg-violet-500/10 border-violet-500/30 text-violet-400'
+                                        : trial.status === 'Interested'
+                                          ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400'
+                                          : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                }`}
+                              >
+                                <option value="New">New</option>
+                                <option value="Called">Called</option>
+                                <option value="Demo Booked">Demo Booked</option>
+                                <option value="Interested">Interested</option>
+                                <option value="Closed">Closed</option>
+                              </select>
+                            </td>
                             <td className="p-4 pr-6 text-right">
+                              <button 
+                                onClick={() => {
+                                  setEditingNotesLeadId(trial.id);
+                                  setNotesText(trial.notes || '');
+                                  setEditingNotesCollection('trials');
+                                }}
+                                className="text-slate-500 hover:text-cyan-accent p-1.5 rounded hover:bg-slate-850 transition-colors cursor-pointer mr-1"
+                                title="Edit CRM Notes"
+                              >
+                                <Sliders className="h-4.5 w-4.5" />
+                              </button>
                               <button 
                                 onClick={() => handleDeleteTrial(trial.id)}
                                 className="text-slate-500 hover:text-rose-400 p-1.5 rounded hover:bg-slate-850 transition-colors cursor-pointer"
+                                title="Delete Trial"
                               >
                                 <Trash2 className="h-4.5 w-4.5" />
                               </button>
@@ -2546,7 +2970,7 @@ function App() {
 
               <div className="p-8 sm:p-10 pt-0 text-left">
                 <button 
-                  onClick={() => openWizard('trial')}
+                  onClick={() => { setCheckoutPlan('growth'); openWizard('trial'); }}
                   className="w-full bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-sm py-4 rounded-xl transition-all cursor-pointer text-center"
                 >
                   Start 14-Day Free Trial
@@ -2608,7 +3032,7 @@ function App() {
 
               <div className="p-8 sm:p-10 pt-0 text-left">
                 <button 
-                  onClick={() => openWizard('trial')}
+                  onClick={() => { setCheckoutPlan('scale'); openWizard('trial'); }}
                   className="w-full bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 font-extrabold text-sm py-4 rounded-xl transition-all cursor-pointer text-center"
                 >
                   Claim Scale Package
@@ -3007,6 +3431,231 @@ function App() {
 
       </div>
 
+      {/* CRM Notes Modal Dialog */}
+      {editingNotesLeadId && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 font-sans">
+          <div className="bg-slate-900 border border-slate-800 text-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200 text-left space-y-4">
+            
+            <button 
+              onClick={() => setEditingNotesLeadId(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div>
+              <span className="bg-violet-500/10 text-violet-400 text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                📝 Lead Interaction CRM Notes
+              </span>
+              <h3 className="text-lg font-bold font-heading text-white mt-2">Interaction Notes</h3>
+              <p className="text-slate-400 text-[10px] mt-0.5">Write and save notes for this customer's pipeline history.</p>
+            </div>
+
+            <textarea
+              rows="5"
+              placeholder="e.g. Called John on Tuesday. He is very interested in the Scale plan but wants custom salon templates. Scheduled call next Monday."
+              value={notesText}
+              onChange={(e) => setNotesText(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-850 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-cyan-accent resize-none"
+            />
+
+            <div className="flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setEditingNotesLeadId(null)}
+                className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await updateDoc(doc(db, editingNotesCollection, editingNotesLeadId), { notes: notesText });
+                    setEditingNotesLeadId(null);
+                  } catch (err) {
+                    console.error(err);
+                    alert("Error saving CRM notes.");
+                  }
+                }}
+                className="bg-cyan-accent hover:bg-cyan-accent-dark text-slate-955 hover:text-white font-extrabold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-md shadow-cyan-accent/15"
+              >
+                Save Notes
+                <Check className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Sandbox Payment Checkout Simulator Modal */}
+      {isCheckoutOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 font-sans">
+          <div className="bg-slate-900 border border-slate-800 text-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200 text-left space-y-6">
+            
+            <button 
+              onClick={() => setIsCheckoutOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {checkoutStep === 'form' && (
+              <div className="space-y-4">
+                <div>
+                  <span className="bg-cyan-500/10 text-cyan-accent text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                    🔒 Sandbox Simulator
+                  </span>
+                  <h3 className="text-xl font-bold font-heading text-white mt-2">Secure Checkout</h3>
+                  <p className="text-slate-400 text-xs mt-1">
+                    You have selected **The {checkoutPlan === 'scale' ? 'Scale' : 'Growth'} Package**.
+                  </p>
+                </div>
+
+                <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl flex justify-between items-center text-xs">
+                  <div>
+                    <p className="font-bold text-white">Setup Fee:</p>
+                    <p className="text-slate-400 text-[10px]">One-time development</p>
+                  </div>
+                  <p className="font-bold text-lg text-cyan-accent">
+                    {checkoutPlan === 'scale' ? (currency === 'INR' ? '₹25,000' : '$299') : (currency === 'INR' ? '₹12,000' : '$149')}
+                  </p>
+                </div>
+
+                {/* Radio selection */}
+                <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    type="button"
+                    onClick={() => setCheckoutForm({...checkoutForm, method: 'card'})}
+                    className={`p-3 rounded-xl border text-xs font-bold cursor-pointer text-center transition-all ${
+                      checkoutForm.method === 'card' ? 'border-cyan-accent bg-cyan-accent/5 text-cyan-accent' : 'border-slate-800 text-slate-400 hover:bg-slate-800/30'
+                    }`}
+                  >
+                    💳 Credit Card
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setCheckoutForm({...checkoutForm, method: 'upi'})}
+                    className={`p-3 rounded-xl border text-xs font-bold cursor-pointer text-center transition-all ${
+                      checkoutForm.method === 'upi' ? 'border-cyan-accent bg-cyan-accent/5 text-cyan-accent' : 'border-slate-800 text-slate-400 hover:bg-slate-800/30'
+                    }`}
+                  >
+                    📱 UPI ID
+                  </button>
+                </div>
+
+                {checkoutForm.method === 'card' ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Card Number</label>
+                      <input 
+                        type="text" 
+                        placeholder="4242 4242 4242 4242"
+                        value={checkoutForm.cardNumber}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 16);
+                          const formatted = val.replace(/(\d{4})(?=\d)/g, '$1 ');
+                          setCheckoutForm({...checkoutForm, cardNumber: formatted});
+                        }}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Expiry Date</label>
+                        <input 
+                          type="text" 
+                          placeholder="MM/YY"
+                          value={checkoutForm.cardExpiry}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 4);
+                            const formatted = val.length >= 2 ? `${val.slice(0, 2)}/${val.slice(2)}` : val;
+                            setCheckoutForm({...checkoutForm, cardExpiry: formatted});
+                          }}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">CVV</label>
+                        <input 
+                          type="password" 
+                          placeholder="123"
+                          value={checkoutForm.cardCvv}
+                          onChange={(e) => setCheckoutForm({...checkoutForm, cardCvv: e.target.value.replace(/[^0-9]/g, '').slice(0, 3)})}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">UPI VPA Address</label>
+                    <input 
+                      type="text" 
+                      placeholder="username@upi"
+                      value={checkoutForm.upiId}
+                      onChange={(e) => setCheckoutForm({...checkoutForm, upiId: e.target.value})}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                      required
+                    />
+                  </div>
+                )}
+
+                <button 
+                  type="button"
+                  onClick={() => {
+                    if (checkoutForm.method === 'card' && (!checkoutForm.cardNumber || !checkoutForm.cardExpiry || !checkoutForm.cardCvv)) {
+                      alert("Please fill card details.");
+                      return;
+                    }
+                    if (checkoutForm.method === 'upi' && !checkoutForm.upiId) {
+                      alert("Please enter UPI VPA ID.");
+                      return;
+                    }
+                    setCheckoutStep('processing');
+                    setTimeout(() => {
+                      setCheckoutStep('success');
+                      setTimeout(() => {
+                        setIsCheckoutOpen(false);
+                        setWizardType('trial');
+                        setWizardStep(1);
+                        setIsWizardModalOpen(true);
+                      }, 1500);
+                    }, 2000);
+                  }}
+                  className="w-full bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 hover:text-white font-extrabold text-xs py-3.5 rounded-xl transition-all cursor-pointer text-center flex items-center justify-center gap-1 shadow-md shadow-cyan-accent/15"
+                >
+                  Confirm Simulated Payment
+                </button>
+              </div>
+            )}
+
+            {checkoutStep === 'processing' && (
+              <div className="py-12 text-center space-y-4 font-sans">
+                <div className="w-10 h-10 border-4 border-slate-800 border-t-cyan-accent rounded-full animate-spin mx-auto"></div>
+                <h4 className="text-sm font-bold text-white">Authorizing Simulated Payment...</h4>
+                <p className="text-[10px] text-slate-400">Verifying sandbox accounts with simulated API nodes.</p>
+              </div>
+            )}
+
+            {checkoutStep === 'success' && (
+              <div className="py-12 text-center space-y-4 font-sans">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto">
+                  <Check className="h-6 w-6" />
+                </div>
+                <h4 className="text-sm font-bold text-white">Payment Completed!</h4>
+                <p className="text-[10px] text-slate-400">Opening Onboarding Customization Wizard...</p>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
+
       {/* Onboarding Wizard Modal */}
       {isWizardModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 font-sans">
@@ -3028,6 +3677,8 @@ function App() {
                 <span className={wizardStep >= 2 ? 'text-cyan-accent-dark' : ''}>2. Obstacles</span>
                 <span>•</span>
                 <span className={wizardStep >= 3 ? 'text-cyan-accent-dark' : ''}>3. Details</span>
+                <span>•</span>
+                <span className={wizardStep >= 4 ? 'text-cyan-accent-dark' : ''}>4. Customize</span>
               </div>
             )}
 
@@ -3116,9 +3767,9 @@ function App() {
 
                 {/* Step 3: Contact details */}
                 {wizardStep === 3 && (
-                  <form onSubmit={handleWizardSubmit} className="space-y-4 animate-in fade-in duration-200">
+                  <div className="space-y-4 animate-in fade-in duration-200 text-left">
                     <h3 className="text-xl font-bold font-heading text-midnight">Enter Business Details</h3>
-                    <p className="text-slate-555 text-xs">Let's create your account. We will analyze your profile and contact you with a layout draft.</p>
+                    <p className="text-slate-500 text-xs">Let's create your account. We will analyze your profile and contact you with a layout draft.</p>
                     
                     <div className="space-y-3 pt-2">
                       <div>
@@ -3128,7 +3779,7 @@ function App() {
                           placeholder="e.g. John Doe"
                           value={wizardData.name}
                           onChange={(e) => setWizardData({...wizardData, name: e.target.value})}
-                          className="w-full border border-slate-200 bg-slate-55 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                          className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
                           required
                         />
                       </div>
@@ -3139,7 +3790,7 @@ function App() {
                           placeholder="e.g. Apex Dental Clinic"
                           value={wizardData.businessName}
                           onChange={(e) => setWizardData({...wizardData, businessName: e.target.value})}
-                          className="w-full border border-slate-200 bg-slate-55 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                          className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
                           required
                         />
                       </div>
@@ -3150,7 +3801,7 @@ function App() {
                           placeholder="e.g. +91 98765 43210"
                           value={wizardData.phone}
                           onChange={(e) => setWizardData({...wizardData, phone: e.target.value})}
-                          className="w-full border border-slate-200 bg-slate-55 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                          className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
                           required
                         />
                       </div>
@@ -3161,14 +3812,134 @@ function App() {
                           placeholder="e.g. contact@business.com"
                           value={wizardData.email}
                           onChange={(e) => setWizardData({...wizardData, email: e.target.value})}
-                          className="w-full border border-slate-200 bg-slate-55 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                          className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
                           required={wizardType === 'trial'}
                         />
                       </div>
                     </div>
 
                     <div className="flex justify-between items-center pt-4">
-                      <button type="button" onClick={() => setWizardStep(2)} className="text-xs font-semibold text-slate-505 hover:text-slate-700 flex items-center gap-1 cursor-pointer">
+                      <button type="button" onClick={() => setWizardStep(2)} className="text-xs font-semibold text-slate-500 hover:text-slate-700 flex items-center gap-1 cursor-pointer">
+                        <ChevronLeft className="h-4 w-4" /> Back
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          if(!wizardData.name || !wizardData.businessName || !wizardData.phone || (wizardType==='trial' && !wizardData.email)) {
+                            alert("Please fill all required details first.");
+                            return;
+                          }
+                          setWizardStep(4);
+                        }}
+                        className="bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs py-3 px-6 rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-md shadow-slate-900/10"
+                      >
+                        Configure Customizations
+                        <ChevronRight className="h-4.5 w-4.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 4: Customizations (timings, color, services) */}
+                {wizardStep === 4 && (
+                  <form onSubmit={handleWizardSubmit} className="space-y-4 animate-in fade-in duration-200 text-left">
+                    <h3 className="text-xl font-bold font-heading text-midnight">Customize Demo Setup</h3>
+                    <p className="text-slate-500 text-xs">Configure your website's custom theme color, opening/closing hours, and service list.</p>
+                    
+                    <div className="space-y-4 pt-2">
+                      
+                      {/* Theme selection */}
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Accent Theme Color</label>
+                        <div className="flex gap-3">
+                          {[
+                            { id: 'blue', color: 'bg-indigo-600', name: 'Indigo' },
+                            { id: 'emerald', color: 'bg-emerald-600', name: 'Emerald' },
+                            { id: 'purple', color: 'bg-violet-600', name: 'Purple' },
+                            { id: 'rose', color: 'bg-rose-600', name: 'Rose' },
+                            { id: 'orange', color: 'bg-amber-600', name: 'Orange' }
+                          ].map((item) => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => setWizardData({...wizardData, themeColor: item.id})}
+                              className={`w-7 h-7 rounded-full ${item.color} relative cursor-pointer flex items-center justify-center`}
+                              title={item.name}
+                            >
+                              {wizardData.themeColor === item.id && (
+                                <span className="absolute inset-0 border-2 border-white rounded-full scale-75 flex items-center justify-center">
+                                  <Check className="h-3.5 w-3.5 text-white" />
+                                </span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Timings row */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Opening Time</label>
+                          <input 
+                            type="time" 
+                            value={wizardData.openTime}
+                            onChange={(e) => setWizardData({...wizardData, openTime: e.target.value})}
+                            className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Closing Time</label>
+                          <input 
+                            type="time" 
+                            value={wizardData.closeTime}
+                            onChange={(e) => setWizardData({...wizardData, closeTime: e.target.value})}
+                            className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {/* Services inputs */}
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Custom Services & Prices (Optional)</label>
+                        <div className="space-y-2">
+                          {[0, 1, 2].map((idx) => {
+                            const svc = wizardData.services[idx] || { name: '', price: '' };
+                            return (
+                              <div key={idx} className="grid grid-cols-12 gap-2">
+                                <input 
+                                  type="text" 
+                                  placeholder={`Service ${idx + 1} Name (e.g. Consultation)`}
+                                  value={svc.name}
+                                  onChange={(e) => {
+                                    const updatedSvcs = [...wizardData.services];
+                                    updatedSvcs[idx] = { ...svc, name: e.target.value };
+                                    setWizardData({...wizardData, services: updatedSvcs});
+                                  }}
+                                  className="col-span-8 border border-slate-200 bg-slate-55 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                                />
+                                <input 
+                                  type="text" 
+                                  placeholder="Price (e.g. ₹500)"
+                                  value={svc.price}
+                                  onChange={(e) => {
+                                    const updatedSvcs = [...wizardData.services];
+                                    updatedSvcs[idx] = { ...svc, price: e.target.value };
+                                    setWizardData({...wizardData, services: updatedSvcs});
+                                  }}
+                                  className="col-span-4 border border-slate-200 bg-slate-55 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white"
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                    </div>
+
+                    <div className="flex justify-between items-center pt-4">
+                      <button type="button" onClick={() => setWizardStep(3)} className="text-xs font-semibold text-slate-500 hover:text-slate-700 flex items-center gap-1 cursor-pointer">
                         <ChevronLeft className="h-4 w-4" /> Back
                       </button>
                       <button 
