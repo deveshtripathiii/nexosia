@@ -9,7 +9,10 @@ service cloud.firestore {
                     && request.resource.data.email is string 
                     && request.resource.data.email.size() < 150
                     && request.resource.data.createdAt is timestamp;
-      allow read, update, delete: if false;
+      
+      // Allow authenticated admin to read and delete subscribers
+      allow read, delete: if request.auth != null;
+      allow update: if false;
     }
 
     // Secure rule for leads collection (Get a Free Demo modal)
@@ -22,10 +25,15 @@ service cloud.firestore {
                     && request.resource.data.phone.size() < 30
                     && request.resource.data.businessName is string
                     && request.resource.data.businessName.size() < 150
-                    && request.resource.data.niche is string
-                    && request.resource.data.niche.size() < 50
+                    && request.resource.data.email is string
+                    && request.resource.data.email.size() < 150
+                    && request.resource.data.businessType is string
+                    && request.resource.data.businessType.size() < 50
+                    && request.resource.data.status is string
                     && request.resource.data.createdAt is timestamp;
-      allow read, update, delete: if false;
+      
+      // Allow authenticated admin to read, update (change status), and delete leads
+      allow read, update, delete: if request.auth != null;
     }
 
     // Secure rule for trials collection (Start 14-day trial modal)
@@ -41,8 +49,13 @@ service cloud.firestore {
                     && request.resource.data.email != null
                     && request.resource.data.email is string
                     && request.resource.data.email.size() < 150
+                    && request.resource.data.businessType is string
+                    && request.resource.data.businessType.size() < 50
+                    && request.resource.data.status is string
                     && request.resource.data.createdAt is timestamp;
-      allow read, update, delete: if false;
+      
+      // Allow authenticated admin to read, update, and delete trials
+      allow read, update, delete: if request.auth != null;
     }
   }
 }
