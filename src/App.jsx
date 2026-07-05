@@ -380,6 +380,40 @@ function App() {
     ]);
   };
 
+  const resetSimulator = () => {
+    setSimStep(0);
+    setSimNameInput('');
+    setIsSimTyping(false);
+    setSimMessages([
+      { sender: 'bot', text: "Hi there! 👋 Welcome to Apex Health Clinic. I can help you book an appointment in 30 seconds. Which day works best for you?", time: "10:00 AM" }
+    ]);
+  };
+
+  const resetReviewSimulator = () => {
+    setReviewStep(0);
+    setReviewTyping(false);
+    setReviewMessages([
+      { sender: 'bot', text: "Hi John! Thanks for visiting Apex Health Clinic today. 🩺 How would you rate your experience out of 5 stars?\n\n(Reply with a number 1 to 5)", time: "04:30 PM" }
+    ]);
+  };
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    if (!newsletterEmail) return;
+    setNewsletterSubmitted(true);
+    try {
+      await addDoc(collection(db, 'newsletter'), {
+        email: newsletterEmail,
+        createdAt: serverTimestamp()
+      });
+      setTimeout(() => {
+        setNewsletterEmail('');
+      }, 3000);
+    } catch (err) {
+      console.error("Newsletter Save Error: ", err);
+    }
+  };
+
   // Sync ticket value on currency switch
   useEffect(() => {
     if (currency === 'INR') {
