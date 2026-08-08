@@ -134,6 +134,16 @@ function App() {
   const [currency, setCurrency] = useState('INR'); // 'INR' or 'USD'
   const [billingPeriod, setBillingPeriod] = useState('monthly'); // 'monthly' or 'yearly'
   
+  // Top WhatsApp Form state
+  const [topFormData, setTopFormData] = useState({
+    name: '',
+    businessName: '',
+    phone: '',
+    website: '',
+    message: ''
+  });
+  const [isSubmittingTopForm, setIsSubmittingTopForm] = useState(false);
+
   // Modals state
   const [isWizardModalOpen, setIsWizardModalOpen] = useState(false);
   const [wizardType, setWizardType] = useState('demo'); // 'demo' or 'trial'
@@ -614,6 +624,50 @@ function App() {
         : [...prev.headaches, headache];
       return { ...prev, headaches: list };
     });
+  };
+
+  const handleTopFormSubmit = async (e) => {
+    e.preventDefault();
+    if (!topFormData.name || !topFormData.phone || !topFormData.businessName) {
+      alert("Please fill in Name, Business Name, and WhatsApp Number.");
+      return;
+    }
+    setIsSubmittingTopForm(true);
+    try {
+      // Save lead to Firestore backup
+      await addDoc(collection(db, 'leads'), {
+        name: topFormData.name,
+        businessName: topFormData.businessName,
+        phone: topFormData.phone,
+        website: topFormData.website || 'None',
+        message: topFormData.message || 'Submitted via top form',
+        status: 'New',
+        createdAt: serverTimestamp()
+      });
+    } catch (err) {
+      console.error("Firestore save failed, proceeding to WhatsApp", err);
+    }
+
+    // Format WhatsApp Message
+    const messageText = `*New Nexosia Request:*\n\n` +
+      `👤 *Name:* ${topFormData.name}\n` +
+      `🏥 *Business:* ${topFormData.businessName}\n` +
+      `📞 *WhatsApp:* ${topFormData.phone}\n` +
+      `🌐 *Current Website:* ${topFormData.website || 'None'}\n` +
+      `📝 *Goals/Requirements:* ${topFormData.message || 'None'}`;
+
+    const whatsappUrl = `https://wa.me/919506873107?text=${encodeURIComponent(messageText)}`;
+    window.open(whatsappUrl, '_blank');
+    
+    // Reset
+    setTopFormData({
+      name: '',
+      businessName: '',
+      phone: '',
+      website: '',
+      message: ''
+    });
+    setIsSubmittingTopForm(false);
   };
 
   const handleWizardSubmit = async (e) => {
@@ -2029,22 +2083,93 @@ function App() {
                 Get a premium website and an automated booking system that works 24/7. Built specifically for independent clinics, local stores, and salons. Let customers book appointments in under 30 seconds.
               </p>
 
-              {/* CTAs */}
-              <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
-                <button 
-                  onClick={() => openWizard('trial')}
-                  className="bg-cyan-accent hover:bg-cyan-accent-dark text-white font-bold text-lg px-8 py-4 rounded-full transition-all duration-300 shadow-xl shadow-cyan-accent/25 hover:shadow-cyan-accent/40 hover:-translate-y-0.5 text-center flex items-center justify-center gap-2 cyan-glow-button cursor-pointer"
-                >
-                  Start Your Free 14-Day Trial
-                  <ArrowRight className="h-5 w-5" />
-                </button>
-                <button 
-                  onClick={() => setIsVideoModalOpen(true)}
-                  className="flex items-center justify-center gap-2 text-slate-700 hover:text-midnight font-semibold py-3 px-6 rounded-full transition-all duration-200 border border-slate-300 hover:bg-slate-105 text-center cursor-pointer"
-                >
-                  <Play className="h-4 w-4 fill-slate-700 text-slate-700" />
-                  See How It Works
-                </button>
+              {/* Premium Mobile-Smooth Glassmorphic Lead Generation Form */}
+              <div className="w-full bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 animate-in fade-in duration-300 text-left">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2 font-heading">
+                    <Sparkles className="h-5 w-5 text-cyan-accent animate-pulse" />
+                    Get Custom WhatsApp Bot & Site Draft
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1 font-normal">
+                    Submit your details below. We will build a customized web & WhatsApp bot draft and send it to your WhatsApp!
+                  </p>
+                </div>
+
+                <form onSubmit={handleTopFormSubmit} className="space-y-4 font-sans">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Your Name *</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. John Doe"
+                        value={topFormData.name}
+                        onChange={(e) => setTopFormData({...topFormData, name: e.target.value})}
+                        className="w-full border border-slate-200 bg-slate-50/50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white transition-all text-slate-800"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Business Name *</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. Apex Dental Clinic"
+                        value={topFormData.businessName}
+                        onChange={(e) => setTopFormData({...topFormData, businessName: e.target.value})}
+                        className="w-full border border-slate-200 bg-slate-50/50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white transition-all text-slate-800"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">WhatsApp Number *</label>
+                      <input 
+                        type="tel" 
+                        placeholder="e.g. 9506873107"
+                        value={topFormData.phone}
+                        onChange={(e) => setTopFormData({...topFormData, phone: e.target.value})}
+                        className="w-full border border-slate-200 bg-slate-50/50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white transition-all text-slate-800"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Current Website (Optional)</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. www.apexclinic.com"
+                        value={topFormData.website}
+                        onChange={(e) => setTopFormData({...topFormData, website: e.target.value})}
+                        className="w-full border border-slate-200 bg-slate-50/50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white transition-all text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Custom Goals / Message</label>
+                    <textarea 
+                      placeholder="e.g. Integrate automatic booking notifications with Google Calendar..."
+                      value={topFormData.message}
+                      onChange={(e) => setTopFormData({...topFormData, message: e.target.value})}
+                      className="w-full border border-slate-200 bg-slate-50/50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white transition-all h-20 resize-none text-slate-800"
+                    />
+                  </div>
+
+                  <button 
+                    type="submit"
+                    disabled={isSubmittingTopForm}
+                    className="w-full bg-[#25d366] hover:bg-[#128c7e] text-white font-extrabold text-xs py-3.5 px-6 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20"
+                  >
+                    {isSubmittingTopForm ? (
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    ) : (
+                      <>
+                        <MessageSquare className="h-4.5 w-4.5 fill-white text-white" />
+                        Submit & Connect on WhatsApp
+                      </>
+                    )}
+                  </button>
+                </form>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-200/80 w-full">
