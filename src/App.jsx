@@ -2259,12 +2259,12 @@ function App() {
 
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-            <a href="#features" className="hover:text-midnight transition-colors duration-200">Features</a>
-            <a href="#demo" className="hover:text-midnight transition-colors duration-200">Interactive Demo</a>
-            <a href="#compare" className="hover:text-midnight transition-colors duration-200">Compare</a>
-            <a href="#roi-calculator" className="hover:text-midnight transition-colors duration-200">ROI Calculator</a>
-            <a href="#pricing" className="hover:text-midnight transition-colors duration-200">Pricing</a>
-            <a href="#faq" className="hover:text-midnight transition-colors duration-200">FAQ</a>
+            <a href="#features" className="hover:text-cyan-accent-dark transition-colors duration-200">Superpowers</a>
+            <a href="#demo" className="hover:text-cyan-accent-dark transition-colors duration-200">Live Simulator</a>
+            <a href="#about" className="hover:text-cyan-accent-dark transition-colors duration-200">About Story</a>
+            <a href="#roi-calculator" className="hover:text-cyan-accent-dark transition-colors duration-200">ROI Calculator</a>
+            <a href="#pricing" className="hover:text-cyan-accent-dark transition-colors duration-200">Pricing</a>
+            <a href="#faq" className="hover:text-cyan-accent-dark transition-colors duration-200">FAQ</a>
           </nav>
 
           {/* Action Buttons */}
@@ -2297,9 +2297,9 @@ function App() {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-b border-slate-200 absolute top-16 left-0 w-full p-6 shadow-xl space-y-4 animate-in fade-in slide-in-from-top-5 duration-250">
             <nav className="flex flex-col gap-4 text-base font-semibold text-slate-700">
-              <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">Features</a>
-              <a href="#demo" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">Interactive Demo</a>
-              <a href="#compare" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">Compare</a>
+              <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">Superpowers</a>
+              <a href="#demo" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">Live Simulator</a>
+              <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">About Story</a>
               <a href="#roi-calculator" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">ROI Calculator</a>
               <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">Pricing</a>
               <a href="#faq" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">FAQ</a>
@@ -2337,17 +2337,17 @@ function App() {
             {/* Left Column */}
             <div className="lg:col-span-7 flex flex-col items-start text-left space-y-8">
               
-              <div className="inline-flex items-center gap-2 bg-slate-200/60 backdrop-blur-sm border border-slate-300/50 rounded-full px-4 py-1.5 text-xs sm:text-sm font-semibold text-slate-700">
-                <Sparkles className="h-4 w-4 text-cyan-accent animate-pulse" />
-                <span>Next-Gen Booking Automations for Clinics & Local Stores</span>
+              <div className="inline-flex items-center gap-2 bg-cyan-500/10 backdrop-blur-sm border border-cyan-500/30 rounded-full px-4 py-1.5 text-xs sm:text-sm font-bold text-cyan-accent-dark">
+                <span className="w-2 h-2 rounded-full bg-cyan-accent animate-ping"></span>
+                <span>Stop losing customers while you sleep 😴 • 24/7 WhatsApp AI Bots</span>
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-midnight font-heading tracking-tight leading-tight">
-                Automate Your Local Business. <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-accent to-cyan-accent-dark">Turn Visitors into Bookings</span> via WhatsApp.
+                Get an Aesthetic Website + <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-accent via-blue-500 to-indigo-600">Smart WhatsApp Bot</span> in 48 Hours. 🚀
               </h1>
 
               <p className="text-lg sm:text-xl text-slate-600 max-w-2xl font-normal leading-relaxed">
-                Get a premium website and an automated booking system that works 24/7. Built specifically for independent clinics, local stores, and salons. Let customers book appointments in under 30 seconds.
+                Hey! Are you still booking appointments on WhatsApp manually or missing clients after hours? Nexosia builds your custom website with a 24/7 WhatsApp assistant that books clients in 30 seconds. No corporate jargon. No BS.
               </p>
 
               {/* ⚡ Interactive AI Demo Generator Command Bar */}
@@ -2472,8 +2472,8 @@ function App() {
               <div className="absolute w-72 h-72 rounded-full bg-cyan-accent/20 blur-3xl -top-10 -right-10 pointer-events-none"></div>
               <div className="absolute w-72 h-72 rounded-full bg-slate-300/30 blur-3xl -bottom-10 -left-10 pointer-events-none"></div>
 
-              {/* Side-by-side Layout Wrapper */}
-              <div className="flex items-end gap-4 max-w-full relative">
+              {/* Side-by-side Layout Wrapper with Float Animation */}
+              <div className="flex items-end gap-4 max-w-full relative animate-float">
                 
                 {/* Mockup 1: Mobile Web Interface */}
                 <div className="relative w-48 sm:w-56 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col select-none -rotate-2 hover:rotate-0 hover:scale-105 transition-all duration-500 z-10">
@@ -2712,76 +2712,107 @@ function App() {
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section id="features" className="py-24 md:py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Features Grid - Modern Bento Grid */}
+      <section id="features" className="py-24 md:py-32 bg-slate-950 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
-          <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-cyan-accent font-heading">Complete Automation Stack</h2>
-            <p className="text-3xl sm:text-4xl font-extrabold text-midnight font-heading tracking-tight">
-              One Unified System to Fill Your Calendar & Explode Sales
-            </p>
-            <p className="text-slate-600">
-              Stop juggling expensive tools, slow developers, and complex APIs. Nexosia handles your web and appointment pipeline from end to end.
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-bold uppercase tracking-wider">
+              <span>⚡ Superpowers for your business</span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-black font-heading tracking-tight text-white">
+              Everything Your Business Needs to <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Dominate Locally</span>
+            </h2>
+            <p className="text-slate-400 text-base sm:text-lg">
+              No bloated software, no endless setup. Just clean automation that fills your appointment book on autopilot.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            {/* Feature 1 */}
-            <div className="group bg-slate-50 hover:bg-slate-900 border border-slate-200 hover:border-slate-800 rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between items-start hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-accent/5">
-              <div className="space-y-6">
-                <div className="bg-cyan-accent/10 group-hover:bg-cyan-accent/20 w-14 h-14 rounded-2xl flex items-center justify-center text-cyan-accent-dark group-hover:text-cyan-electric transition-colors duration-300">
-                  <Phone className="h-7 w-7" />
+            {/* Bento Card 1 - Main Feature */}
+            <div className="md:col-span-2 bg-slate-900/70 border border-slate-800 hover:border-cyan-500/50 rounded-3xl p-8 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/10 flex flex-col justify-between group">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                  <Phone className="h-6 w-6" />
                 </div>
-                <h3 className="text-xl font-bold font-heading text-midnight group-hover:text-white transition-colors duration-200">
-                  Web-to-WhatsApp Sync
-                </h3>
-                <p className="text-slate-600 group-hover:text-slate-300 transition-colors duration-200 text-sm leading-relaxed">
-                  Never miss a potential client. Instantly route website visitors directly to your business WhatsApp with beautiful chat triggers, initiating instant automated discussions.
-                </p>
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-cyan-400 uppercase tracking-widest">Instant WhatsApp Capture</span>
+                  <h3 className="text-2xl font-bold font-heading text-white">Web-to-WhatsApp Direct Pipeline</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed max-w-xl">
+                    Every visitor gets a warm, one-click WhatsApp prompt. Their inquiry lands directly inside your phone with zero forms, zero friction, and instant response capability.
+                  </p>
+                </div>
               </div>
-              <div className="mt-8 flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-cyan-accent-dark group-hover:text-cyan-electric transition-all duration-200">
-                <span>Direct Lead Capture</span>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <span className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-xs font-medium text-cyan-300">⚡ 0.8s Response Time</span>
+                <span className="px-3 py-1 bg-slate-800/80 border border-slate-700 rounded-full text-xs font-medium text-slate-300">📈 +340% Conversions</span>
+                <span className="px-3 py-1 bg-slate-800/80 border border-slate-700 rounded-full text-xs font-medium text-slate-300">💬 Zero App Downloads</span>
+              </div>
+            </div>
+
+            {/* Bento Card 2 */}
+            <div className="bg-slate-900/70 border border-slate-800 hover:border-emerald-500/50 rounded-3xl p-8 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 flex flex-col justify-between group">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <Calendar className="h-6 w-6" />
+                </div>
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">24/7 Smart Booking</span>
+                  <h3 className="text-xl font-bold font-heading text-white">Zero Double Bookings</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    AI checks available slots in real time, locks appointments, and sends instant confirmation to both you and the client.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-6 pt-6 border-t border-slate-800/80 flex items-center justify-between text-xs text-emerald-400 font-bold">
+                <span>Google Calendar Sync</span>
                 <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
 
-            {/* Feature 2 */}
-            <div className="group bg-slate-50 hover:bg-slate-900 border border-slate-200 hover:border-slate-800 rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between items-start hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-accent/5">
-              <div className="space-y-6">
-                <div className="bg-cyan-accent/10 group-hover:bg-cyan-accent/20 w-14 h-14 rounded-2xl flex items-center justify-center text-cyan-accent-dark group-hover:text-cyan-electric transition-colors duration-300">
-                  <Calendar className="h-7 w-7" />
+            {/* Bento Card 3 */}
+            <div className="bg-slate-900/70 border border-slate-800 hover:border-amber-500/50 rounded-3xl p-8 transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/10 flex flex-col justify-between group">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <Star className="h-6 w-6" />
                 </div>
-                <h3 className="text-xl font-bold font-heading text-midnight group-hover:text-white transition-colors duration-200">
-                  Automated Appointments
-                </h3>
-                <p className="text-slate-600 group-hover:text-slate-300 transition-colors duration-200 text-sm leading-relaxed">
-                  A smart booking bot answers patient or customer questions in real-time, displays open slots, saves appointments, and sends reminder messages to eliminate no-shows by 85%.
-                </p>
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">Reputation Booster</span>
+                  <h3 className="text-xl font-bold font-heading text-white">5-Star Review Engine</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Automatically checks in with clients 2 hours post-visit. Satisfied clients are nudged straight to your Google Maps review page.
+                  </p>
+                </div>
               </div>
-              <div className="mt-8 flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-cyan-accent-dark group-hover:text-cyan-electric transition-all duration-200">
-                <span>Reduce Empty Slots</span>
+              <div className="mt-6 pt-6 border-t border-slate-800/80 flex items-center justify-between text-xs text-amber-400 font-bold">
+                <span>Rank #1 on Google Maps</span>
                 <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
 
-            {/* Feature 3 */}
-            <div className="group bg-slate-50 hover:bg-slate-900 border border-slate-200 hover:border-slate-805 rounded-3xl p-8 transition-all duration-305 flex flex-col justify-between items-start hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-accent/5">
-              <div className="space-y-6">
-                <div className="bg-cyan-accent/10 group-hover:bg-cyan-accent/20 w-14 h-14 rounded-2xl flex items-center justify-center text-cyan-accent-dark group-hover:text-cyan-electric transition-colors duration-300">
-                  <Star className="h-7 w-7" />
+            {/* Bento Card 4 */}
+            <div className="md:col-span-2 bg-slate-900/70 border border-slate-800 hover:border-cyan-500/50 rounded-3xl p-8 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/10 flex flex-col justify-between group">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                  <Zap className="h-6 w-6" />
                 </div>
-                <h3 className="text-xl font-bold font-heading text-midnight group-hover:text-white transition-colors duration-200">
-                  Auto-Review Generation
-                </h3>
-                <p className="text-slate-600 group-hover:text-slate-300 transition-colors duration-200 text-sm leading-relaxed">
-                  Automatically message customers after a visit, ask for feedback, and route happy customers directly to your Google business profile to scale 5-star reviews on autopilot.
-                </p>
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">Zero Setup Headache</span>
+                  <h3 className="text-2xl font-bold font-heading text-white">We Build & Manage Everything For You</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed max-w-xl">
+                    You don't touch a single line of code. Our team sets up your custom website, connects your WhatsApp, trains the assistant on your services, and goes live in under 48 hours.
+                  </p>
+                </div>
               </div>
-              <div className="mt-8 flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-cyan-accent-dark group-hover:text-cyan-electric transition-all duration-200">
-                <span>Boost Local SEO</span>
-                <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              <div className="mt-6 pt-6 border-t border-slate-800/80 flex items-center justify-between">
+                <span className="text-xs text-slate-400">Need adjustments later? Text us anytime on WhatsApp.</span>
+                <a href="https://wa.me/917860716837?text=Hi%20Devesh!%20I%20want%20to%20learn%20more%20about%20Nexosia." target="_blank" rel="noreferrer" className="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
+                  Chat With Us <ArrowRight className="h-4 w-4" />
+                </a>
               </div>
             </div>
 
@@ -3285,6 +3316,130 @@ function App() {
               </span>
             ))}
           </div>
+        </div>
+      </section>
+
+            {/* About Us & Founder Story Section */}
+      <section id="about" className="py-24 md:py-32 bg-slate-900 text-white relative overflow-hidden border-t border-b border-slate-800">
+        <div className="absolute top-1/2 left-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -translate-y-1/2"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            
+            {/* Left Story Column */}
+            <div className="lg:col-span-7 space-y-6 text-left">
+              
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-bold uppercase tracking-wider">
+                <span>👋 Who's behind Nexosia?</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-heading tracking-tight text-white leading-tight">
+                Built with ❤️ by <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Devesh Tripathi</span> & Team
+              </h2>
+
+              <p className="text-slate-300 text-base sm:text-lg leading-relaxed">
+                We started Nexosia because we noticed a painful reality: local business owners — doctors, salons, coaches, and boutique consultants — are losing dozens of high-paying clients every week simply because their websites are slow, outdated, and lack immediate WhatsApp connectivity.
+              </p>
+
+              <div className="space-y-4 pt-2">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0 mt-0.5">
+                    <Check className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-white">We treat your business like our own</h4>
+                    <p className="text-slate-400 text-sm">No robotic tickets or overseas outsourcing. You talk directly with the founders who build and tune your pipeline.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3.5">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
+                    <Check className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-white">Laser-focused on ROI, not vanity metrics</h4>
+                    <p className="text-slate-400 text-sm">We don't just give you pretty pictures. We engineer funnels designed to turn clicks into paid bookings.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3.5">
+                  <div className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 mt-0.5">
+                    <Check className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-white">Direct Line: +91 7860716837</h4>
+                    <p className="text-slate-400 text-sm">Got an urgent question or need a custom tweak? Ping us directly on WhatsApp or call anytime.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 flex flex-wrap items-center gap-4">
+                <a 
+                  href="https://wa.me/917860716837?text=Hi%20Devesh!%20I%20would%20like%20to%20talk%20about%20Nexosia." 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-sm rounded-2xl shadow-lg shadow-emerald-500/20 flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Chat with Devesh on WhatsApp
+                </a>
+                <a 
+                  href="tel:+917860716837"
+                  className="px-6 py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-sm rounded-2xl flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
+                >
+                  <Phone className="h-4 w-4 text-cyan-400" />
+                  Direct Call
+                </a>
+              </div>
+
+            </div>
+
+            {/* Right Card / Founder Highlight Column */}
+            <div className="lg:col-span-5 flex flex-col gap-6">
+              
+              <div className="bg-gradient-to-b from-slate-800/80 to-slate-900/90 border border-slate-700/80 rounded-3xl p-8 space-y-6 relative overflow-hidden shadow-2xl">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white text-2xl font-black font-heading shadow-lg shadow-cyan-500/30">
+                    DT
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold font-heading text-white">Devesh Tripathi</h3>
+                    <p className="text-cyan-400 text-xs font-semibold">Founder & Tech Lead @ Nexosia</p>
+                    <span className="inline-block mt-1 text-[11px] text-slate-400">Gorakhpur & Lucknow, India</span>
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-700/60 pt-4 space-y-3 text-xs text-slate-300 leading-relaxed">
+                  <p className="italic">
+                    "My goal is simple: ensure every local business gets access to the same high-converting automation technology that multi-million dollar venture-backed startups use — at an honest, upfront price."
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 text-center">
+                    <span className="text-2xl font-extrabold text-cyan-400 font-heading block">50+</span>
+                    <span className="text-[11px] text-slate-400">Websites Deployed</span>
+                  </div>
+                  <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 text-center">
+                    <span className="text-2xl font-extrabold text-emerald-400 font-heading block">100%</span>
+                    <span className="text-[11px] text-slate-400">Client Satisfaction</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-6 space-y-3 hover:border-cyan-500/40 transition-colors text-left">
+                <span className="text-2xl block">🤝</span>
+                <h4 className="text-base font-bold font-heading text-white">Direct Human Support</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  You get direct WhatsApp access to our founder and engineering team whenever you need to update prices, timings, or add staff.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
         </div>
       </section>
 
