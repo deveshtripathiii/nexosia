@@ -128,6 +128,57 @@ const COMPARISON_ROWS = [
   { feature: "Customer Support", nexosia: "24/7 Dedicated Support", agency: "Charges per maintenance ticket", diy: "Help docs & chat bots only" }
 ];
 
+
+// --- ROYAL GOLDEN MANDALA SVG COMPONENT ---
+const MandalaOrnament = ({ className = "w-96 h-96", opacity = 0.25, reverse = false }) => (
+  <svg
+    viewBox="0 0 400 400"
+    className={`pointer-events-none select-none ${className}`}
+    style={{ opacity, animation: reverse ? 'spinReverseSlow 70s linear infinite' : 'spinSlow 50s linear infinite' }}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#FFFBEB" />
+        <stop offset="30%" stopColor="#FDE047" />
+        <stop offset="70%" stopColor="#F59E0B" />
+        <stop offset="100%" stopColor="#D97706" />
+      </linearGradient>
+      <radialGradient id="goldCenterGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stopColor="#FEF08A" stopOpacity="0.8" />
+        <stop offset="50%" stopColor="#F59E0B" stopOpacity="0.3" />
+        <stop offset="100%" stopColor="#78350F" stopOpacity="0" />
+      </radialGradient>
+    </defs>
+    <circle cx="200" cy="200" r="192" stroke="url(#goldGrad)" strokeWidth="1" strokeDasharray="4 4" opacity="0.4" />
+    <circle cx="200" cy="200" r="180" stroke="url(#goldGrad)" strokeWidth="1.8" opacity="0.7" />
+    <circle cx="200" cy="200" r="155" stroke="url(#goldGrad)" strokeWidth="1.2" />
+    <circle cx="200" cy="200" r="125" stroke="url(#goldGrad)" strokeWidth="1.6" strokeDasharray="8 4" />
+    <circle cx="200" cy="200" r="95" stroke="url(#goldGrad)" strokeWidth="1.2" />
+    <circle cx="200" cy="200" r="65" stroke="url(#goldGrad)" strokeWidth="1.8" />
+    <circle cx="200" cy="200" r="35" stroke="url(#goldGrad)" strokeWidth="2" fill="url(#goldCenterGlow)" />
+    <circle cx="200" cy="200" r="12" fill="url(#goldGrad)" />
+    {[...Array(24)].map((_, i) => (
+      <g key={`op-${i}`} transform={`rotate(${i * 15} 200 200)`}>
+        <path d="M200 20 C210 55 218 105 200 145 C182 105 190 55 200 20 Z" stroke="url(#goldGrad)" strokeWidth="1" fill="rgba(245,158,11,0.03)" />
+        <circle cx="200" cy="26" r="2.5" fill="#FDE047" />
+      </g>
+    ))}
+    {[...Array(16)].map((_, i) => (
+      <g key={`mp-${i}`} transform={`rotate(${i * 22.5 + 7.5} 200 200)`}>
+        <path d="M200 75 C214 105 216 135 200 165 C184 135 186 105 200 75 Z" stroke="url(#goldGrad)" strokeWidth="1.4" fill="rgba(217,119,6,0.05)" />
+        <circle cx="200" cy="80" r="3" fill="#FBBF24" />
+      </g>
+    ))}
+    {[...Array(12)].map((_, i) => (
+      <g key={`ip-${i}`} transform={`rotate(${i * 30} 200 200)`}>
+        <path d="M200 115 C212 135 214 158 200 172 C186 158 188 135 200 115 Z" stroke="url(#goldGrad)" strokeWidth="1.6" fill="rgba(253,224,71,0.1)" />
+      </g>
+    ))}
+  </svg>
+);
+
 function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState(null);
