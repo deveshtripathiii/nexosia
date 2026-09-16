@@ -1,14 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
   --font-heading: 'Outfit', sans-serif;
-  --color-midnight: #0B0F19;
-  --color-cyan-electric: #00F0FF;
-  --color-cyan-accent: #06B6D4;
-  --color-cyan-accent-dark: #0891B2;
+  --font-royal: 'Cinzel', serif;
+  --color-midnight: #090205;
+  --color-burgundy-deep: #120308;
+  --color-burgundy-card: #1c050d;
+  --color-gold-electric: #FFD700;
+  --color-gold-accent: #F59E0B;
+  --color-gold-accent-dark: #D97706;
+  --color-gold-light: #FDE047;
+  --color-saffron: #EA580C;
+  --color-crimson: #991B1B;
 }
 
 html {
@@ -17,27 +23,38 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background-color: #FAFAFC;
-  color: #1E293B;
+  background-color: #0A0205;
+  color: #FEF3C7;
   overflow-x: hidden;
 }
 
-/* Custom modern sleek scrollbar */
+/* Custom Royal Gold Scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #F1F5F9;
+  background: #0D0206;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: linear-gradient(to bottom, #78350F, #D97706, #F59E0B);
   border-radius: 999px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #06B6D4;
+  background: linear-gradient(to bottom, #D97706, #F59E0B, #FDE047);
 }
 
 /* Animations */
+@keyframes spinSlow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spinReverseSlow {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
 @keyframes floatSlow {
   0%, 100% {
     transform: translateY(0px) rotate(0deg);
@@ -47,72 +64,95 @@ body {
   }
 }
 
-@keyframes pulseGlow {
+@keyframes goldPulseGlow {
   0%, 100% {
-    box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.3), inset 0 0 10px rgba(245, 158, 11, 0.1);
   }
   50% {
-    box-shadow: 0 0 30px rgba(6, 182, 212, 0.65);
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.7), inset 0 0 20px rgba(245, 158, 11, 0.3);
   }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 50s linear infinite;
+}
+
+.animate-spin-reverse-slow {
+  animation: spinReverseSlow 70s linear infinite;
 }
 
 .animate-float {
   animation: floatSlow 4s ease-in-out infinite;
 }
 
-.cyan-glow-button {
-  animation: pulseGlow 2.5s infinite;
+.gold-glow-button {
+  animation: goldPulseGlow 3s infinite;
 }
 
-/* Glassmorphic Utilities */
-.glass-card {
-  background: rgba(255, 255, 255, 0.85);
+/* Mandala Texture Layer */
+.mandala-hero-bg {
+  background-image: 
+    radial-gradient(circle at 80% 30%, rgba(245, 158, 11, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(185, 28, 28, 0.25) 0%, transparent 50%),
+    radial-gradient(circle at center, rgba(10, 2, 5, 0.82) 0%, rgba(10, 2, 5, 0.96) 100%),
+    url('/mandala-bg.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.mandala-section-bg {
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at center, rgba(13, 2, 6, 0.88) 0%, rgba(13, 2, 6, 0.98) 100%),
+    url('/mandala-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Gold Gradient Typography */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FDE047 30%, #F59E0B 70%, #D97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-crimson-gold {
+  background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 40%, #EF4444 80%, #991B1B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Royal Glassmorphism Utilities */
+.glass-gold-card {
+  background: rgba(22, 6, 12, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px -5px rgba(245, 158, 11, 0.1);
 }
 
-.glass-dark {
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.glass-gold-card:hover {
+  border-color: rgba(245, 158, 11, 0.55);
+  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.7), 0 0 30px rgba(245, 158, 11, 0.2);
 }
 
-.glass-glow {
-  background: rgba(255, 255, 255, 0.75);
+.glass-dark-gold {
+  background: rgba(14, 3, 8, 0.85);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(6, 182, 212, 0.25);
-  box-shadow: 0 20px 40px -15px rgba(6, 182, 212, 0.15);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(245, 158, 11, 0.18);
 }
 
-/* Bento Card Style */
-.bento-card {
+/* Bento Card Royal Style */
+.bento-gold {
+  background: rgba(22, 5, 12, 0.8);
+  border: 1px solid rgba(245, 158, 11, 0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(226, 232, 240, 0.9);
 }
 
-.bento-card:hover {
+.bento-gold:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.08);
-  border-color: rgba(6, 182, 212, 0.4);
-}
-
-/* Gradient Text Utilities */
-.text-gradient-cyan {
-  background: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-purple {
-  background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-amber {
-  background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  border-color: rgba(245, 158, 11, 0.55);
+  box-shadow: 0 20px 40px -10px rgba(245, 158, 11, 0.15), 0 0 25px rgba(245, 158, 11, 0.1);
 }

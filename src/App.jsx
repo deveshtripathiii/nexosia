@@ -2241,43 +2241,43 @@ function App() {
   // --- VISITOR LANDING PAGE VIEW (DEFAULT) ---
   // ----------------------------------------------------
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-cyan-accent selection:text-white">
+    <div className="min-h-screen bg-[#0A0205] text-[#FEF3C7] font-sans selection:bg-amber-500 selection:text-slate-950">
       
       {/* Scroll Progress Bar */}
-      <div className="fixed top-0 left-0 h-1 bg-gradient-to-r from-cyan-accent to-cyan-accent-dark z-50 transition-all duration-305" style={{
+      <div className="fixed top-0 left-0 h-1 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600 z-50 transition-all duration-305" style={{
         width: `${typeof window !== 'undefined' ? (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 105 : 0}%`
       }}></div>
 
-      {/* Sticky Navigation Bar */}
-      <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/80 backdrop-blur-md transition-all duration-300">
+      {/* Sticky Navigation Bar - Royal Mandala Glass */}
+      <header className="sticky top-0 z-40 w-full border-b border-amber-500/20 bg-[#0E0207]/85 backdrop-blur-md transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
           {/* Logo */}
           <a href="#" className="flex items-center gap-2 group">
-            <img src={logoImg} alt="Nexosia Logo" className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105" />
+            <img src={logoImg} alt="Nexosia Logo" className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_0_12px_rgba(245,158,11,0.3)]" />
           </a>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-            <a href="#features" className="hover:text-cyan-accent-dark transition-colors duration-200">Superpowers</a>
-            <a href="#demo" className="hover:text-cyan-accent-dark transition-colors duration-200">Live Simulator</a>
-            <a href="#about" className="hover:text-cyan-accent-dark transition-colors duration-200">About Story</a>
-            <a href="#roi-calculator" className="hover:text-cyan-accent-dark transition-colors duration-200">ROI Calculator</a>
-            <a href="#pricing" className="hover:text-cyan-accent-dark transition-colors duration-200">Pricing</a>
-            <a href="#faq" className="hover:text-cyan-accent-dark transition-colors duration-200">FAQ</a>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-amber-100/80">
+            <a href="#features" className="hover:text-amber-300 transition-colors duration-200">Superpowers</a>
+            <a href="#demo" className="hover:text-amber-300 transition-colors duration-200">Live Simulator</a>
+            <a href="#about" className="hover:text-amber-300 transition-colors duration-200">About Story</a>
+            <a href="#roi-calculator" className="hover:text-amber-300 transition-colors duration-200">ROI Calculator</a>
+            <a href="#pricing" className="hover:text-amber-300 transition-colors duration-200">Pricing</a>
+            <a href="#faq" className="hover:text-amber-300 transition-colors duration-200">FAQ</a>
           </nav>
 
           {/* Action Buttons */}
           <div className="hidden md:flex items-center gap-4">
             <button 
               onClick={() => setIsLoginModalOpen(true)}
-              className="text-slate-600 hover:text-midnight text-sm font-bold transition-colors duration-200 px-4 py-2"
+              className="text-amber-200/80 hover:text-amber-300 text-sm font-bold transition-colors duration-200 px-4 py-2"
             >
               Login
             </button>
             <button 
               onClick={() => openWizard('demo')}
-              className="bg-cyan-accent hover:bg-cyan-accent-dark text-white text-sm font-bold px-6 py-2.5 rounded-full transition-all duration-300 shadow-lg shadow-cyan-accent/20 hover:shadow-cyan-accent/40 hover:-translate-y-0.5 cyan-glow-button cursor-pointer"
+              className="bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-slate-950 text-sm font-black px-6 py-2.5 rounded-full transition-all duration-300 shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:-translate-y-0.5 gold-glow-button cursor-pointer"
             >
               Get a Free Demo
             </button>
@@ -2286,7 +2286,7 @@ function App() {
           {/* Mobile Menu Toggle */}
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-slate-600 hover:text-midnight focus:outline-none"
+            className="md:hidden text-amber-300 hover:text-amber-100 focus:outline-none"
             aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -2295,25 +2295,25 @@ function App() {
 
         {/* Mobile Dropdown Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-white border-b border-slate-200 absolute top-16 left-0 w-full p-6 shadow-xl space-y-4 animate-in fade-in slide-in-from-top-5 duration-250">
-            <nav className="flex flex-col gap-4 text-base font-semibold text-slate-700">
-              <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">Superpowers</a>
-              <a href="#demo" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">Live Simulator</a>
-              <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">About Story</a>
-              <a href="#roi-calculator" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">ROI Calculator</a>
-              <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">Pricing</a>
-              <a href="#faq" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-cyan-accent py-2 border-b border-slate-100">FAQ</a>
+          <div className="md:hidden bg-[#140309] border-b border-amber-500/25 absolute top-16 left-0 w-full p-6 shadow-2xl space-y-4 animate-in fade-in slide-in-from-top-5 duration-250">
+            <nav className="flex flex-col gap-4 text-base font-semibold text-amber-100/90">
+              <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-amber-300 py-2 border-b border-amber-900/30">Superpowers</a>
+              <a href="#demo" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-amber-300 py-2 border-b border-amber-900/30">Live Simulator</a>
+              <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-amber-300 py-2 border-b border-amber-900/30">About Story</a>
+              <a href="#roi-calculator" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-amber-300 py-2 border-b border-amber-900/30">ROI Calculator</a>
+              <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-amber-300 py-2 border-b border-amber-900/30">Pricing</a>
+              <a href="#faq" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-amber-300 py-2 border-b border-amber-900/30">FAQ</a>
             </nav>
             <div className="flex flex-col gap-3 pt-4">
               <button 
                 onClick={() => { setIsMobileMenuOpen(false); setIsLoginModalOpen(true); }}
-                className="w-full text-center text-slate-600 hover:text-midnight py-2 font-bold"
+                className="w-full text-center text-amber-200 hover:text-amber-100 py-2 font-bold"
               >
                 Login
               </button>
               <button 
                 onClick={() => { setIsMobileMenuOpen(false); openWizard('demo'); }}
-                className="w-full bg-cyan-accent hover:bg-cyan-accent-dark text-white text-center font-bold py-3 rounded-xl transition-all duration-300"
+                className="w-full bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-slate-950 text-center font-black py-3 rounded-xl transition-all duration-300 shadow-lg shadow-amber-500/25"
               >
                 Get a Free Demo
               </button>
@@ -2322,52 +2322,54 @@ function App() {
         )}
       </header>
 
-      {/* Hero Section */}
-      <section className="relative pt-12 pb-24 md:py-32 overflow-hidden bg-gradient-to-b from-slate-100 via-white to-slate-50">
+      {/* Hero Section - Royal Golden Mandala Theme */}
+      <section className="relative pt-12 pb-24 md:py-32 overflow-hidden mandala-hero-bg text-[#FEF3C7]">
         
-        {/* Background Grid */}
-        <div className="absolute inset-0 opacity-30 pointer-events-none" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, #CBD5E1 1px, transparent 0)',
-          backgroundSize: '32px 32px'
-        }}></div>
+        {/* Ambient Golden Rotating Mandalas in Background */}
+        <div className="absolute -top-24 -right-24 md:-top-32 md:-right-32 w-[480px] md:w-[650px] h-[480px] md:h-[650px] pointer-events-none opacity-20">
+          <MandalaOrnament className="w-full h-full" opacity={0.35} />
+        </div>
+        <div className="absolute -bottom-32 -left-32 w-[420px] md:w-[550px] h-[420px] md:h-[550px] pointer-events-none opacity-15">
+          <MandalaOrnament className="w-full h-full" opacity={0.25} reverse={true} />
+        </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
             
             {/* Left Column */}
             <div className="lg:col-span-7 flex flex-col items-start text-left space-y-8">
               
-              <div className="inline-flex items-center gap-2 bg-cyan-500/10 backdrop-blur-sm border border-cyan-500/30 rounded-full px-4 py-1.5 text-xs sm:text-sm font-bold text-cyan-accent-dark">
-                <span className="w-2 h-2 rounded-full bg-cyan-accent animate-ping"></span>
-                <span>Stop losing customers while you sleep 😴 • 24/7 WhatsApp AI Bots</span>
+              <div className="inline-flex items-center gap-2 bg-amber-500/10 backdrop-blur-md border border-amber-500/30 rounded-full px-4 py-1.5 text-xs sm:text-sm font-bold text-amber-300">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                <span>Stop losing clients while you sleep 😴 • 24/7 WhatsApp AI Assistant</span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-midnight font-heading tracking-tight leading-tight">
-                Get an Aesthetic Website + <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-accent via-blue-500 to-indigo-600">Smart WhatsApp Bot</span> in 48 Hours. 🚀
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-heading tracking-tight leading-tight text-white">
+                Get an Aesthetic Website + <span className="text-gold-gradient">Smart WhatsApp Bot</span> in 48 Hours. 🚀
               </h1>
 
-              <p className="text-lg sm:text-xl text-slate-600 max-w-2xl font-normal leading-relaxed">
-                Hey! Are you still booking appointments on WhatsApp manually or missing clients after hours? Nexosia builds your custom website with a 24/7 WhatsApp assistant that books clients in 30 seconds. No corporate jargon. No BS.
+              <p className="text-lg sm:text-xl text-amber-100/80 max-w-2xl font-normal leading-relaxed">
+                Hey! Are you still booking appointments on WhatsApp manually or missing clients after hours? Nexosia crafts your luxury website with a 24/7 WhatsApp assistant that books clients in 30 seconds.
               </p>
 
               {/* ⚡ Interactive AI Demo Generator Command Bar */}
-              <div className="w-full bg-gradient-to-r from-slate-900 via-midnight to-slate-950 p-6 sm:p-7 rounded-3xl text-white shadow-2xl border border-cyan-500/30 relative overflow-hidden text-left space-y-4">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-accent/10 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="w-full bg-[#120308]/90 p-6 sm:p-7 rounded-3xl text-white shadow-2xl border border-amber-500/30 relative overflow-hidden text-left space-y-4 backdrop-blur-xl">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-900/40 pb-3">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-accent animate-ping"></span>
-                    <span className="text-xs font-bold text-cyan-accent tracking-wider uppercase font-mono">Nexosia AI Generator v2.5</span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+                    <span className="text-xs font-bold text-amber-400 tracking-wider uppercase font-mono">Nexosia AI Generator v2.5</span>
                   </div>
                   <button 
                     onClick={() => {
                       setAiModalStep(1);
                       setIsAiModalOpen(true);
                     }}
-                    className="text-[11px] font-bold text-slate-300 hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
+                    className="text-[11px] font-bold text-amber-200/80 hover:text-amber-100 flex items-center gap-1 cursor-pointer transition-colors"
                   >
                     <span>💬 Step-by-Step AI Guide</span>
-                    <ArrowRight className="h-3.5 w-3.5 text-cyan-accent" />
+                    <ArrowRight className="h-3.5 w-3.5 text-amber-400" />
                   </button>
                 </div>
 
@@ -2375,7 +2377,7 @@ function App() {
                   <h3 className="text-lg sm:text-xl font-extrabold text-white font-heading leading-tight">
                     Generate Your AI Website Demo in 5 Seconds
                   </h3>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-amber-200/70 mt-1">
                     Enter your business details below or select a niche preset to test your visual website & WhatsApp booking bot instantly!
                   </p>
                 </div>
@@ -2389,27 +2391,27 @@ function App() {
                   className="flex flex-col sm:flex-row gap-2 pt-1"
                 >
                   <div className="relative flex-grow">
-                    <Sparkles className="h-4 w-4 text-cyan-accent absolute left-3.5 top-3.5" />
+                    <Sparkles className="h-4 w-4 text-amber-400 absolute left-3.5 top-3.5" />
                     <input 
-                      type="text"
+                      type="text" 
                       placeholder="e.g. Dr. Verma Dental Care, Jaipur, Root Canal ₹1500, Consultation ₹500..."
                       value={aiPromptInput}
                       onChange={(e) => setAiPromptInput(e.target.value)}
-                      className="w-full bg-slate-950/80 border border-slate-700/80 rounded-2xl pl-10 pr-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent transition-all"
+                      className="w-full bg-[#080104]/80 border border-amber-500/30 rounded-2xl pl-10 pr-4 py-3 text-xs text-amber-50 placeholder-amber-200/40 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
                     />
                   </div>
                   <button 
                     type="submit"
-                    className="bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 font-extrabold text-xs px-6 py-3 rounded-2xl transition-all shadow-lg shadow-cyan-accent/20 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap hover:scale-102 active:scale-98"
+                    className="bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs px-6 py-3 rounded-2xl transition-all shadow-lg shadow-amber-500/25 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap hover:scale-102 active:scale-98"
                   >
                     <span>⚡ Generate Demo</span>
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-4 w-4 text-slate-950" />
                   </button>
                 </form>
 
                 {/* Quick Presets Row */}
                 <div className="pt-2">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Or Choose a Business Niche Preset:</span>
+                  <span className="text-[10px] font-bold text-amber-300/70 uppercase tracking-wider block mb-2">Or Choose a Business Niche Preset:</span>
                   <div className="flex flex-wrap gap-2">
                     {[
                       { key: 'clinic', icon: '🏥', label: 'Dental / Clinic' },
@@ -2426,7 +2428,7 @@ function App() {
                           const preset = nichePresets[item.key];
                           if (preset) startAiGenerationSequence(preset);
                         }}
-                        className="bg-slate-800/80 hover:bg-slate-700/90 text-slate-200 hover:text-white border border-slate-700 rounded-xl px-3 py-1.5 text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-cyan-400/50"
+                        className="bg-[#1C050E]/90 hover:bg-[#2A0815] text-amber-100 hover:text-amber-300 border border-amber-500/25 rounded-xl px-3 py-1.5 text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-amber-400/50"
                       >
                         <span>{item.icon}</span>
                         <span>{item.label}</span>
@@ -2440,126 +2442,102 @@ function App() {
               <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
                 <button 
                   onClick={() => openWizard('trial')}
-                  className="bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs py-3.5 px-6 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer border border-slate-700 hover:scale-102"
+                  className="bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs py-3.5 px-6 rounded-2xl transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer hover:scale-102"
                 >
                   <span>🚀 Start 14-Day Free Setup Trial</span>
-                  <ArrowRight className="h-4 w-4 text-cyan-accent" />
+                  <ArrowRight className="h-4 w-4 text-slate-950" />
                 </button>
                 <a 
                   href="#custom-inquiry"
-                  className="bg-cyan-accent/10 hover:bg-cyan-accent/20 border border-cyan-500/40 text-cyan-accent-dark font-extrabold text-xs py-3.5 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/40 text-amber-300 font-extrabold text-xs py-3.5 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <MessageSquare className="h-4 w-4 fill-cyan-accent text-cyan-accent" />
+                  <MessageSquare className="h-4 w-4 fill-amber-400 text-amber-400" />
                   <span>Custom Requirements Form ↓</span>
                 </a>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-200/80 w-full">
-                <div className="flex items-center gap-2 text-slate-600 text-sm">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-amber-900/40 w-full">
+                <div className="flex items-center gap-2 text-amber-200/80 text-sm">
+                  <CheckCircle2 className="h-5 w-5 text-amber-400 flex-shrink-0" />
                   <span>No credit card required for trial</span>
                 </div>
-                <div className="flex items-center gap-2 text-slate-600 text-sm">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0" />
+                <div className="flex items-center gap-2 text-amber-200/80 text-sm">
+                  <CheckCircle2 className="h-5 w-5 text-amber-400 flex-shrink-0" />
                   <span>Setup ready in 3-5 business days</span>
                 </div>
               </div>
 
             </div>
 
-            {/* Right Column */}
+            {/* Right Column - Aesthetic Mockups & Floating Badges */}
             <div className="lg:col-span-5 relative flex justify-center">
-              <div className="absolute w-72 h-72 rounded-full bg-cyan-accent/20 blur-3xl -top-10 -right-10 pointer-events-none"></div>
-              <div className="absolute w-72 h-72 rounded-full bg-slate-300/30 blur-3xl -bottom-10 -left-10 pointer-events-none"></div>
+              <div className="absolute w-80 h-80 rounded-full bg-amber-500/15 blur-3xl -top-10 -right-10 pointer-events-none"></div>
+              <div className="absolute w-80 h-80 rounded-full bg-red-500/15 blur-3xl -bottom-10 -left-10 pointer-events-none"></div>
 
               {/* Side-by-side Layout Wrapper with Float Animation */}
               <div className="flex items-end gap-4 max-w-full relative animate-float">
                 
                 {/* Mockup 1: Mobile Web Interface */}
-                <div className="relative w-48 sm:w-56 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col select-none -rotate-2 hover:rotate-0 hover:scale-105 transition-all duration-500 z-10">
-                  <div className="bg-slate-100 px-3 py-2 flex items-center gap-1.5 border-b border-slate-200">
-                    <div className="w-2.5 h-2.5 rounded-full bg-rose-400"></div>
-                    <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
-                    <div className="bg-white text-[9px] text-slate-400 rounded px-2 py-0.5 ml-2 truncate w-full flex-grow text-center">
+                <div className="relative w-48 sm:w-56 bg-[#16050C] rounded-2xl shadow-2xl border border-amber-500/30 overflow-hidden flex flex-col select-none -rotate-2 hover:rotate-0 hover:scale-105 transition-all duration-500 z-10">
+                  <div className="bg-[#0D0206] px-3 py-2 flex items-center gap-1.5 border-b border-amber-900/40">
+                    <div className="w-2.5 h-2.5 rounded-full bg-rose-500"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                    <div className="bg-[#1C050E] text-[9px] text-amber-300/70 rounded px-2 py-0.5 ml-2 truncate w-full flex-grow text-center">
                       apexhealth.com
                     </div>
                   </div>
                   <div className="p-4 space-y-4">
-                    <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
-                      <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-white text-[10px] font-bold">A</div>
-                      <span className="font-bold text-[10px] text-midnight font-heading">Apex Health</span>
+                    <div className="flex items-center gap-2 border-b border-amber-900/30 pb-2">
+                      <div className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center text-slate-950 text-[10px] font-black">A</div>
+                      <span className="font-bold text-[10px] text-amber-200 font-heading">Apex Health</span>
                     </div>
-                    <div className="h-20 bg-indigo-50 rounded-lg flex items-center justify-center p-2 relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-tr from-indigo-100 to-cyan-50"></div>
-                      <span className="text-[10px] text-indigo-700 font-bold text-center z-10">Modern Clinic Website</span>
+                    <div className="h-20 bg-gradient-to-br from-amber-950/40 to-[#120308] border border-amber-500/20 rounded-lg flex items-center justify-center p-2 relative overflow-hidden">
+                      <span className="text-[10px] text-amber-300 font-bold text-center z-10">Modern Clinic Website</span>
                     </div>
                     <div className="space-y-1.5">
-                      <div className="h-2 w-3/4 bg-slate-200 rounded"></div>
-                      <div className="h-1.5 w-full bg-slate-100 rounded"></div>
+                      <div className="h-2 w-3/4 bg-amber-900/40 rounded"></div>
+                      <div className="h-1.5 w-full bg-amber-950/40 rounded"></div>
                     </div>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      <div className="p-2 border border-slate-100 rounded-lg flex flex-col items-center">
-                        <span className="text-[8px] font-bold text-slate-700">Consultation</span>
-                        <span className="text-[6px] text-slate-400">30 Mins</span>
-                      </div>
-                      <div className="p-2 border border-slate-100 rounded-lg flex flex-col items-center">
-                        <span className="text-[8px] font-bold text-slate-700">Dental Care</span>
-                        <span className="text-[6px] text-slate-400">45 Mins</span>
+                    <div className="pt-2">
+                      <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg p-2 flex items-center justify-center gap-1.5 text-[9px] font-bold shadow-sm">
+                        <MessageSquare className="h-3 w-3" />
+                        <span>Book on WhatsApp</span>
                       </div>
                     </div>
-                    <button 
-                      onClick={() => {
-                        setSimTab('widget');
-                        const target = document.getElementById('demo');
-                        if (target) target.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="w-full bg-[#25d366] hover:bg-[#128c7e] text-white text-[10px] font-extrabold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
-                    >
-                      <MessageSquare className="h-3 w-3 fill-white" />
-                      Book via WhatsApp
-                    </button>
                   </div>
                 </div>
 
-                {/* Mockup 2: WhatsApp Chat */}
-                <div className="relative w-52 sm:w-60 bg-[#e5ddd5] rounded-3xl shadow-2xl border border-slate-300 overflow-hidden flex flex-col h-[320px] sm:h-[360px] rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-500">
-                  <div className="bg-[#075e54] text-white px-3 py-2 pt-4 pb-2.5 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[#075e54] font-bold text-[10px]">A</div>
-                      <div>
-                        <h4 className="text-[10px] font-bold leading-tight">Apex Health Bot</h4>
-                        <span className="text-[7px] opacity-80 block">Online</span>
+                {/* Mockup 2: WhatsApp Chat Interface */}
+                <div className="relative w-52 sm:w-60 bg-[#0e1614] rounded-2xl shadow-2xl border border-amber-500/40 overflow-hidden flex flex-col select-none rotate-2 hover:rotate-0 hover:scale-105 transition-all duration-500 z-20">
+                  <div className="bg-[#075e54] text-white p-3 flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs">🤖</div>
+                    <div className="flex-grow min-w-0">
+                      <div className="text-[11px] font-bold truncate">Apex Bot Assistant</div>
+                      <div className="text-[8px] text-emerald-200 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Online
                       </div>
                     </div>
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
                   </div>
-                  <div className="flex-grow p-2.5 space-y-2 overflow-y-auto flex flex-col justify-end">
-                    <div className="bg-[#dcf8c6] text-slate-800 text-[9px] rounded-lg p-1.5 max-w-[85%] self-end shadow-sm">
-                      Hi, I want to book a dentist appointment.
+                  <div className="p-3 space-y-2.5 bg-[#0b141a] text-[10px] flex-grow">
+                    <div className="bg-[#202c33] text-slate-200 p-2.5 rounded-xl rounded-tl-none shadow-sm max-w-[88%] border border-slate-700/40">
+                      Namaste! 🙏 Welcome to Apex Health. Would you like to book a consultation today?
                     </div>
-                    <div className="bg-white text-slate-800 text-[9px] rounded-lg p-1.5 max-w-[85%] self-start shadow-sm leading-normal">
-                      Hello! Welcome to Apex Health. I can schedule your visit. Which day would you prefer?
+                    <div className="bg-[#005c4b] text-white p-2.5 rounded-xl rounded-tr-none shadow-sm max-w-[88%] ml-auto">
+                      Yes please, tomorrow at 5 PM.
                     </div>
-                    <div className="bg-[#dcf8c6] text-slate-800 text-[9px] rounded-lg p-1.5 max-w-[85%] self-end shadow-sm">
-                      July 6 (Monday)
-                    </div>
-                    <div className="bg-white text-slate-800 text-[9px] rounded-lg p-1.5 max-w-[85%] self-start shadow-sm leading-normal border-l-4 border-emerald-500">
-                      🎉 **Booking Confirmed!**
-                      <br />
-                      📅 **Date:** Monday, July 6
-                      <br />
-                      ⏰ **Time:** 10:00 AM
+                    <div className="bg-[#202c33] text-slate-200 p-2.5 rounded-xl rounded-tl-none shadow-sm max-w-[88%] border border-slate-700/40">
+                      ✅ Slot locked for 5:00 PM! Reminder sent to your calendar.
                     </div>
                   </div>
-                  <div className="bg-[#f0f0f0] p-1.5 flex items-center border-t border-slate-200">
-                    <div className="bg-white rounded-full flex-grow px-2 py-0.5 text-[8px] text-slate-400 truncate">
-                      Type message...
-                    </div>
-                    <div className="ml-1.5 w-5 h-5 rounded-full bg-[#075e54] flex items-center justify-center text-white">
-                      <Check className="h-3 w-3" />
-                    </div>
-                  </div>
+                </div>
+
+                {/* Floating Aesthetic Badges */}
+                <div className="absolute -top-4 -left-4 bg-[#140308]/90 backdrop-blur-md border border-amber-500/40 px-3 py-1.5 rounded-xl shadow-xl flex items-center gap-1.5 text-[11px] font-bold text-amber-300 z-30">
+                  <span>⚡ 0.8s WhatsApp Sync</span>
+                </div>
+                <div className="absolute -bottom-4 -right-2 bg-[#140308]/90 backdrop-blur-md border border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-xl flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 z-30">
+                  <span>📈 3.4x More Bookings</span>
                 </div>
 
               </div>
@@ -2568,53 +2546,54 @@ function App() {
 
           </div>
         </div>
-
       </section>
 
       {/* ========================================================================= */}
-      {/* 📋 SECTION 02: DEDICATED CUSTOM WEBSITE & WHATSAPP FORM */}
-      {/* ========================================================================= */}
-      <section id="custom-inquiry" className="py-20 bg-gradient-to-b from-white via-slate-50 to-slate-100 border-b border-slate-200">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-10">
+      <section id="custom-inquiry" className="py-20 bg-[#0E0207] border-y border-amber-900/40 relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] pointer-events-none opacity-10">
+          <MandalaOrnament className="w-full h-full" opacity={0.2} />
+        </div>
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-10 relative z-10">
           
           <div className="max-w-2xl mx-auto space-y-3">
-            <span className="inline-flex items-center gap-1.5 bg-cyan-500/10 border border-cyan-500/30 text-cyan-accent text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">
-              <MessageSquare className="h-4 w-4 fill-cyan-accent" />
+            <span className="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">
+              <MessageSquare className="h-4 w-4 fill-amber-400" />
               Direct Founder Connection
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-midnight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-white tracking-tight">
               Have Custom Business Requirements?
             </h2>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Fill in your details below. We'll build your custom website & WhatsApp bot layout and connect with you directly on WhatsApp at <strong className="text-midnight">+91 7860716837</strong>!
+            <p className="text-sm text-amber-200/70 leading-relaxed">
+              Fill in your details below. We'll build your custom website & WhatsApp bot layout and connect with you directly on WhatsApp at <strong className="text-amber-400">+91 7860716837</strong>!
             </p>
           </div>
 
           {/* Premium Glassmorphic Lead Generation Form Card */}
-          <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-slate-200 text-left relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-accent/5 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="glass-gold-card rounded-3xl p-8 sm:p-10 shadow-2xl text-left relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
             <form onSubmit={handleTopFormSubmit} className="space-y-6 font-sans relative z-10">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">Your Name *</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-amber-300/80">Your Name *</label>
                   <input 
                     type="text" 
                     placeholder="e.g. Dr. Ramesh Sharma / Anita Verma"
                     value={topFormData.name}
                     onChange={(e) => setTopFormData({...topFormData, name: e.target.value})}
-                    className="w-full border border-slate-200 bg-slate-50/70 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white transition-all text-slate-800 shadow-sm"
+                    className="w-full border border-amber-500/25 bg-[#080104]/80 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-amber-400 focus:bg-[#0D0206] transition-all text-amber-50 placeholder-amber-200/30 shadow-sm"
                     required
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">Business Name *</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-amber-300/80">Business Name *</label>
                   <input 
                     type="text" 
                     placeholder="e.g. Apex Health Clinic / Vibe Salon & Spa"
                     value={topFormData.businessName}
                     onChange={(e) => setTopFormData({...topFormData, businessName: e.target.value})}
-                    className="w-full border border-slate-200 bg-slate-50/70 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white transition-all text-slate-800 shadow-sm"
+                    className="w-full border border-amber-500/25 bg-[#080104]/80 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-amber-400 focus:bg-[#0D0206] transition-all text-amber-50 placeholder-amber-200/30 shadow-sm"
                     required
                   />
                 </div>
@@ -2622,48 +2601,48 @@ function App() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">WhatsApp Phone Number *</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-amber-300/80">WhatsApp Phone Number *</label>
                   <input 
                     type="tel" 
                     placeholder="e.g. 7860716837"
                     value={topFormData.phone}
                     onChange={(e) => setTopFormData({...topFormData, phone: e.target.value})}
-                    className="w-full border border-slate-200 bg-slate-50/70 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white transition-all text-slate-800 shadow-sm"
+                    className="w-full border border-amber-500/25 bg-[#080104]/80 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-amber-400 focus:bg-[#0D0206] transition-all text-amber-50 placeholder-amber-200/30 shadow-sm"
                     required
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">Current Website / Instagram (Optional)</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-amber-300/80">Current Website / Instagram (Optional)</label>
                   <input 
                     type="text" 
                     placeholder="e.g. www.apexclinic.com / @vibesalon"
                     value={topFormData.website}
                     onChange={(e) => setTopFormData({...topFormData, website: e.target.value})}
-                    className="w-full border border-slate-200 bg-slate-50/70 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white transition-all text-slate-800 shadow-sm"
+                    className="w-full border border-amber-500/25 bg-[#080104]/80 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-amber-400 focus:bg-[#0D0206] transition-all text-amber-50 placeholder-amber-200/30 shadow-sm"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">Describe Your Goals & Specific Requirements</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-amber-300/80">Describe Your Goals & Specific Requirements</label>
                 <textarea 
                   placeholder="e.g. I run a 4-chair dental clinic in Lucknow. I want an automated WhatsApp chatbot that books appointments, sends Google Review links after treatment, and links with my clinic calendar..."
                   value={topFormData.message}
                   onChange={(e) => setTopFormData({...topFormData, message: e.target.value})}
-                  className="w-full border border-slate-200 bg-slate-50/70 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white transition-all h-24 resize-none text-slate-800 shadow-sm"
+                  className="w-full border border-amber-500/25 bg-[#080104]/80 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-amber-400 focus:bg-[#0D0206] transition-all h-24 resize-none text-amber-50 placeholder-amber-200/30 shadow-sm"
                 />
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-100">
-                <div className="text-xs text-slate-500 flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                  <span>Direct submission to founder WhatsApp: <strong>+91 7860716837</strong></span>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-amber-900/30">
+                <div className="text-xs text-amber-200/70 flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-amber-400 shrink-0" />
+                  <span>Direct submission to founder WhatsApp: <strong className="text-amber-400">+91 7860716837</strong></span>
                 </div>
 
                 <button 
                   type="submit"
                   disabled={isSubmittingTopForm}
-                  className="w-full sm:w-auto bg-[#25d366] hover:bg-[#128c7e] text-white font-extrabold text-sm py-4 px-8 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/20 hover:scale-102 active:scale-98"
+                  className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-sm py-4 px-8 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/20 hover:scale-102 active:scale-98"
                 >
                   {isSubmittingTopForm ? (
                     <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
@@ -2677,140 +2656,108 @@ function App() {
               </div>
             </form>
           </div>
-
         </div>
       </section>
 
-      {/* Social Proof Section */}
-      <section className="bg-slate-100 py-10 border-y border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-xs sm:text-sm font-semibold tracking-wider text-slate-500 uppercase mb-8">
-            Trusted by 500+ local clinics, salons, and retail businesses globally
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-10 md:gap-16 opacity-60">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold font-heading text-xs">M</div>
-              <span className="font-extrabold text-slate-805 text-sm font-heading tracking-tight">MedCare Clinic</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-slate-800 text-white flex items-center justify-center font-bold font-heading text-xs">U</div>
-              <span className="font-extrabold text-slate-805 text-sm font-heading tracking-tight">UrbanStyle</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold font-heading text-xs">P</div>
-              <span className="font-extrabold text-slate-805 text-sm font-heading tracking-tight">PetHaven</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-md bg-slate-800 text-white flex items-center justify-center font-bold font-heading text-xs">B</div>
-              <span className="font-extrabold text-slate-805 text-sm font-heading tracking-tight">BrightDent</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold font-heading text-xs">G</div>
-              <span className="font-extrabold text-slate-805 text-sm font-heading tracking-tight">GreenGrocer</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-            {/* Features Grid - Modern Bento Grid */}
-      <section id="features" className="py-24 md:py-32 bg-slate-950 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Features Grid - Royal Mandala Bento Grid */}
+      <section id="features" className="py-24 md:py-32 bg-[#0A0205] text-[#FEF3C7] relative overflow-hidden border-t border-amber-900/30">
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-red-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-bold uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold uppercase tracking-wider">
               <span>⚡ Superpowers for your business</span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-black font-heading tracking-tight text-white">
-              Everything Your Business Needs to <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Dominate Locally</span>
+              Everything Your Business Needs to <span className="text-gold-gradient">Dominate Locally</span>
             </h2>
-            <p className="text-slate-400 text-base sm:text-lg">
-              No bloated software, no endless setup. Just clean automation that fills your appointment book on autopilot.
+            <p className="text-amber-100/70 text-base sm:text-lg">
+              No bloated software, no endless setup. Just clean royal automation that fills your appointment book on autopilot.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             {/* Bento Card 1 - Main Feature */}
-            <div className="md:col-span-2 bg-slate-900/70 border border-slate-800 hover:border-cyan-500/50 rounded-3xl p-8 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/10 flex flex-col justify-between group">
+            <div className="md:col-span-2 bento-gold rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between group">
               <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-lg shadow-amber-500/10">
                   <Phone className="h-6 w-6" />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-xs font-bold text-cyan-400 uppercase tracking-widest">Instant WhatsApp Capture</span>
+                  <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">Instant WhatsApp Capture</span>
                   <h3 className="text-2xl font-bold font-heading text-white">Web-to-WhatsApp Direct Pipeline</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed max-w-xl">
+                  <p className="text-amber-200/70 text-sm leading-relaxed max-w-xl">
                     Every visitor gets a warm, one-click WhatsApp prompt. Their inquiry lands directly inside your phone with zero forms, zero friction, and instant response capability.
                   </p>
                 </div>
               </div>
               <div className="mt-8 flex flex-wrap items-center gap-3">
-                <span className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-xs font-medium text-cyan-300">⚡ 0.8s Response Time</span>
-                <span className="px-3 py-1 bg-slate-800/80 border border-slate-700 rounded-full text-xs font-medium text-slate-300">📈 +340% Conversions</span>
-                <span className="px-3 py-1 bg-slate-800/80 border border-slate-700 rounded-full text-xs font-medium text-slate-300">💬 Zero App Downloads</span>
+                <span className="px-3 py-1 bg-amber-500/15 border border-amber-500/30 rounded-full text-xs font-medium text-amber-300">⚡ 0.8s Response Time</span>
+                <span className="px-3 py-1 bg-[#1A040C] border border-amber-900/40 rounded-full text-xs font-medium text-amber-200/70">📈 +340% Conversions</span>
+                <span className="px-3 py-1 bg-[#1A040C] border border-amber-900/40 rounded-full text-xs font-medium text-amber-200/70">💬 Zero App Downloads</span>
               </div>
             </div>
 
             {/* Bento Card 2 */}
-            <div className="bg-slate-900/70 border border-slate-800 hover:border-emerald-500/50 rounded-3xl p-8 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 flex flex-col justify-between group">
+            <div className="bento-gold rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between group">
               <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
                   <Calendar className="h-6 w-6" />
                 </div>
                 <div className="space-y-2">
                   <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">24/7 Smart Booking</span>
                   <h3 className="text-xl font-bold font-heading text-white">Zero Double Bookings</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">
+                  <p className="text-amber-200/70 text-sm leading-relaxed">
                     AI checks available slots in real time, locks appointments, and sends instant confirmation to both you and the client.
                   </p>
                 </div>
               </div>
-              <div className="mt-6 pt-6 border-t border-slate-800/80 flex items-center justify-between text-xs text-emerald-400 font-bold">
+              <div className="mt-6 pt-6 border-t border-amber-900/40 flex items-center justify-between text-xs text-emerald-400 font-bold">
                 <span>Google Calendar Sync</span>
                 <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
 
             {/* Bento Card 3 */}
-            <div className="bg-slate-900/70 border border-slate-800 hover:border-amber-500/50 rounded-3xl p-8 transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/10 flex flex-col justify-between group">
+            <div className="bento-gold rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between group">
               <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
                   <Star className="h-6 w-6" />
                 </div>
                 <div className="space-y-2">
                   <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">Reputation Booster</span>
                   <h3 className="text-xl font-bold font-heading text-white">5-Star Review Engine</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">
+                  <p className="text-amber-200/70 text-sm leading-relaxed">
                     Automatically checks in with clients 2 hours post-visit. Satisfied clients are nudged straight to your Google Maps review page.
                   </p>
                 </div>
               </div>
-              <div className="mt-6 pt-6 border-t border-slate-800/80 flex items-center justify-between text-xs text-amber-400 font-bold">
+              <div className="mt-6 pt-6 border-t border-amber-900/40 flex items-center justify-between text-xs text-amber-400 font-bold">
                 <span>Rank #1 on Google Maps</span>
                 <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
 
             {/* Bento Card 4 */}
-            <div className="md:col-span-2 bg-slate-900/70 border border-slate-800 hover:border-cyan-500/50 rounded-3xl p-8 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/10 flex flex-col justify-between group">
+            <div className="md:col-span-2 bento-gold rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between group">
               <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
                   <Zap className="h-6 w-6" />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">Zero Setup Headache</span>
+                  <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">Zero Setup Headache</span>
                   <h3 className="text-2xl font-bold font-heading text-white">We Build & Manage Everything For You</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed max-w-xl">
+                  <p className="text-amber-200/70 text-sm leading-relaxed max-w-xl">
                     You don't touch a single line of code. Our team sets up your custom website, connects your WhatsApp, trains the assistant on your services, and goes live in under 48 hours.
                   </p>
                 </div>
               </div>
-              <div className="mt-6 pt-6 border-t border-slate-800/80 flex items-center justify-between">
-                <span className="text-xs text-slate-400">Need adjustments later? Text us anytime on WhatsApp.</span>
-                <a href="https://wa.me/917860716837?text=Hi%20Devesh!%20I%20want%20to%20learn%20more%20about%20Nexosia." target="_blank" rel="noreferrer" className="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
+              <div className="mt-6 pt-6 border-t border-amber-900/40 flex items-center justify-between">
+                <span className="text-xs text-amber-200/60">Need adjustments later? Text us anytime on WhatsApp.</span>
+                <a href="https://wa.me/917860716837?text=Hi%20Devesh!%20I%20want%20to%20learn%20more%20about%20Nexosia." target="_blank" rel="noreferrer" className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1">
                   Chat With Us <ArrowRight className="h-4 w-4" />
                 </a>
               </div>
@@ -2822,7 +2769,7 @@ function App() {
       </section>
 
       {/* Advanced Feature: Comparison Table */}
-      <section id="compare" className="py-24 md:py-32 bg-slate-55 border-t border-b border-slate-200">
+      <section id="compare" className="py-24 md:py-32 bg-[#0E0207] border-t border-b border-amber-900/40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
@@ -2835,22 +2782,22 @@ function App() {
             </p>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+          <div className="glass-gold-card rounded-3xl shadow-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-900 text-white text-xs uppercase tracking-wider font-bold">
+                  <tr className="bg-[#1C050E] text-amber-300 text-xs uppercase tracking-wider font-bold border-b border-amber-500/30">
                     <th className="p-6">Feature / Metric</th>
-                    <th className="p-6 text-cyan-electric">🚀 Nexosia</th>
+                    <th className="p-6 text-amber-400 font-extrabold">🚀 Nexosia (Royal)</th>
                     <th className="p-6 opacity-80">Traditional Agency</th>
                     <th className="p-6 opacity-80">DIY Builders (Wix/WPS)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200 text-sm">
+                <tbody className="divide-y divide-amber-900/30 text-sm text-amber-100">
                   {COMPARISON_ROWS.map((row, idx) => (
                     <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                       <td className="p-6 font-bold text-midnight">{row.feature}</td>
-                      <td className="p-6 bg-cyan-accent/5 font-semibold text-cyan-accent-dark">{row.nexosia}</td>
+                      <td className="p-6 bg-amber-500/10 font-bold text-amber-300">{row.nexosia}</td>
                       <td className="p-6 text-slate-505">{row.agency}</td>
                       <td className="p-6 text-slate-505">{row.diy}</td>
                     </tr>
@@ -2864,30 +2811,30 @@ function App() {
       </section>
 
       {/* Interactive Showcase & Chat Simulator */}
-      <section id="demo" className="py-24 bg-white">
+      <section id="demo" className="py-24 bg-[#0A0205] relative overflow-hidden border-b border-amber-900/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
             
             {/* Left Content column */}
             <div className="lg:col-span-6 text-left space-y-6">
-              <div className="inline-flex items-center gap-1.5 bg-cyan-accent/10 border border-cyan-accent/20 rounded-full px-3.5 py-1.5 text-xs font-bold text-cyan-accent-dark">
+              <div className="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full px-3.5 py-1.5 text-xs font-bold text-amber-300">
                 <MessageSquare className="h-3.5 w-3.5" />
                 <span>Interactive Live Demo Simulator</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-midnight font-heading tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-heading tracking-tight">
                 Experience the Entire Booking & Feedback Ecosystem
               </h2>
-              <p className="text-slate-600 text-base leading-relaxed">
+              <p className="text-amber-100/70 text-base leading-relaxed">
                 Click the tabs below to toggle between different modules of the system. Test how visitors transition from browsing to booking, and finally giving a 5-star Google review.
               </p>
 
               {/* Selector Tabs */}
-              <div className="flex flex-col sm:flex-row gap-2.5 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+              <div className="flex flex-col sm:flex-row gap-2.5 p-1.5 bg-[#140309] rounded-2xl border border-amber-500/25">
                 <button 
                   onClick={() => setSimTab('widget')}
                   className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                    simTab === 'widget' ? 'bg-white text-midnight shadow-md border-b-2 border-cyan-accent' : 'text-slate-500 hover:text-slate-808'
+                    simTab === 'widget' ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black shadow-lg shadow-amber-500/20' : 'text-amber-200/70 hover:text-amber-100'
                   }`}
                 >
                   <Globe className="h-4 w-4" />
@@ -2896,7 +2843,7 @@ function App() {
                 <button 
                   onClick={() => setSimTab('bot')}
                   className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                    simTab === 'bot' ? 'bg-white text-midnight shadow-md border-b-2 border-cyan-accent' : 'text-slate-500 hover:text-slate-808'
+                    simTab === 'bot' ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black shadow-lg shadow-amber-500/20' : 'text-amber-200/70 hover:text-amber-100'
                   }`}
                 >
                   <MessageCircle className="h-4 w-4" />
@@ -2905,7 +2852,7 @@ function App() {
                 <button 
                   onClick={() => setSimTab('reviews')}
                   className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                    simTab === 'reviews' ? 'bg-white text-midnight shadow-md border-b-2 border-cyan-accent' : 'text-slate-500 hover:text-slate-808'
+                    simTab === 'reviews' ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black shadow-lg shadow-amber-500/20' : 'text-amber-200/70 hover:text-amber-100'
                   }`}
                 >
                   <Star className="h-4 w-4" />
@@ -2914,7 +2861,7 @@ function App() {
               </div>
 
               {/* Tab Description Cards */}
-              <div className="bg-slate-100/50 rounded-2xl p-6 border border-slate-200">
+              <div className="glass-gold-card rounded-2xl p-6">
                 {simTab === 'widget' && (
                   <div className="space-y-2 text-sm">
                     <h4 className="font-extrabold text-midnight">Step 1: The Clean Web Trigger</h4>
@@ -3165,7 +3112,7 @@ function App() {
       </section>
 
       {/* Interactive ROI Calculator */}
-      <section id="roi-calculator" className="py-24 md:py-32 bg-slate-900 text-white relative overflow-hidden border-t border-slate-800">
+      <section id="roi-calculator" className="py-24 md:py-32 bg-[#0E0207] text-white relative overflow-hidden border-t border-amber-900/40">
         <div className="absolute w-[500px] h-[500px] rounded-full bg-cyan-accent/10 blur-3xl -top-20 -left-20 pointer-events-none"></div>
         <div className="absolute w-[500px] h-[500px] rounded-full bg-indigo-500/5 blur-3xl -bottom-20 -right-20 pointer-events-none"></div>
 
@@ -3444,7 +3391,7 @@ function App() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-24 md:py-32 bg-slate-55 relative overflow-hidden">
+      <section id="how-it-works" className="py-24 md:py-32 bg-[#0A0205] text-[#FEF3C7] relative overflow-hidden border-t border-amber-900/30">
         <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
           backgroundImage: 'radial-gradient(circle at 1px 1px, #0F172A 1px, transparent 0)',
           backgroundSize: '40px 40px'
@@ -3532,7 +3479,7 @@ function App() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-24 md:py-32 bg-white">
+      <section id="pricing" className="py-24 md:py-32 bg-[#0E0207] text-[#FEF3C7] border-t border-amber-900/40 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
@@ -3908,7 +3855,7 @@ function App() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="py-24 md:py-32 bg-white border-t border-slate-200">
+      <section id="faq" className="py-24 md:py-32 bg-[#0A0205] text-[#FEF3C7] border-t border-amber-900/40 relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center mb-16 space-y-4">
