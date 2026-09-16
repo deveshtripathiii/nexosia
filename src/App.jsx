@@ -134,6 +134,30 @@ function App() {
   const [currency, setCurrency] = useState('INR'); // 'INR' or 'USD'
   const [billingPeriod, setBillingPeriod] = useState('monthly'); // 'monthly' or 'yearly'
   
+  // --- Interactive AI Demo Generator States ---
+  const [aiPromptInput, setAiPromptInput] = useState('');
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [aiModalStep, setAiModalStep] = useState(1);
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [aiGenStatusText, setAiGenStatusText] = useState('');
+  const [aiGenProgress, setAiGenProgress] = useState(0);
+
+  const [aiModalData, setAiModalData] = useState({
+    businessName: '',
+    businessType: 'clinic',
+    city: '',
+    phone: '',
+    openTime: '09:00',
+    closeTime: '20:00',
+    services: [
+      { name: '', price: '' },
+      { name: '', price: '' },
+      { name: '', price: '' },
+      { name: '', price: '' }
+    ],
+    themeColor: 'blue'
+  });
+
   // Top WhatsApp Form state
   const [topFormData, setTopFormData] = useState({
     name: '',
@@ -626,6 +650,185 @@ function App() {
     });
   };
 
+  // --- AI Demo Generator Helpers & Presets ---
+  const nichePresets = {
+    clinic: {
+      businessName: 'Apex Healthcare & Dental Clinic',
+      businessType: 'clinic',
+      city: 'Jaipur',
+      openTime: '09:00',
+      closeTime: '20:00',
+      themeColor: 'blue',
+      services: [
+        { name: 'Doctor Consultation', price: '₹500' },
+        { name: 'Root Canal Treatment', price: '₹2,500' },
+        { name: 'Teeth Whitening & Scaling', price: '₹1,200' },
+        { name: 'Digital X-Ray & Diagnostics', price: '₹800' }
+      ]
+    },
+    salon: {
+      businessName: 'Aura Luxury Salon & Spa',
+      businessType: 'salon',
+      city: 'Delhi NCR',
+      openTime: '10:00',
+      closeTime: '21:00',
+      themeColor: 'rose',
+      services: [
+        { name: 'Designer Haircut & Styling', price: '₹600' },
+        { name: 'Keratin & Hair Botox', price: '₹3,500' },
+        { name: 'Hydra-Facial & Glow Therapy', price: '₹1,800' },
+        { name: 'Gel Nails & Manicure', price: '₹999' }
+      ]
+    },
+    gym: {
+      businessName: 'IronFit 24/7 Fitness Studio',
+      businessType: 'gym',
+      city: 'Mumbai',
+      openTime: '06:00',
+      closeTime: '23:00',
+      themeColor: 'orange',
+      services: [
+        { name: 'Monthly Gym Membership', price: '₹1,999' },
+        { name: 'Personal Trainer Package', price: '₹5,000' },
+        { name: 'HIIT & Crossfit Group Class', price: '₹2,500' },
+        { name: 'Diet & Nutrition Consultation', price: '₹1,200' }
+      ]
+    },
+    cafe: {
+      businessName: 'Urban Brew Cafe & Kitchen',
+      businessType: 'cafe',
+      city: 'Bangalore',
+      openTime: '08:30',
+      closeTime: '23:00',
+      themeColor: 'orange',
+      services: [
+        { name: 'Artisan Pour-Over Coffee', price: '₹240' },
+        { name: 'Wood-Fired Pizza Slice', price: '₹390' },
+        { name: 'Table Reservation Slot', price: 'Free' },
+        { name: 'Custom Party Catering Box', price: '₹2,499' }
+      ]
+    },
+    ca: {
+      businessName: 'TaxPro Legal & Business Advisory',
+      businessType: 'professional',
+      city: 'Pune',
+      openTime: '09:30',
+      closeTime: '19:00',
+      themeColor: 'purple',
+      services: [
+        { name: 'GST Filing & Audit Consultation', price: '₹1,500' },
+        { name: 'Company Registration (Pvt Ltd)', price: '₹7,999' },
+        { name: 'Income Tax Return (ITR)', price: '₹999' },
+        { name: 'Trademark & IP Filing', price: '₹4,500' }
+      ]
+    },
+    store: {
+      businessName: 'Royal Elegance Boutique & Store',
+      businessType: 'store',
+      city: 'Chandigarh',
+      openTime: '10:30',
+      closeTime: '21:30',
+      themeColor: 'emerald',
+      services: [
+        { name: 'Custom Tailoring & Fitting', price: '₹1,200' },
+        { name: 'Pre-Order Catalog Booking', price: 'Free' },
+        { name: 'VIP Home Trial Delivery', price: '₹250' },
+        { name: 'Personal Style Consultation', price: '₹800' }
+      ]
+    }
+  };
+
+  const startAiGenerationSequence = async (demoPayload) => {
+    setIsAiGenerating(true);
+    setIsAiModalOpen(false);
+    setAiGenProgress(15);
+    setAiGenStatusText('⚡ Initializing Nexosia Neural Design Core...');
+
+    try {
+      // Save lead to Firestore backup
+      await addDoc(collection(db, 'leads'), {
+        name: demoPayload.businessName,
+        businessName: demoPayload.businessName,
+        phone: demoPayload.phone || 'AI Generated Demo',
+        businessType: demoPayload.businessType || 'clinic',
+        city: demoPayload.city || 'India',
+        source: 'ai_demo_generator',
+        status: 'Demo Generated',
+        createdAt: serverTimestamp()
+      });
+    } catch (err) {
+      console.warn("Firestore logging (offline fallback active)", err);
+    }
+
+    setTimeout(() => {
+      setAiGenProgress(45);
+      setAiGenStatusText(`🔍 Analyzing business niche: "${demoPayload.businessName}"...`);
+    }, 700);
+
+    setTimeout(() => {
+      setAiGenProgress(75);
+      setAiGenStatusText('🎨 Synthesizing responsive UI components & branding palette...');
+    }, 1400);
+
+    setTimeout(() => {
+      setAiGenProgress(95);
+      setAiGenStatusText('💬 Initializing 24/7 WhatsApp AI booking simulator...');
+    }, 2100);
+
+    setTimeout(() => {
+      setIsAiGenerating(false);
+      setActiveDemoData(demoPayload);
+      setPage('demo');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 2800);
+  };
+
+  const handleQuickAiGenerate = (customPrompt) => {
+    const text = (customPrompt || aiPromptInput).trim();
+    if (!text) {
+      setIsAiModalOpen(true);
+      return;
+    }
+
+    const lower = text.toLowerCase();
+    let detectedType = 'clinic';
+    let themeColor = 'blue';
+
+    if (lower.includes('salon') || lower.includes('spa') || lower.includes('hair') || lower.includes('beauty') || lower.includes('parlour')) {
+      detectedType = 'salon';
+      themeColor = 'rose';
+    } else if (lower.includes('gym') || lower.includes('fitness') || lower.includes('workout') || lower.includes('crossfit')) {
+      detectedType = 'gym';
+      themeColor = 'orange';
+    } else if (lower.includes('cafe') || lower.includes('coffee') || lower.includes('restaurant') || lower.includes('food') || lower.includes('bakery')) {
+      detectedType = 'cafe';
+      themeColor = 'orange';
+    } else if (lower.includes('ca') || lower.includes('tax') || lower.includes('legal') || lower.includes('advocate') || lower.includes('law')) {
+      detectedType = 'professional';
+      themeColor = 'purple';
+    } else if (lower.includes('shop') || lower.includes('store') || lower.includes('boutique') || lower.includes('retail')) {
+      detectedType = 'store';
+      themeColor = 'emerald';
+    }
+
+    const words = text.split(/[,\n•-]+/).map(w => w.trim()).filter(Boolean);
+    const bName = words[0] || (detectedType === 'clinic' ? 'Apex Health Clinic' : 'Modern Business Studio');
+
+    const defaultPreset = nichePresets[detectedType] || nichePresets.clinic;
+    const demoPayload = {
+      businessName: bName,
+      businessType: detectedType,
+      city: words[1] || 'Metro City',
+      openTime: '09:00',
+      closeTime: '20:00',
+      themeColor: themeColor,
+      services: defaultPreset.services,
+      headaches: ['after_hours', 'manual_calls']
+    };
+
+    startAiGenerationSequence(demoPayload);
+  };
+
   const handleTopFormSubmit = async (e) => {
     e.preventDefault();
     if (!topFormData.name || !topFormData.phone || !topFormData.businessName) {
@@ -656,7 +859,7 @@ function App() {
       `🌐 *Current Website:* ${topFormData.website || 'None'}\n` +
       `📝 *Goals/Requirements:* ${topFormData.message || 'None'}`;
 
-    const whatsappUrl = `https://wa.me/919506873107?text=${encodeURIComponent(messageText)}`;
+    const whatsappUrl = `https://wa.me/917860716837?text=${encodeURIComponent(messageText)}`;
     window.open(whatsappUrl, '_blank');
     
     // Reset
@@ -855,21 +1058,41 @@ function App() {
         {/* Dynamic Header */}
         <header className="sticky top-0 z-40 bg-white/95 border-b border-slate-200 shadow-sm backdrop-blur-md">
           
-          {/* Top Banner Alert showing it is a simulator demo */}
-          <div className="bg-gradient-to-r from-cyan-accent to-cyan-accent-dark text-slate-950 px-4 py-2 text-center text-xs font-extrabold flex justify-center items-center gap-2">
-            <Sparkles className="h-4 w-4 animate-bounce" />
-            <span>AI ENGINE GENERATED SITE PREVIEW FOR: "{activeDemoData?.businessName || 'Your Business'}"</span>
-            <button 
-              onClick={() => {
-                // Clear state, remove URL params and reload home
-                window.history.pushState(null, '', window.location.pathname);
-                setActiveDemoData(null);
-                setPage('landing');
-              }}
-              className="underline text-[10px] ml-4 hover:text-white cursor-pointer"
-            >
-              Back to Nexosia Home
-            </button>
+          {/* Top Banner Alert showing it is an interactive AI simulator demo */}
+          <div className="bg-gradient-to-r from-cyan-accent to-cyan-accent-dark text-slate-950 px-4 py-2.5 text-center text-xs font-extrabold flex flex-wrap justify-between items-center gap-3 shadow-md">
+            <div className="flex items-center gap-2 mx-auto sm:mx-0">
+              <Sparkles className="h-4 w-4 animate-bounce text-slate-950" />
+              <span>✨ LIVE AI DEMO PREVIEW: "{activeDemoData?.businessName || 'Your Business'}" (Visual Only)</span>
+            </div>
+            
+            <div className="flex items-center gap-2 mx-auto sm:mx-0">
+              <a 
+                href="tel:+917860716837"
+                className="bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1 transition-all shadow-sm"
+              >
+                <Phone className="h-3 w-3 text-cyan-accent" />
+                <span>Call: 7860716837</span>
+              </a>
+              <a 
+                href={`https://wa.me/917860716837?text=${encodeURIComponent(`Hi Devesh! I just tested the AI demo website for "${activeDemoData?.businessName || 'My Business'}" on Nexosia. I am interested in launching it live. Please share pricing & next steps!`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#25d366] hover:bg-[#128c7e] text-white text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1 transition-all shadow-sm"
+              >
+                <MessageSquare className="h-3 w-3 fill-white" />
+                <span>WhatsApp to Launch</span>
+              </a>
+              <button 
+                onClick={() => {
+                  window.history.pushState(null, '', window.location.pathname);
+                  setActiveDemoData(null);
+                  setPage('landing');
+                }}
+                className="bg-black/20 hover:bg-black/40 text-slate-950 hover:text-white px-2.5 py-1 rounded-full text-[10px] cursor-pointer transition-colors"
+              >
+                Back to Home ✕
+              </button>
+            </div>
           </div>
 
           <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -993,27 +1216,59 @@ function App() {
               </div>
             </section>
 
-            {/* CTA/Pitch for Nexosia */}
-            <section className="bg-slate-900 text-white py-16 text-center relative overflow-hidden">
-              <div className="absolute w-72 h-72 rounded-full bg-cyan-accent/5 blur-3xl -top-10 -right-10 pointer-events-none"></div>
-              <div className="max-w-4xl mx-auto px-4 space-y-6">
-                <h3 className="text-2xl font-extrabold font-heading text-white">Like this automated website template?</h3>
-                <p className="text-slate-400 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
-                  This custom site and WhatsApp bot scheduler were generated automatically by Nexosia's AI engine. You can connect your own phone number and launch this page for real in 3 days!
+            {/* High-Converting Launch CTA on Demo Website */}
+            <section className="bg-gradient-to-b from-slate-900 to-slate-950 text-white py-16 sm:py-20 text-center relative overflow-hidden border-t border-slate-800">
+              <div className="absolute w-96 h-96 rounded-full bg-cyan-accent/10 blur-3xl -top-20 -right-20 pointer-events-none"></div>
+              <div className="absolute w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl -bottom-20 -left-20 pointer-events-none"></div>
+
+              <div className="max-w-4xl mx-auto px-4 space-y-7 relative z-10">
+                <span className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 text-cyan-accent text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">
+                  <Sparkles className="h-4 w-4" />
+                  Visual Demo Generated by Nexosia AI
+                </span>
+
+                <h3 className="text-3xl sm:text-4xl font-extrabold font-heading text-white tracking-tight">
+                  Interested in Launching This Website for <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-accent to-cyan-accent-dark">"{activeDemoData?.businessName || 'Your Business'}"</span>?
+                </h3>
+                
+                <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+                  We will link your custom .com domain, configure your real WhatsApp booking automation, and go live within 48 hours. Let's talk directly with our founder!
                 </p>
-                <div className="pt-2">
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                  <a 
+                    href="tel:+917860716837"
+                    className="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-sm py-4 px-8 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg border border-slate-700 hover:border-slate-500 cursor-pointer"
+                  >
+                    <Phone className="h-4.5 w-4.5 text-cyan-accent" />
+                    <span>Call Founder: +91 7860716837</span>
+                  </a>
+
+                  <a 
+                    href={`https://wa.me/917860716837?text=${encodeURIComponent(`Hi Devesh! I tested the AI demo website for "${activeDemoData?.businessName || 'My Business'}" on Nexosia. I would like to discuss launching it live. Let's connect!`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto bg-[#25d366] hover:bg-[#128c7e] text-white font-extrabold text-sm py-4 px-8 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/20 cursor-pointer"
+                  >
+                    <MessageSquare className="h-4.5 w-4.5 fill-white text-white" />
+                    <span>Message on WhatsApp (7860716837)</span>
+                  </a>
+
                   <button 
                     onClick={() => {
                       window.history.pushState(null, '', window.location.pathname);
                       setActiveDemoData(null);
                       setPage('landing');
                     }}
-                    className="bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 hover:text-white font-extrabold text-xs px-8 py-3.5 rounded-full transition-all cursor-pointer inline-flex items-center gap-1 shadow-lg shadow-cyan-accent/15"
+                    className="w-full sm:w-auto text-slate-400 hover:text-white font-bold text-xs py-3 px-5 transition-colors cursor-pointer"
                   >
-                    <ArrowLeft className="h-4 w-4" />
-                    Back to Nexosia Home
+                    ← Back to Nexosia
                   </button>
                 </div>
+
+                <p className="text-[11px] text-slate-500 pt-2">
+                  ✅ 14-Day Money-Back Guarantee • Full WhatsApp Support • Zero Hidden Charges
+                </p>
               </div>
             </section>
 
@@ -2083,6 +2338,92 @@ function App() {
                 Get a premium website and an automated booking system that works 24/7. Built specifically for independent clinics, local stores, and salons. Let customers book appointments in under 30 seconds.
               </p>
 
+              {/* ⚡ Interactive AI Demo Generator Command Bar */}
+              <div className="w-full bg-gradient-to-r from-slate-900 via-midnight to-slate-950 p-6 sm:p-7 rounded-3xl text-white shadow-2xl border border-cyan-500/30 relative overflow-hidden text-left space-y-4">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-accent/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-accent animate-ping"></span>
+                    <span className="text-xs font-bold text-cyan-accent tracking-wider uppercase font-mono">Nexosia AI Generator v2.5</span>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setAiModalStep(1);
+                      setIsAiModalOpen(true);
+                    }}
+                    className="text-[11px] font-bold text-slate-300 hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <span>💬 Step-by-Step AI Guide</span>
+                    <ArrowRight className="h-3.5 w-3.5 text-cyan-accent" />
+                  </button>
+                </div>
+
+                <div>
+                  <h3 className="text-lg sm:text-xl font-extrabold text-white font-heading leading-tight">
+                    Generate Your AI Website Demo in 5 Seconds
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Enter your business details below or select a niche preset to test your visual website & WhatsApp booking bot instantly!
+                  </p>
+                </div>
+
+                {/* AI Prompt Input Bar */}
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleQuickAiGenerate(aiPromptInput);
+                  }}
+                  className="flex flex-col sm:flex-row gap-2 pt-1"
+                >
+                  <div className="relative flex-grow">
+                    <Sparkles className="h-4 w-4 text-cyan-accent absolute left-3.5 top-3.5" />
+                    <input 
+                      type="text"
+                      placeholder="e.g. Dr. Verma Dental Care, Jaipur, Root Canal ₹1500, Consultation ₹500..."
+                      value={aiPromptInput}
+                      onChange={(e) => setAiPromptInput(e.target.value)}
+                      className="w-full bg-slate-950/80 border border-slate-700/80 rounded-2xl pl-10 pr-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-accent focus:ring-1 focus:ring-cyan-accent transition-all"
+                    />
+                  </div>
+                  <button 
+                    type="submit"
+                    className="bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 font-extrabold text-xs px-6 py-3 rounded-2xl transition-all shadow-lg shadow-cyan-accent/20 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap hover:scale-102 active:scale-98"
+                  >
+                    <span>⚡ Generate Demo</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </form>
+
+                {/* Quick Presets Row */}
+                <div className="pt-2">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Or Choose a Business Niche Preset:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { key: 'clinic', icon: '🏥', label: 'Dental / Clinic' },
+                      { key: 'salon', icon: '💇‍♀️', label: 'Salon & Spa' },
+                      { key: 'gym', icon: '🏋️', label: 'Gym & Fitness' },
+                      { key: 'cafe', icon: '☕', label: 'Cafe & Dining' },
+                      { key: 'ca', icon: '🏢', label: 'CA & Legal' },
+                      { key: 'store', icon: '🛍️', label: 'Retail Store' }
+                    ].map((item) => (
+                      <button
+                        key={item.key}
+                        type="button"
+                        onClick={() => {
+                          const preset = nichePresets[item.key];
+                          if (preset) startAiGenerationSequence(preset);
+                        }}
+                        className="bg-slate-800/80 hover:bg-slate-700/90 text-slate-200 hover:text-white border border-slate-700 rounded-xl px-3 py-1.5 text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer hover:border-cyan-400/50"
+                      >
+                        <span>{item.icon}</span>
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               {/* Premium Mobile-Smooth Glassmorphic Lead Generation Form */}
               <div className="w-full bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4 animate-in fade-in duration-300 text-left">
                 <div>
@@ -2126,7 +2467,7 @@ function App() {
                       <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">WhatsApp Number *</label>
                       <input 
                         type="tel" 
-                        placeholder="e.g. 9506873107"
+                        placeholder="e.g. 7860716837"
                         value={topFormData.phone}
                         onChange={(e) => setTopFormData({...topFormData, phone: e.target.value})}
                         className="w-full border border-slate-200 bg-slate-50/50 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-cyan-accent focus:bg-white transition-all text-slate-800"
@@ -3777,6 +4118,299 @@ function App() {
               </div>
             )}
 
+          </div>
+        </div>
+      )}
+
+      {/* 🤖 Interactive AI Website Generator Modal */}
+      {isAiModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 font-sans">
+          <div className="bg-slate-900 border border-slate-800 text-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200 text-left space-y-6">
+            
+            <button 
+              onClick={() => setIsAiModalOpen(false)}
+              className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {/* Stepper Header */}
+            <div className="space-y-1">
+              <span className="bg-cyan-500/10 text-cyan-accent text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                🤖 AI Website Generator Assistant
+              </span>
+              <h3 className="text-xl sm:text-2xl font-bold font-heading text-white mt-1">
+                {aiModalStep === 1 && "1. Tell us about your business"}
+                {aiModalStep === 2 && "2. Configure services & pricing"}
+                {aiModalStep === 3 && "3. Working hours & brand vibe"}
+              </h3>
+              <p className="text-xs text-slate-400">
+                Our AI will synthesize your inputs and launch a live interactive visual website demo in seconds.
+              </p>
+            </div>
+
+            {/* Step 1: Basic Business Details */}
+            {aiModalStep === 1 && (
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Business Name *</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. Dr. Verma Dental Hospital"
+                    value={aiModalData.businessName}
+                    onChange={(e) => setAiModalData({...aiModalData, businessName: e.target.value})}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Business Category / Niche</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { key: 'clinic', label: '🏥 Clinic' },
+                      { key: 'salon', label: '💇‍♀️ Salon' },
+                      { key: 'gym', label: '🏋️ Gym' },
+                      { key: 'cafe', label: '☕ Cafe' },
+                      { key: 'ca', label: '🏢 CA/Law' },
+                      { key: 'store', label: '🛍️ Retail' }
+                    ].map((item) => (
+                      <button
+                        key={item.key}
+                        type="button"
+                        onClick={() => {
+                          const preset = nichePresets[item.key];
+                          setAiModalData(prev => ({
+                            ...prev,
+                            businessType: item.key,
+                            services: preset ? preset.services : prev.services,
+                            themeColor: preset ? preset.themeColor : prev.themeColor
+                          }));
+                        }}
+                        className={`p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center ${
+                          aiModalData.businessType === item.key 
+                            ? 'border-cyan-accent bg-cyan-accent/10 text-cyan-accent' 
+                            : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:border-slate-700'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">City / Location</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Jaipur, Rajasthan"
+                      value={aiModalData.city}
+                      onChange={(e) => setAiModalData({...aiModalData, city: e.target.value})}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">WhatsApp Number</label>
+                    <input 
+                      type="tel" 
+                      placeholder="e.g. 7860716837"
+                      value={aiModalData.phone}
+                      onChange={(e) => setAiModalData({...aiModalData, phone: e.target.value})}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-3 flex justify-end">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (!aiModalData.businessName.trim()) {
+                        alert("Please enter your business name.");
+                        return;
+                      }
+                      setAiModalStep(2);
+                    }}
+                    className="bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 font-extrabold text-xs px-6 py-3 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+                  >
+                    <span>Next: Services & Rates</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Custom Services */}
+            {aiModalStep === 2 && (
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Your Core Services & Pricing</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const preset = nichePresets[aiModalData.businessType] || nichePresets.clinic;
+                        setAiModalData(prev => ({ ...prev, services: preset.services }));
+                      }}
+                      className="text-[10px] text-cyan-accent hover:underline font-bold"
+                    >
+                      ⚡ Auto-fill for {aiModalData.businessType}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-slate-500">Edit or enter the services you want customers to book via WhatsApp:</p>
+                </div>
+
+                <div className="space-y-2.5">
+                  {aiModalData.services.map((svc, idx) => (
+                    <div key={idx} className="grid grid-cols-12 gap-2">
+                      <input 
+                        type="text" 
+                        placeholder={`Service ${idx + 1} Name`}
+                        value={svc.name}
+                        onChange={(e) => {
+                          const updated = [...aiModalData.services];
+                          updated[idx] = { ...svc, name: e.target.value };
+                          setAiModalData({...aiModalData, services: updated});
+                        }}
+                        className="col-span-8 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="Price (e.g. ₹500)"
+                        value={svc.price}
+                        onChange={(e) => {
+                          const updated = [...aiModalData.services];
+                          updated[idx] = { ...svc, price: e.target.value };
+                          setAiModalData({...aiModalData, services: updated});
+                        }}
+                        className="col-span-4 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-3 flex justify-between">
+                  <button 
+                    type="button"
+                    onClick={() => setAiModalStep(1)}
+                    className="text-xs text-slate-400 hover:text-white font-bold cursor-pointer"
+                  >
+                    ← Back
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setAiModalStep(3)}
+                    className="bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 font-extrabold text-xs px-6 py-3 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+                  >
+                    <span>Next: Brand Theme & Hours</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Timings & Theme */}
+            {aiModalStep === 3 && (
+              <div className="space-y-5 animate-in fade-in duration-200">
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Accent Color Theme</label>
+                  <div className="flex gap-3">
+                    {[
+                      { id: 'blue', color: 'bg-indigo-600', name: 'Indigo' },
+                      { id: 'emerald', color: 'bg-emerald-600', name: 'Emerald' },
+                      { id: 'purple', color: 'bg-violet-600', name: 'Purple' },
+                      { id: 'rose', color: 'bg-rose-600', name: 'Rose' },
+                      { id: 'orange', color: 'bg-amber-600', name: 'Orange' }
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setAiModalData({...aiModalData, themeColor: item.id})}
+                        className={`w-9 h-9 rounded-2xl ${item.color} relative cursor-pointer flex items-center justify-center transition-transform hover:scale-105`}
+                        title={item.name}
+                      >
+                        {aiModalData.themeColor === item.id && (
+                          <Check className="h-4 w-4 text-white" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Opening Time</label>
+                    <input 
+                      type="time" 
+                      value={aiModalData.openTime}
+                      onChange={(e) => setAiModalData({...aiModalData, openTime: e.target.value})}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Closing Time</label>
+                    <input 
+                      type="time" 
+                      value={aiModalData.closeTime}
+                      onChange={(e) => setAiModalData({...aiModalData, closeTime: e.target.value})}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-accent"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-3 flex justify-between items-center">
+                  <button 
+                    type="button"
+                    onClick={() => setAiModalStep(2)}
+                    className="text-xs text-slate-400 hover:text-white font-bold cursor-pointer"
+                  >
+                    ← Back
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => startAiGenerationSequence(aiModalData)}
+                    className="bg-gradient-to-r from-cyan-accent to-cyan-accent-dark text-slate-950 font-extrabold text-xs px-7 py-3.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-cyan-accent/20 hover:scale-102 active:scale-98"
+                  >
+                    <Sparkles className="h-4 w-4 text-slate-950" />
+                    <span>⚡ Compile & Launch Live Demo</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
+
+      {/* 🚀 AI Live Generation Compilation Screen Overlay */}
+      {isAiGenerating && (
+        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-lg flex items-center justify-center p-4 animate-in fade-in duration-200 font-sans">
+          <div className="bg-slate-900 border border-cyan-500/30 rounded-3xl max-w-md w-full p-8 text-center shadow-2xl space-y-6 relative overflow-hidden">
+            <div className="absolute -top-20 -right-20 w-48 h-48 bg-cyan-accent/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div className="relative">
+              <div className="w-16 h-16 rounded-3xl bg-cyan-accent/10 border border-cyan-500/40 flex items-center justify-center mx-auto shadow-lg shadow-cyan-accent/10 animate-bounce">
+                <Sparkles className="h-8 w-8 text-cyan-accent" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-xl font-extrabold font-heading text-white">Nexosia AI Generator Active</h3>
+              <p className="text-xs text-cyan-accent font-mono animate-pulse">{aiGenStatusText}</p>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
+              <div 
+                className="bg-gradient-to-r from-cyan-accent to-indigo-500 h-full transition-all duration-500 rounded-full"
+                style={{ width: `${aiGenProgress}%` }}
+              ></div>
+            </div>
+
+            <p className="text-[10px] text-slate-500">
+              Synthesizing layouts, service catalog, calendar slots, and WhatsApp bot simulator...
+            </p>
           </div>
         </div>
       )}
