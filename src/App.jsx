@@ -2871,11 +2871,11 @@ function App() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-cyan-accent font-heading">Smart Comparison</h2>
-            <p className="text-3xl sm:text-4xl font-extrabold text-midnight font-heading tracking-tight">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400 font-heading">Smart Comparison</h2>
+            <p className="text-3xl sm:text-4xl font-extrabold text-white font-heading tracking-tight">
               Why Local Businesses Choose Nexosia
             </p>
-            <p className="text-slate-600">
+            <p className="text-amber-200/70">
               See how we stack up against traditional development agencies and generic DIY website builders.
             </p>
           </div>
@@ -2893,11 +2893,11 @@ function App() {
                 </thead>
                 <tbody className="divide-y divide-amber-900/30 text-sm text-amber-100">
                   {COMPARISON_ROWS.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="p-6 font-bold text-midnight">{row.feature}</td>
+                    <tr key={idx} className="hover:bg-amber-500/5 transition-colors">
+                      <td className="p-6 font-bold text-white">{row.feature}</td>
                       <td className="p-6 bg-amber-500/10 font-bold text-amber-300">{row.nexosia}</td>
-                      <td className="p-6 text-slate-505">{row.agency}</td>
-                      <td className="p-6 text-slate-505">{row.diy}</td>
+                      <td className="p-6 text-amber-100/70">{row.agency}</td>
+                      <td className="p-6 text-amber-100/70">{row.diy}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -2962,8 +2962,8 @@ function App() {
               <div className="glass-gold-card rounded-2xl p-6">
                 {simTab === 'widget' && (
                   <div className="space-y-2 text-sm">
-                    <h4 className="font-extrabold text-midnight">Step 1: The Clean Web Trigger</h4>
-                    <p className="text-slate-500">When visitors land on your website, a floating WhatsApp bubble prompts them to chat. Clicking the button automatically redirects them to WhatsApp with a pre-filled welcome text, achieving zero lead friction.</p>
+                    <h4 className="font-extrabold text-white">Step 1: The Clean Web Trigger</h4>
+                    <p className="text-amber-100/80">When visitors land on your website, a floating WhatsApp bubble prompts them to chat. Clicking the button automatically redirects them to WhatsApp with a pre-filled welcome text, achieving zero lead friction.</p>
                     <button 
                       onClick={() => setSimTab('bot')} 
                       className="mt-3 text-cyan-accent-dark font-bold hover:underline flex items-center gap-1 cursor-pointer"
@@ -2974,14 +2974,14 @@ function App() {
                 )}
                 {simTab === 'bot' && (
                   <div className="space-y-2 text-sm">
-                    <h4 className="font-extrabold text-midnight">Step 2: AI Bot Consultation & Slot Lock</h4>
-                    <p className="text-slate-500">The bot greets them instantly, presents open days and slots directly in WhatsApp, takes their name, books the session, and triggers calendar synching. Try booking an appointment on the simulator phone mockup!</p>
+                    <h4 className="font-extrabold text-white">Step 2: AI Bot Consultation & Slot Lock</h4>
+                    <p className="text-amber-100/80">The bot greets them instantly, presents open days and slots directly in WhatsApp, takes their name, books the session, and triggers calendar synching. Try booking an appointment on the simulator phone mockup!</p>
                   </div>
                 )}
                 {simTab === 'reviews' && (
                   <div className="space-y-2 text-sm">
-                    <h4 className="font-extrabold text-midnight">Step 3: The Google Review Multiplier</h4>
-                    <p className="text-slate-500">After appointments conclude, our script requests feedback via WhatsApp. Happy clients get direct links to write a 5-star Google review. Test it by clicking the rating buttons inside the simulator screen!</p>
+                    <h4 className="font-extrabold text-white">Step 3: The Google Review Multiplier</h4>
+                    <p className="text-amber-100/80">After appointments conclude, our script requests feedback via WhatsApp. Happy clients get direct links to write a 5-star Google review. Test it by clicking the rating buttons inside the simulator screen!</p>
                   </div>
                 )}
               </div>
@@ -3341,22 +3341,22 @@ function App() {
       </section>
 
       {/* Integrations Grid */}
-      <section className="py-16 bg-white border-b border-slate-200">
+      <section className="py-16 bg-[#0E0207] border-y border-amber-900/30">
         <div className="max-w-7xl mx-auto px-4 text-center space-y-8">
           <div className="space-y-2 max-w-2xl mx-auto">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-cyan-accent font-heading">Seamless Ecosystem</h3>
-            <p className="text-xl sm:text-2xl font-extrabold text-midnight font-heading tracking-tight">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-amber-400 font-heading">Seamless Ecosystem</h3>
+            <p className="text-xl sm:text-2xl font-extrabold text-white font-heading tracking-tight">
               Connects Directly to Your Everyday Work Tools
             </p>
           </div>
           
-          <div className="flex flex-wrap justify-center items-center gap-6 max-w-4xl mx-auto">
+          <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 max-w-4xl mx-auto">
             {['Google Calendar', 'Stripe Payments', 'WhatsApp API', 'Apple Calendar', 'Google Business', 'Twilio Sync', 'WordPress', 'Shopify'].map((tool, idx) => (
               <span 
                 key={idx}
-                className="bg-slate-50 border border-slate-200 hover:border-cyan-accent text-slate-600 hover:text-midnight font-semibold text-xs px-4 py-2.5 rounded-full transition-all duration-200 shadow-sm flex items-center gap-2 cursor-default select-none"
+                className="bg-[#140309] border border-amber-500/30 hover:border-amber-400 text-amber-100/90 hover:text-white font-semibold text-xs px-4 py-2.5 rounded-full transition-all duration-200 shadow-sm flex items-center gap-2 cursor-default select-none"
               >
-                <span className="w-1.5 h-1.5 bg-cyan-accent"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50"></span>
                 {tool}
               </span>
             ))}
@@ -3490,72 +3490,74 @@ function App() {
 
       {/* How It Works */}
       <section id="how-it-works" className="py-24 md:py-32 bg-[#0A0205] text-[#FEF3C7] relative overflow-hidden border-t border-amber-900/30">
-        <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, #0F172A 1px, transparent 0)',
-          backgroundSize: '40px 40px'
-        }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] pointer-events-none opacity-10">
+          <MandalaOrnament className="w-full h-full" opacity={0.15} />
+        </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative font-sans">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 font-sans">
           
           <div className="text-center max-w-2xl mx-auto mb-20 space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-cyan-accent font-heading">Frictionless Integration</h2>
-            <p className="text-3xl sm:text-4xl font-extrabold text-midnight font-heading tracking-tight">
-              We Do 100% of the Work. You Get the Bookings.
-            </p>
-            <p className="text-slate-600 text-base">
+            <span className="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3.5 py-1.5 rounded-full text-xs font-bold text-amber-400 uppercase tracking-widest font-mono">
+              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+              Frictionless Integration
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-heading tracking-tight">
+              We Do 100% of the Work. <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500">You Get the Bookings.</span>
+            </h2>
+            <p className="text-amber-200/70 text-sm sm:text-base leading-relaxed">
               Set up your modern website and WhatsApp ecosystem in three simple phases. No coding, no API configuration, and no technical headaches.
             </p>
           </div>
 
           <div className="relative">
-            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-cyan-accent/20 via-cyan-accent to-cyan-accent/20 -translate-y-12"></div>
+            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-500/10 via-amber-400/40 to-amber-500/10 -translate-y-12"></div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 relative">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-10 relative">
               
               {/* Step 1 */}
-              <div className="bg-white border border-slate-200 rounded-3xl p-8 relative flex flex-col justify-between items-center text-center shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="absolute -top-6 bg-slate-900 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg font-heading shadow-md">
+              <div className="bg-[#140309]/95 border border-amber-500/30 rounded-3xl p-8 relative flex flex-col justify-between items-center text-center shadow-2xl backdrop-blur-md hover:border-amber-400/60 transition-all duration-300 group">
+                <div className="absolute -top-6 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 w-12 h-12 rounded-full flex items-center justify-center font-black text-lg font-heading shadow-xl shadow-amber-500/25 group-hover:scale-110 transition-transform">
                   1
                 </div>
                 <div className="space-y-4 pt-4">
-                  <h3 className="text-xl font-bold font-heading text-midnight">We Build Your Premium Site</h3>
-                  <p className="text-sm text-slate-505 leading-relaxed">
+                  <h3 className="text-xl font-bold font-heading text-white">We Build Your Premium Site</h3>
+                  <p className="text-sm text-amber-100/90 leading-relaxed font-normal">
                     Our professional design team codes a blazing fast, SEO-optimized mobile-responsive website tailored to your business, featuring custom images, reviews, and interactive forms.
                   </p>
                 </div>
-                <div className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+                <div className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-3.5 py-1.5 rounded-full">
                   <span>Custom Crafted For You</span>
                 </div>
               </div>
 
               {/* Step 2 */}
-              <div className="bg-white border border-slate-200 rounded-3xl p-8 relative flex flex-col justify-between items-center text-center shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="absolute -top-6 bg-slate-900 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg font-heading shadow-md">
+              <div className="bg-[#140309]/95 border border-amber-500/30 rounded-3xl p-8 relative flex flex-col justify-between items-center text-center shadow-2xl backdrop-blur-md hover:border-amber-400/60 transition-all duration-300 group">
+                <div className="absolute -top-6 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 w-12 h-12 rounded-full flex items-center justify-center font-black text-lg font-heading shadow-xl shadow-amber-500/25 group-hover:scale-110 transition-transform">
                   2
                 </div>
                 <div className="space-y-4 pt-4">
-                  <h3 className="text-xl font-bold font-heading text-midnight">We Connect the WhatsApp AI Bot</h3>
-                  <p className="text-sm text-slate-505 leading-relaxed">
+                  <h3 className="text-xl font-bold font-heading text-white">We Connect the WhatsApp AI Bot</h3>
+                  <p className="text-sm text-amber-100/90 leading-relaxed font-normal">
                     We link your official WhatsApp Business account to our automation bot. The bot is custom configured to answer your customers, confirm times, and save details.
                   </p>
                 </div>
-                <div className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+                <div className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-3.5 py-1.5 rounded-full">
                   <span>Official API Ecosystem</span>
                 </div>
               </div>
 
               {/* Step 3 */}
-              <div className="bg-white border border-slate-200 rounded-3xl p-8 relative flex flex-col justify-between items-center text-center shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="absolute -top-6 bg-slate-900 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg font-heading shadow-md">
+              <div className="bg-[#140309]/95 border border-amber-500/30 rounded-3xl p-8 relative flex flex-col justify-between items-center text-center shadow-2xl backdrop-blur-md hover:border-amber-400/60 transition-all duration-300 group">
+                <div className="absolute -top-6 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 w-12 h-12 rounded-full flex items-center justify-center font-black text-lg font-heading shadow-xl shadow-amber-500/25 group-hover:scale-110 transition-transform">
                   3
                 </div>
                 <div className="space-y-4 pt-4">
-                  <h3 className="text-xl font-bold font-heading text-midnight">You Watch Bookings Roll In</h3>
-                  <p className="text-sm text-slate-505 leading-relaxed">
+                  <h3 className="text-xl font-bold font-heading text-white">You Watch Bookings Roll In</h3>
+                  <p className="text-sm text-amber-100/90 leading-relaxed font-normal">
                     New clients schedule automatically while you sleep. You receive scheduling notifications directly on your phone and dashboard. Watch your business grow.
                   </p>
                 </div>
-                <div className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+                <div className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-3.5 py-1.5 rounded-full">
                   <span>High ROI & Growth</span>
                 </div>
               </div>
@@ -3564,13 +3566,15 @@ function App() {
           </div>
 
           <div className="text-center mt-16">
-            <button 
-              onClick={() => openWizard('trial')}
-              className="bg-midnight hover:bg-slate-800 text-white font-bold text-base px-8 py-3.5 rounded-full transition-all duration-300 shadow-xl inline-flex items-center gap-2 cursor-pointer"
+            <a 
+              href="https://wa.me/917860716837?text=Hi%20Devesh!%20I%20want%20to%20get%20started%20with%20Nexosia.%20Please%20guide%20me%20on%20the%20next%20steps!"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-base px-8 py-4 rounded-full transition-all duration-300 shadow-xl shadow-amber-500/25 inline-flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
             >
-              Get Started Risk Free
-              <ArrowRight className="h-4.5 w-4.5" />
-            </button>
+              <span>Get Started Risk Free</span>
+              <ArrowRight className="h-5 w-5 text-slate-950" />
+            </a>
           </div>
 
         </div>
@@ -4396,18 +4400,18 @@ function App() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 bg-slate-55 border-t border-slate-200">
+      <section className="py-24 bg-[#0A0205] text-[#FEF3C7] border-t border-amber-900/30">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center mb-16 space-y-2">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-cyan-accent font-heading">Success Stories</h2>
-            <p className="text-3xl font-extrabold text-midnight font-heading tracking-tight">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400 font-heading">Success Stories</h2>
+            <p className="text-3xl font-extrabold text-white font-heading tracking-tight">
               Loved by Local Clinics & Stores Globally
             </p>
           </div>
 
-          <div className="bg-white border border-slate-200/80 rounded-3xl p-8 sm:p-12 shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[350px]">
-            <div className="absolute top-6 right-8 text-slate-100 text-8xl font-serif font-bold pointer-events-none select-none">“</div>
+          <div className="bg-[#140309]/95 border border-amber-500/30 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[350px] backdrop-blur-md">
+            <div className="absolute top-6 right-8 text-amber-500/10 text-8xl font-serif font-bold pointer-events-none select-none">“</div>
 
             <div className="space-y-6 text-left">
               <div className="flex gap-1 text-amber-400">
@@ -4415,26 +4419,26 @@ function App() {
                   <Star key={i} className="h-5 w-5 fill-current" />
                 ))}
               </div>
-              <p className="text-lg sm:text-xl text-slate-700 italic font-medium leading-relaxed font-sans">
+              <p className="text-lg sm:text-xl text-amber-100/95 italic font-medium leading-relaxed font-sans">
                 "{TESTIMONIALS[activeTestimonial].quote}"
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t border-slate-100 pt-6 mt-8 gap-4 text-left font-sans">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t border-amber-900/40 pt-6 mt-8 gap-4 text-left font-sans">
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-full bg-slate-950 text-white flex items-center justify-center font-bold text-sm font-heading">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 flex items-center justify-center font-black text-sm font-heading shadow-md">
                   {TESTIMONIALS[activeTestimonial].avatar}
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-midnight font-heading text-sm sm:text-base leading-tight">
+                  <h4 className="font-extrabold text-white font-heading text-sm sm:text-base leading-tight">
                     {TESTIMONIALS[activeTestimonial].name}
                   </h4>
-                  <p className="text-slate-400 text-xs mt-0.5">{TESTIMONIALS[activeTestimonial].role}</p>
+                  <p className="text-amber-300/80 text-xs mt-0.5">{TESTIMONIALS[activeTestimonial].role}</p>
                 </div>
               </div>
 
               <div className="flex items-center justify-between sm:justify-end gap-6">
-                <span className="bg-cyan-accent/10 text-cyan-accent-dark font-extrabold text-[10px] px-3.5 py-1.5 rounded-full uppercase tracking-wider">
+                <span className="bg-amber-500/15 text-amber-300 font-extrabold text-[10px] px-3.5 py-1.5 rounded-full uppercase tracking-wider border border-amber-500/30">
                   {TESTIMONIALS[activeTestimonial].badge}
                 </span>
                 <div className="flex gap-2">
@@ -4443,7 +4447,7 @@ function App() {
                       key={idx}
                       onClick={() => setActiveTestimonial(idx)}
                       className={`w-3 h-3 rounded-full transition-all cursor-pointer ${
-                        activeTestimonial === idx ? 'bg-cyan-accent w-6' : 'bg-slate-200 hover:bg-slate-300'
+                        activeTestimonial === idx ? 'bg-amber-400 w-6' : 'bg-amber-900/50 hover:bg-amber-700/50'
                       }`}
                     ></button>
                   ))}
@@ -4461,11 +4465,11 @@ function App() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-cyan-accent font-heading">Got Questions?</h2>
-            <p className="text-3xl sm:text-4xl font-extrabold text-midnight font-heading tracking-tight">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400 font-heading">Got Questions?</h2>
+            <p className="text-3xl sm:text-4xl font-extrabold text-white font-heading tracking-tight">
               Frequently Asked Questions
             </p>
-            <p className="text-slate-600 text-sm sm:text-base">
+            <p className="text-amber-200/70 text-sm sm:text-base">
               Everything you need to know about our websites, WhatsApp bots, billing, and trial options.
             </p>
           </div>
@@ -4476,17 +4480,17 @@ function App() {
               return (
                 <div 
                   key={idx}
-                  className="bg-white border border-slate-200 rounded-2xl overflow-hidden transition-all duration-300"
+                  className="bg-[#140309]/95 border border-amber-500/30 rounded-2xl overflow-hidden transition-all duration-300 hover:border-amber-400/50 backdrop-blur-md"
                 >
                   <button 
                     onClick={() => setActiveFaq(isOpen ? null : idx)}
-                    className="w-full text-left p-6 flex justify-between items-center gap-4 hover:bg-slate-50 transition-colors"
+                    className="w-full text-left p-6 flex justify-between items-center gap-4 hover:bg-amber-500/5 transition-colors cursor-pointer"
                   >
-                    <span className="font-bold text-midnight text-base sm:text-lg font-heading leading-tight">{faq.question}</span>
-                    {isOpen ? <ChevronDown className="h-5 w-5 text-cyan-accent shrink-0" /> : <ChevronRight className="h-5 w-5 text-slate-400 shrink-0" />}
+                    <span className="font-bold text-white text-base sm:text-lg font-heading leading-tight">{faq.question}</span>
+                    {isOpen ? <ChevronDown className="h-5 w-5 text-amber-400 shrink-0" /> : <ChevronRight className="h-5 w-5 text-amber-400/60 shrink-0" />}
                   </button>
                   {isOpen && (
-                    <div className="px-6 pb-6 pt-1 text-slate-600 text-sm leading-relaxed border-t border-slate-100 animate-in fade-in duration-200">
+                    <div className="px-6 pb-6 pt-1 text-amber-100/90 text-sm leading-relaxed border-t border-amber-900/40 animate-in fade-in duration-200">
                       <p>{faq.answer}</p>
                     </div>
                   )}
