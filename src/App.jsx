@@ -65,24 +65,36 @@ import {
 // FAQ items
 const FAQ_ITEMS = [
   {
-    question: "Do I need to pay anything upfront for the trial?",
-    answer: "No. Our 14-day free trial allows you to see the website and WhatsApp automation system live for your business without paying anything upfront. You only pay after you see the results and decide to go live."
+    question: "What are the website pricing options at Nexosia Tech?",
+    answer: "We offer 4 clear options to suit your business stage: 1) Monthly Website Rental at ₹599/month (₹599 security deposit, ₹250 advance), 2) Yearly Website Rental at ₹5,000/year (₹599 security deposit, saves ₹2,100+), 3) Monthly Rental + Maintenance Pack at ₹748/month (includes 10 minor edits/month), and 4) Permanent Website Purchase at ₹10,000 one-time (full source code handover and IP rights defined in a written agreement)."
   },
   {
-    question: "How long does it take to build my website and connect the bot?",
+    question: "How do advance payments and delivery balances work for rental plans?",
+    answer: "To start your custom design and WhatsApp bot setup, you pay an advance payment of ₹250 (which is included in the initial total). The remaining balance (₹948 for Monthly Rental, or ₹5,349 for Yearly Rental) is payable only after website delivery and agreed admin access."
+  },
+  {
+    question: "What is the ₹599 Security Deposit and how is it handled?",
+    answer: "The ₹599 security deposit is a separate one-time deposit required for rental plans. It is neither a service fee nor a guaranteed unconditional refund. The deposit is held separately from rental fees, and its reconciliation strictly follows the signed agreement and applicable law upon plan termination or conversion."
+  },
+  {
+    question: "What is the Monthly Maintenance Pack (₹149/mo) and what does it include?",
+    answer: "The Maintenance Pack is an optional monthly add-on of ₹149/month (bringing total recurring cost to ₹748/month with rental). It requires explicit customer consent and includes up to 10 minor edit requests per billing month (such as price updates, menu edits, hours changes, or text updates) subject to our fair-use policy. We do not automatically apply monthly Maintenance Pack charges to yearly rental customers; their maintenance arrangement is confirmed separately."
+  },
+  {
+    question: "What basic maintenance is included vs what is charged separately?",
+    answer: "All rental plans include the first month of basic maintenance from website activation (covering server uptime, SSL certificate renewal, core security monitoring, and basic bug fixes). Routine hosting health continues with active renewals. Heavy structural redesigns, adding new modules/pages, or edit requests exceeding the 10 minor edits/month fair-use policy are quoted and charged separately."
+  },
+  {
+    question: "How does the Permanent Website Purchase (₹10,000) work?",
+    answer: "Plan 4 (₹10,000 one-time) is a full purchase arrangement, not a recurring rental plan. The website scope, deliverables, source-code handover, intellectual-property rights, third-party licence exclusions, hosting, domain, future renewals, and maintenance are defined in a written agreement. We do not promise lifetime hosting, domain renewals, or maintenance unless explicitly included in writing. When converting from rental to permanent purchase, prior rental dues or deposit balances are reconciled per the contract."
+  },
+  {
+    question: "Are custom domains and renewals included?",
+    answer: "A default fast subdomain (e.g. yourbusiness.nexosia.app) is included with all rental packages. Custom domain registration (.com, .in, etc.) and annual domain renewals are charged separately unless agreed otherwise in writing."
+  },
+  {
+    question: "How long does it take to build and launch my website?",
     answer: "We deliver your custom, premium website and fully functional WhatsApp booking bot within 3 to 5 business days. We handle everything from copy, design, to technical integrations."
-  },
-  {
-    question: "Do I need my own WhatsApp Business API account?",
-    answer: "We handle the entire setup. We connect your business to the official WhatsApp API ecosystem so you don't have to deal with complex developer configurations. You'll manage everything through a simple dashboard."
-  },
-  {
-    question: "Can I customize the booking bot's questions?",
-    answer: "Absolutely! The bot is completely customizable to match your clinic, salon, or retail store's workflow. We configure it to ask for name, service, date, time, or custom info, and sync it directly with Google Calendar or your existing CRM."
-  },
-  {
-    question: "What happens after the setup? Are there ongoing fees?",
-    answer: "Yes, we charge a low, flat monthly subscription of ₹999 (or $15) to cover secure cloud hosting, WhatsApp server costs, automated reminders, review generation, and 24/7 support. There are zero hidden fees."
   }
 ];
 
@@ -119,13 +131,14 @@ const TESTIMONIALS = [
 
 // Comparison Data
 const COMPARISON_ROWS = [
-  { feature: "Setup Time", nexosia: "3 - 5 Days", agency: "4 - 8 Weeks", diy: "Weeks of trial & error" },
-  { feature: "Upfront Cost", nexosia: "Flat ₹15,000 / $200", agency: "₹50,000 - ₹1,50,000+", diy: "Free setup, but your own time" },
-  { feature: "WhatsApp Auto-Booking", nexosia: "Yes, pre-configured", agency: "Requires separate expensive API integration", diy: "Not supported natively" },
-  { feature: "Google Review Automation", nexosia: "Included", agency: "Extra monthly charge", diy: "Requires manual plugins setup" },
-  { feature: "Technical Knowledge Needed", nexosia: "Zero (We handle all setup)", agency: "Must manage developers", diy: "You have to configure everything yourself" },
-  { feature: "Hosting & SSL Security", nexosia: "Included in retainer", agency: "₹5,000+ yearly hosting bills", diy: "₹1,200 - ₹3,000/mo subscription" },
-  { feature: "Customer Support", nexosia: "24/7 Dedicated Support", agency: "Charges per maintenance ticket", diy: "Help docs & chat bots only" }
+  { feature: "Pricing Structure", nexosia: "₹599/mo Rental (₹250 Adv) or ₹10,000 Purchase", agency: "₹50,000 - ₹1,50,000+ upfront", diy: "Hidden plugins + time investment" },
+  { feature: "Security Deposit Terms", nexosia: "₹599 one-time (Reconciled per signed contract & law)", agency: "Non-refundable heavy deposits", diy: "Non-refundable annual subscriptions" },
+  { feature: "Setup Time", nexosia: "3 - 5 Days rapid delivery", agency: "4 - 8 Weeks", diy: "Weeks of trial & error" },
+  { feature: "Maintenance Inclusions", nexosia: "1st mo basic incl. + optional ₹149/mo pack (10 edits)", agency: "₹5,000 - ₹15,000/mo retainer", diy: "Self-maintained / Community forums" },
+  { feature: "WhatsApp Auto-Booking", nexosia: "Yes, pre-configured 24/7 assistant", agency: "Requires separate expensive API integration", diy: "Not supported natively" },
+  { feature: "Source Code & IP Rights", nexosia: "Rental flexibility or 100% Code Handover (₹10k plan)", agency: "Often retained / locked by agency", diy: "Proprietary lock-in (cannot export)" },
+  { feature: "Domain & Hosting Clarity", nexosia: "Subdomain incl. / Custom domain charged separately", agency: "₹5,000+ yearly hosting bills", diy: "₹1,200 - ₹3,000/mo recurring" },
+  { feature: "Founder Support", nexosia: "24/7 Direct Founder WhatsApp (+91 7860716837)", agency: "Slow support ticket queues", diy: "Generic AI chatbots only" }
 ];
 
 
@@ -215,7 +228,8 @@ function App() {
     businessName: '',
     phone: '',
     website: '',
-    message: ''
+    message: '',
+    selectedPlan: 'Plan 1: Monthly Website Rental (₹599/mo + ₹599 deposit | ₹250 adv)'
   });
   const [isSubmittingTopForm, setIsSubmittingTopForm] = useState(false);
 
@@ -248,7 +262,7 @@ function App() {
   const [tempBookingData, setTempBookingData] = useState({ name: '', service: '', slot: '' });
   
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [checkoutPlan, setCheckoutPlan] = useState(''); // 'growth' | 'scale'
+  const [checkoutPlan, setCheckoutPlan] = useState('plan1'); // 'plan1' | 'plan2' | 'plan3' | 'plan4'
   const [checkoutStep, setCheckoutStep] = useState('form'); // 'form' | 'processing' | 'success'
   const [checkoutForm, setCheckoutForm] = useState({ method: 'card', cardNumber: '', cardExpiry: '', cardCvv: '', upiId: '' });
 
@@ -892,6 +906,14 @@ function App() {
     startAiGenerationSequence(demoPayload);
   };
 
+  const handleSelectPlan = (planName) => {
+    setTopFormData(prev => ({ ...prev, selectedPlan: planName }));
+    const el = document.getElementById('custom-inquiry');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const handleTopFormSubmit = async (e) => {
     e.preventDefault();
     if (!topFormData.name || !topFormData.phone || !topFormData.businessName) {
@@ -905,6 +927,7 @@ function App() {
         name: topFormData.name,
         businessName: topFormData.businessName,
         phone: topFormData.phone,
+        selectedPlan: topFormData.selectedPlan || 'Plan 1: Monthly Website Rental (₹599/mo)',
         website: topFormData.website || 'None',
         message: topFormData.message || 'Submitted via top form',
         status: 'New',
@@ -919,6 +942,7 @@ function App() {
       `👤 *Name:* ${topFormData.name}\n` +
       `🏥 *Business:* ${topFormData.businessName}\n` +
       `📞 *WhatsApp:* ${topFormData.phone}\n` +
+      `📦 *Selected Plan:* ${topFormData.selectedPlan || 'Plan 1: Monthly Website Rental (₹599/mo)'}\n` +
       `🌐 *Current Website:* ${topFormData.website || 'None'}\n` +
       `📝 *Goals/Requirements:* ${topFormData.message || 'None'}`;
 
@@ -931,7 +955,8 @@ function App() {
       businessName: '',
       phone: '',
       website: '',
-      message: ''
+      message: '',
+      selectedPlan: 'Plan 1: Monthly Website Rental (₹599/mo + ₹599 deposit | ₹250 adv)'
     });
     setIsSubmittingTopForm(false);
   };
@@ -1023,7 +1048,7 @@ function App() {
       
       const textLower = userMsg.toLowerCase();
       if (textLower.includes('pricing') || textLower.includes('cost') || textLower.includes('package')) {
-        replyText = `Our pricing is transparent. We have a flat setup fee of ${currency === 'INR' ? '₹15,000' : '$200'} one-time, and a retainer starting at ${currency === 'INR' ? '₹999/mo' : '$15/mo'}. No setup charges apply during your 14-day trial!`;
+        replyText = `Our pricing is transparent: 1) Monthly Rental at ₹599/mo (₹250 advance token), 2) Yearly Rental at ₹5,000/yr (save ₹2,100+), 3) Monthly Rental + Maintenance Pack at ₹748/mo (up to 10 edits/mo), or 4) Permanent Website Purchase at ₹10,000 one-time with 100% source-code handover. Which plan fits your business?`;
       } else if (textLower.includes('setup') || textLower.includes('how long')) {
         replyText = "We configure everything and deliver your premium website + WhatsApp booking API ready to use in just 3 to 5 business days!";
       }
@@ -2674,6 +2699,28 @@ function App() {
                 </div>
               </div>
 
+              {/* Plan Selection Option */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-amber-300/80">Choose Preferred Pricing Plan *</label>
+                  <span className="text-[10px] text-amber-400/80 font-mono">₹250 Advance Token for Rentals</span>
+                </div>
+                <select 
+                  value={topFormData.selectedPlan}
+                  onChange={(e) => setTopFormData({...topFormData, selectedPlan: e.target.value})}
+                  className="w-full border border-amber-500/30 bg-[#080104]/90 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-amber-400 focus:bg-[#0D0206] transition-all text-amber-100 shadow-sm cursor-pointer font-medium"
+                >
+                  <option value="Plan 1: Monthly Website Rental (₹599/mo + ₹599 deposit | ₹250 adv)">Plan 1: Monthly Website Rental — ₹599/mo (₹250 Adv, ₹599 Deposit, Balance ₹948)</option>
+                  <option value="Plan 2: Yearly Website Rental (₹5,000/yr + ₹599 deposit | ₹250 adv)">Plan 2: Yearly Website Rental — ₹5,000/yr (Save ₹2,100+, ₹250 Adv, Balance ₹5,349)</option>
+                  <option value="Plan 3: Monthly Rental + Maintenance Pack (₹748/mo + ₹599 deposit)">Plan 3: Monthly Rental + Maintenance Pack — ₹748/mo (10 Edits/mo Fair-Use)</option>
+                  <option value="Plan 4: Permanent Website Purchase (₹10,000 one-time)">Plan 4: Permanent Website Purchase — ₹10,000 One-Time (100% Source Code & IP Handover)</option>
+                  <option value="Custom Enterprise / Consultation">Custom Enterprise / Free Consultation</option>
+                </select>
+                <p className="text-[10px] text-amber-300/60 pl-1">
+                  * All rental plans include 1st month basic maintenance. Security deposit (₹599) reconciliation follows the signed agreement and applicable law.
+                </p>
+              </div>
+
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold uppercase tracking-wider text-amber-300/80">Describe Your Goals & Specific Requirements</label>
                 <textarea 
@@ -3531,185 +3578,689 @@ function App() {
 
       {/* Pricing Section */}
       <section id="pricing" className="py-24 md:py-32 bg-[#0E0207] text-[#FEF3C7] border-t border-amber-900/40 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Ambient Mandala Background Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] pointer-events-none opacity-10">
+          <MandalaOrnament className="w-full h-full" opacity={0.18} />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
-          <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-cyan-accent font-heading">Transparent Pricing</h2>
-            <p className="text-3xl sm:text-4xl font-extrabold text-midnight font-heading tracking-tight">
-              Simple Packages. Everything Included.
-            </p>
-            <p className="text-slate-600 text-base">
-              Flat, low upfront fee for custom website development and chatbot configuration, followed by a minor SaaS retainer to maintain hosting and bot infrastructure.
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 px-4 py-1.5 rounded-full text-xs font-bold text-amber-400 uppercase tracking-widest font-mono">
+              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+              <span>Transparent Pricing Architecture</span>
+            </div>
+            
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-white font-heading tracking-tight leading-tight">
+              Fair Website Rentals or <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500">100% Code Ownership</span>
+            </h2>
+            
+            <p className="text-amber-100/70 text-sm sm:text-base leading-relaxed">
+              Launch a high-converting website with an automated 24/7 WhatsApp assistant. Choose flexible low-cost monthly rental, save with yearly rental, or purchase the complete codebase forever.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6">
-              
-              {/* Currency Toggle */}
-              <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-full border border-slate-200">
-                <button 
-                  onClick={() => setCurrency('INR')}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                    currency === 'INR' ? 'bg-white text-midnight shadow-md' : 'text-slate-500 hover:text-slate-808'
-                  }`}
-                >
-                  🇮🇳 INR (₹)
-                </button>
-                <button 
-                  onClick={() => setCurrency('USD')}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                    currency === 'USD' ? 'bg-white text-midnight shadow-md' : 'text-slate-500 hover:text-slate-808'
-                  }`}
-                >
-                  🇺🇸 USD ($)
-                </button>
+            {/* Legal & Security Deposit Notice Box */}
+            <div className="mt-6 bg-[#16040C]/90 border border-amber-500/30 rounded-2xl p-4 sm:p-5 text-left flex items-start gap-3.5 shadow-xl backdrop-blur-sm max-w-2xl mx-auto">
+              <Shield className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+              <div className="text-xs space-y-1">
+                <p className="font-bold text-amber-300 uppercase tracking-wider font-mono">
+                  ⚖️ Transparent Contract & Deposit Policy
+                </p>
+                <p className="text-amber-100/80 leading-relaxed">
+                  The one-time <strong>₹599 security deposit</strong> on rental plans is held separately from rental fees. It is neither a service fee nor a guaranteed unconditional refund; its reconciliation strictly follows the signed agreement and applicable law upon termination or conversion.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* 4 STUNNING PRICING CARDS */}
+          {/* ========================================================================= */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            
+            {/* ---------------- CARD 1: Monthly Website Rental ---------------- */}
+            <div className="bg-[#120308]/90 border border-amber-500/25 rounded-3xl p-6 sm:p-7 flex flex-col justify-between hover:border-amber-400/50 transition-all duration-300 shadow-xl relative backdrop-blur-md hover:-translate-y-1 text-left font-sans">
+              <div className="space-y-5">
+                <div className="flex justify-between items-start gap-2">
+                  <span className="bg-amber-500/10 text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-amber-500/30 font-mono">
+                    Plan 1 • Monthly Rental
+                  </span>
+                  <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                    Zero Lock-in
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-bold font-heading text-white">Monthly Website Rental</h3>
+                  <p className="text-amber-200/60 text-xs mt-1">Ideal for budding clinics, studios, salons & local businesses.</p>
+                </div>
+
+                {/* Pricing Display */}
+                <div className="border-y border-amber-900/40 py-4 space-y-1">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-3xl sm:text-4xl font-black text-amber-400 font-heading">₹599</span>
+                    <span className="text-amber-200/60 text-xs font-semibold">/ month</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-amber-300/80 font-medium">
+                    <span>+ ₹599 One-time Security Deposit</span>
+                  </div>
+                </div>
+
+                {/* Breakdown Mini Box */}
+                <div className="bg-[#1C050E]/80 border border-amber-900/50 rounded-2xl p-3.5 space-y-2 text-xs">
+                  <div className="flex justify-between items-center text-amber-200/80">
+                    <span>Initial Total Outlay:</span>
+                    <strong className="text-white font-mono">₹1,198</strong>
+                  </div>
+                  <div className="flex justify-between items-center text-emerald-400 font-semibold">
+                    <span>Advance to Start:</span>
+                    <span className="font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">₹250</span>
+                  </div>
+                  <div className="flex justify-between items-center text-amber-200/70 text-[11px]">
+                    <span>Balance on Delivery & Access:</span>
+                    <span className="text-amber-300 font-mono">₹948</span>
+                  </div>
+                  <div className="flex justify-between items-center text-amber-200/70 text-[11px] pt-1 border-t border-amber-900/40">
+                    <span>Subsequent Renewals:</span>
+                    <span className="text-white font-mono">₹599/mo</span>
+                  </div>
+                </div>
+
+                {/* Inclusions */}
+                <div className="space-y-2.5 pt-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300/70 block">What is Included:</span>
+                  <ul className="space-y-2 text-xs text-amber-100/80">
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                      <span><strong>1st month basic maintenance</strong> included from website activation</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                      <span><strong>Default subdomain included</strong> (custom domain & renewal separate unless agreed)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                      <span>Official 24/7 WhatsApp AI booking bot & lead sync</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                      <span>High-speed cloud hosting, SSL & mobile responsiveness</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
 
-              {/* Billing Period Toggle */}
-              <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-full border border-slate-200">
-                <button 
-                  onClick={() => setBillingPeriod('monthly')}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                    billingPeriod === 'monthly' ? 'bg-white text-midnight shadow-md' : 'text-slate-500 hover:text-slate-808'
-                  }`}
+              {/* Action Buttons */}
+              <div className="pt-6 space-y-2">
+                <a
+                  href={`https://wa.me/917860716837?text=${encodeURIComponent("Hi Devesh! I want to get started with Plan 1: Monthly Website Rental (₹599/month, ₹250 advance payment). Please share the setup details!")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-amber-500/20 text-center flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  Monthly
-                </button>
-                <button 
-                  onClick={() => setBillingPeriod('yearly')}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                    billingPeriod === 'yearly' ? 'bg-white text-midnight shadow-md' : 'text-slate-500 hover:text-slate-808'
-                  }`}
+                  <span>Book with ₹250 Advance</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-slate-950" />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => handleSelectPlan("Plan 1: Monthly Website Rental (₹599/mo + ₹599 deposit | ₹250 adv)")}
+                  className="w-full text-center text-[11px] text-amber-300/80 hover:text-amber-200 py-1 cursor-pointer transition-colors"
                 >
-                  Yearly (Save 20%)
+                  Or Select in Inquiry Form ↓
                 </button>
               </div>
+            </div>
 
+            {/* ---------------- CARD 2: Yearly Website Rental (VIP Highlighted) ---------------- */}
+            <div className="bg-gradient-to-b from-[#1C050E] to-[#120308] border-2 border-amber-400 rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-2xl shadow-amber-500/20 relative backdrop-blur-md scale-[1.02] text-left font-sans ring-1 ring-amber-400/50">
+              {/* Highlight Ribbon */}
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-slate-950 text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-wider shadow-md whitespace-nowrap">
+                👑 MOST POPULAR • SAVE ₹2,100+
+              </div>
+
+              <div className="space-y-5 pt-2">
+                <div className="flex justify-between items-start gap-2">
+                  <span className="bg-amber-400/20 text-amber-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-amber-400/50 font-mono">
+                    Plan 2 • Annual Rental
+                  </span>
+                  <span className="text-[10px] text-amber-300 font-extrabold bg-amber-500/20 px-2 py-0.5 rounded-full">
+                    Best Value
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-black font-heading text-white">Yearly Website Rental</h3>
+                  <p className="text-amber-200/70 text-xs mt-1">Maximum value for established practices & growing stores.</p>
+                </div>
+
+                {/* Pricing Display */}
+                <div className="border-y border-amber-500/30 py-4 space-y-1">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-3xl sm:text-4xl font-black text-white font-heading">₹5,000</span>
+                    <span className="text-amber-300/80 text-xs font-semibold">/ year</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-amber-300/90 font-medium">
+                    <span>+ ₹599 One-time Security Deposit</span>
+                    <span className="text-emerald-400 font-bold font-mono">~₹416/mo</span>
+                  </div>
+                </div>
+
+                {/* Breakdown Mini Box */}
+                <div className="bg-amber-500/10 border border-amber-400/30 rounded-2xl p-3.5 space-y-2 text-xs">
+                  <div className="flex justify-between items-center text-amber-200">
+                    <span>Initial Total Outlay:</span>
+                    <strong className="text-white font-mono text-sm">₹5,599</strong>
+                  </div>
+                  <div className="flex justify-between items-center text-emerald-400 font-semibold">
+                    <span>Advance to Start:</span>
+                    <span className="font-mono bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/40">₹250</span>
+                  </div>
+                  <div className="flex justify-between items-center text-amber-200/80 text-[11px]">
+                    <span>Balance on Delivery & Access:</span>
+                    <span className="text-amber-300 font-mono">₹5,349</span>
+                  </div>
+                  <div className="flex justify-between items-center text-amber-200/80 text-[11px] pt-1 border-t border-amber-500/20">
+                    <span>Annual Renewal:</span>
+                    <span className="text-white font-mono">₹5,000/year (Agreed terms)</span>
+                  </div>
+                </div>
+
+                {/* Inclusions */}
+                <div className="space-y-2.5 pt-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300 block">Everything in Monthly, Plus:</span>
+                  <ul className="space-y-2 text-xs text-amber-100/90">
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                      <span><strong>Saves ₹2,188/year</strong> compared to monthly renewals</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                      <span><strong>1st month basic maintenance</strong> included (extra arranged separately)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                      <span><strong>Default subdomain included</strong> (custom domain & renewal separate)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                      <span>Priority setup & direct founder WhatsApp access</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-6 space-y-2">
+                <a
+                  href={`https://wa.me/917860716837?text=${encodeURIComponent("Hi Devesh! I want to get started with Plan 2: Yearly Website Rental (₹5,000/year, ₹250 advance payment). Please share the setup details!")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs py-3.5 px-4 rounded-xl transition-all shadow-xl shadow-amber-500/30 text-center flex items-center justify-center gap-1.5 cursor-pointer hover:scale-102 active:scale-98"
+                >
+                  <span>Book with ₹250 Advance</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-slate-950" />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => handleSelectPlan("Plan 2: Yearly Website Rental (₹5,000/yr + ₹599 deposit | ₹250 adv)")}
+                  className="w-full text-center text-[11px] text-amber-300 hover:text-white py-1 cursor-pointer transition-colors font-semibold"
+                >
+                  Or Select in Inquiry Form ↓
+                </button>
+              </div>
+            </div>
+
+            {/* ---------------- CARD 3: Rental + Monthly Maintenance Pack ---------------- */}
+            <div className="bg-[#120308]/90 border border-amber-500/25 rounded-3xl p-6 sm:p-7 flex flex-col justify-between hover:border-amber-400/50 transition-all duration-300 shadow-xl relative backdrop-blur-md hover:-translate-y-1 text-left font-sans">
+              <div className="space-y-5">
+                <div className="flex justify-between items-start gap-2">
+                  <span className="bg-purple-500/10 text-purple-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-purple-500/30 font-mono">
+                    Plan 3 • Rental + Pack
+                  </span>
+                  <span className="text-[10px] text-purple-300 font-bold bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/30">
+                    10 Edits/Mo
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-bold font-heading text-white">Rental + Maintenance</h3>
+                  <p className="text-amber-200/60 text-xs mt-1">For businesses needing frequent price, menu, or banner updates.</p>
+                </div>
+
+                {/* Pricing Display */}
+                <div className="border-y border-amber-900/40 py-4 space-y-1">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-3xl sm:text-4xl font-black text-amber-400 font-heading">₹748</span>
+                    <span className="text-amber-200/60 text-xs font-semibold">/ month</span>
+                  </div>
+                  <div className="text-[11px] text-amber-300/80 font-medium">
+                    <span>₹599 rental + ₹149 Maintenance Pack</span>
+                  </div>
+                </div>
+
+                {/* Breakdown Mini Box */}
+                <div className="bg-[#1C050E]/80 border border-amber-900/50 rounded-2xl p-3.5 space-y-2 text-xs">
+                  <div className="flex justify-between items-center text-amber-200/80">
+                    <span>Initial Total Outlay:</span>
+                    <strong className="text-white font-mono">₹1,198</strong>
+                  </div>
+                  <div className="flex justify-between items-center text-emerald-400 font-semibold">
+                    <span>Advance to Start:</span>
+                    <span className="font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">₹250</span>
+                  </div>
+                  <div className="flex justify-between items-center text-amber-200/70 text-[11px]">
+                    <span>Balance on Delivery & Access:</span>
+                    <span className="text-amber-300 font-mono">₹948</span>
+                  </div>
+                  <div className="flex justify-between items-center text-amber-200/70 text-[11px] pt-1 border-t border-amber-900/40">
+                    <span>Recurring Cost:</span>
+                    <span className="text-purple-300 font-mono">₹748/mo (Opt-in only)</span>
+                  </div>
+                </div>
+
+                {/* Inclusions */}
+                <div className="space-y-2.5 pt-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300/70 block">Maintenance Pack Scope:</span>
+                  <ul className="space-y-2 text-xs text-amber-100/80">
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
+                      <span><strong>Up to 10 minor edits/month</strong> (subject to fair-use policy)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
+                      <span>Fast turnaround for menu, timings, prices, and photos</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
+                      <span>Pack requires <strong>explicit consent</strong>; not auto-applied to yearly rental</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
+                      <span>Default subdomain included (custom domain separate)</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-6 space-y-2">
+                <a
+                  href={`https://wa.me/917860716837?text=${encodeURIComponent("Hi Devesh! I want to get started with Plan 3: Website Rental + Monthly Maintenance Pack (₹748/month). Please share the setup details!")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-amber-500/20 text-center flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>Book Plan 3 (₹748/mo)</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-slate-950" />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => handleSelectPlan("Plan 3: Monthly Rental + Maintenance Pack (₹748/mo + ₹599 deposit)")}
+                  className="w-full text-center text-[11px] text-amber-300/80 hover:text-amber-200 py-1 cursor-pointer transition-colors"
+                >
+                  Or Select in Inquiry Form ↓
+                </button>
+              </div>
+            </div>
+
+            {/* ---------------- CARD 4: Permanent Website Purchase ---------------- */}
+            <div className="bg-[#120308]/90 border border-amber-500/25 rounded-3xl p-6 sm:p-7 flex flex-col justify-between hover:border-amber-400/50 transition-all duration-300 shadow-xl relative backdrop-blur-md hover:-translate-y-1 text-left font-sans">
+              <div className="space-y-5">
+                <div className="flex justify-between items-start gap-2">
+                  <span className="bg-emerald-500/10 text-emerald-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-emerald-500/30 font-mono">
+                    Plan 4 • One-Time Buy
+                  </span>
+                  <span className="text-[10px] text-emerald-300 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                    100% Code Handover
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-bold font-heading text-white">Permanent Purchase</h3>
+                  <p className="text-amber-200/60 text-xs mt-1">Full code handover & intellectual property rights per contract.</p>
+                </div>
+
+                {/* Pricing Display */}
+                <div className="border-y border-amber-900/40 py-4 space-y-1">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-3xl sm:text-4xl font-black text-amber-400 font-heading">₹10,000</span>
+                    <span className="text-amber-200/60 text-xs font-semibold">one-time</span>
+                  </div>
+                  <div className="text-[11px] text-emerald-400 font-medium">
+                    <span>Purchase arrangement • Not a rental</span>
+                  </div>
+                </div>
+
+                {/* Breakdown Mini Box */}
+                <div className="bg-[#1C050E]/80 border border-amber-900/50 rounded-2xl p-3.5 space-y-2 text-xs">
+                  <div className="flex justify-between items-center text-amber-200/80">
+                    <span>One-Time Price:</span>
+                    <strong className="text-white font-mono">₹10,000</strong>
+                  </div>
+                  <div className="flex justify-between items-center text-emerald-400 font-semibold">
+                    <span>Security Deposit:</span>
+                    <span className="font-mono text-emerald-300">₹0 (None required)</span>
+                  </div>
+                  <div className="flex justify-between items-center text-amber-200/70 text-[11px]">
+                    <span>Source Code Handover:</span>
+                    <span className="text-amber-300 font-semibold">Full GitHub / Zip</span>
+                  </div>
+                  <div className="flex justify-between items-center text-amber-200/70 text-[11px] pt-1 border-t border-amber-900/40">
+                    <span>Recurring Nexosia Fee:</span>
+                    <span className="text-white font-mono">₹0 (Zero)</span>
+                  </div>
+                </div>
+
+                {/* Inclusions */}
+                <div className="space-y-2.5 pt-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300/70 block">Written Agreement Terms:</span>
+                  <ul className="space-y-2 text-xs text-amber-100/80">
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span><strong>Full source-code & IP rights</strong> defined in written contract</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>Deliverables, 3rd-party license exclusions & scope clearly documented</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>Hosting, domain & future maintenance defined in writing (no false lifetime claims)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>Rental conversion: Prior rental dues / deposit reconciled upon purchase</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-6 space-y-2">
+                <a
+                  href={`https://wa.me/917860716837?text=${encodeURIComponent("Hi Devesh! I am interested in Plan 4: Permanent Website Purchase (₹10,000 one-time). Please share written agreement details & contract terms!")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-emerald-500/20 text-center flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>Purchase Website (₹10,000)</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-white" />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => handleSelectPlan("Plan 4: Permanent Website Purchase (₹10,000 one-time)")}
+                  className="w-full text-center text-[11px] text-amber-300/80 hover:text-amber-200 py-1 cursor-pointer transition-colors"
+                >
+                  Or Select in Inquiry Form ↓
+                </button>
+              </div>
             </div>
 
           </div>
 
-          {/* Side-by-Side Cards (Growth vs Scale Package) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            
-            {/* Card 1: Growth Package */}
-            <div className="bg-slate-900 text-white rounded-3xl shadow-xl overflow-hidden border border-slate-800 relative hover:scale-[1.01] transition-transform duration-300 flex flex-col justify-between">
-              <div className="p-8 sm:p-10 space-y-6 text-left font-sans">
-                <div>
-                  <h3 className="text-2xl font-bold font-heading text-cyan-electric">The Growth Package</h3>
-                  <p className="text-slate-400 text-xs mt-1">Perfect for local clinics, salons, spas, and boutique retail stores.</p>
-                </div>
+          {/* ========================================================================= */}
+          {/* PAYMENT FLOW & TRANSPARENCY INFOGRAPHIC */}
+          {/* ========================================================================= */}
+          <div className="mt-20 bg-[#140309] border border-amber-500/30 rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden backdrop-blur-xl text-left">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
-                <div className="border-y border-slate-800 py-6 space-y-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-extrabold font-heading text-white">{setupFee}</span>
-                    <span className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Setup fee</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-300 text-sm">
-                    <span>+</span>
-                    <span className="text-2xl font-bold font-heading text-white">{monthlyRetainer}</span>
-                    <span className="text-slate-400 text-xs">{billPeriodLabel} retainer</span>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Included Features:</h4>
-                  <ul className="space-y-3 text-slate-300 text-sm font-sans">
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4.5 w-4.5 text-cyan-accent flex-shrink-0" />
-                      <span>Custom Website (Up to 5 Pages)</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4.5 w-4.5 text-cyan-accent flex-shrink-0" />
-                      <span>WhatsApp Automated Booking Bot</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4.5 w-4.5 text-cyan-accent flex-shrink-0" />
-                      <span>1 Staff Member Calendar Integration</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4.5 w-4.5 text-cyan-accent flex-shrink-0" />
-                      <span>Google Reviews Automation</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4.5 w-4.5 text-cyan-accent flex-shrink-0" />
-                      <span>Secure Web Hosting & Free SSL</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="p-8 sm:p-10 pt-0 text-left">
-                <button 
-                  onClick={() => { setCheckoutPlan('growth'); openWizard('trial'); }}
-                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-sm py-4 rounded-xl transition-all cursor-pointer text-center"
-                >
-                  Start 14-Day Free Trial
-                </button>
-              </div>
+            <div className="max-w-3xl mb-8 space-y-2">
+              <span className="text-amber-400 font-mono text-xs font-bold uppercase tracking-wider">
+                ⚡ Simple 4-Step Payment Journey
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-white font-heading">
+                How Onboarding & Milestone Payments Work
+              </h3>
+              <p className="text-xs sm:text-sm text-amber-200/70">
+                Transparent milestones with zero guesswork. Start with just a ₹250 advance token for any rental plan.
+              </p>
             </div>
 
-            {/* Card 2: Scale Package */}
-            <div className="bg-white text-slate-800 rounded-3xl shadow-2xl overflow-hidden border-2 border-cyan-accent relative hover:scale-[1.01] transition-transform duration-305 flex flex-col justify-between">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
               
-              <div className="absolute top-0 right-0 bg-cyan-accent text-slate-955 font-bold text-[10px] px-5 py-2 rounded-bl-2xl uppercase tracking-widest font-heading">
-                Best Value / Scale
+              {/* Step 1 */}
+              <div className="bg-[#0A0205]/80 border border-amber-500/20 rounded-2xl p-5 space-y-3 relative group hover:border-amber-400/40 transition-all">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-sm font-mono">
+                  01
+                </div>
+                <h4 className="font-bold text-sm text-white font-heading">₹250 Advance Token</h4>
+                <p className="text-xs text-amber-100/70 leading-relaxed">
+                  Pay an advance payment of <strong>₹250</strong> (included in initial total) to kick off custom UI design and bot drafting.
+                </p>
               </div>
 
-              <div className="p-8 sm:p-10 space-y-6 text-left font-sans">
-                <div>
-                  <h3 className="text-2xl font-bold font-heading text-midnight">The Scale Package</h3>
-                  <p className="text-slate-505 text-xs mt-1">For multi-staff clinics, busy stores, and high-volume services.</p>
+              {/* Step 2 */}
+              <div className="bg-[#0A0205]/80 border border-amber-500/20 rounded-2xl p-5 space-y-3 relative group hover:border-amber-400/40 transition-all">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-sm font-mono">
+                  02
                 </div>
-
-                <div className="border-y border-slate-200 py-6 space-y-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-extrabold font-heading text-midnight">{scaleSetupFee}</span>
-                    <span className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Setup fee</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-600 text-sm">
-                    <span>+</span>
-                    <span className="text-2xl font-bold font-heading text-midnight">{scaleMonthlyRetainer}</span>
-                    <span className="text-slate-400 text-xs">{billPeriodLabel} retainer</span>
-                  </div>
-                </div>
-
-                <div className="space-y-4 font-sans">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-505">Everything in Growth plus:</h4>
-                  <ul className="space-y-3 text-slate-700 text-sm">
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4.5 w-4.5 text-cyan-accent-dark flex-shrink-0" />
-                      <span className="font-semibold text-midnight">Multi-Staff Scheduling (Up to 10 staff)</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4.5 w-4.5 text-cyan-accent-dark flex-shrink-0" />
-                      <span className="font-semibold text-midnight">Multi-Location Booking Support</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4.5 w-4.5 text-cyan-accent-dark flex-shrink-0" />
-                      <span>Custom CRM or API Integrations</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4.5 w-4.5 text-cyan-accent-dark flex-shrink-0" />
-                      <span>Stripe Payment Links in WhatsApp</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4.5 w-4.5 text-cyan-accent-dark flex-shrink-0" />
-                      <span>Priority 24/7 Dedicated Manager</span>
-                    </li>
-                  </ul>
-                </div>
+                <h4 className="font-bold text-sm text-white font-heading">3–5 Days Rapid Build</h4>
+                <p className="text-xs text-amber-100/70 leading-relaxed">
+                  We build your mobile-responsive luxury website and integrate the 24/7 WhatsApp appointment booking assistant.
+                </p>
               </div>
 
-              <div className="p-8 sm:p-10 pt-0 text-left">
-                <button 
-                  onClick={() => { setCheckoutPlan('scale'); openWizard('trial'); }}
-                  className="w-full bg-cyan-accent hover:bg-cyan-accent-dark text-slate-950 font-extrabold text-sm py-4 rounded-xl transition-all cursor-pointer text-center"
-                >
-                  Claim Scale Package
-                </button>
+              {/* Step 3 */}
+              <div className="bg-[#0A0205]/80 border border-amber-500/20 rounded-2xl p-5 space-y-3 relative group hover:border-amber-400/40 transition-all">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-sm font-mono">
+                  03
+                </div>
+                <h4 className="font-bold text-sm text-white font-heading">Delivery & Balance</h4>
+                <p className="text-xs text-amber-100/70 leading-relaxed">
+                  Inspect your live website. Pay the remaining balance (<strong>₹948</strong> for Monthly / <strong>₹5,349</strong> for Yearly) upon delivery and agreed admin access.
+                </p>
               </div>
+
+              {/* Step 4 */}
+              <div className="bg-[#0A0205]/80 border border-amber-500/20 rounded-2xl p-5 space-y-3 relative group hover:border-amber-400/40 transition-all">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-sm font-mono">
+                  04
+                </div>
+                <h4 className="font-bold text-sm text-white font-heading">Deposit & Maintenance</h4>
+                <p className="text-xs text-amber-100/70 leading-relaxed">
+                  The ₹599 security deposit reconciliation follows the signed agreement & law. 1st month basic maintenance included; optional ₹149/mo pack covers 10 edits.
+                </p>
+              </div>
+
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* UPDATED 4-OPTION PRICING COMPARISON TABLE */}
+          {/* ========================================================================= */}
+          <div className="mt-20 text-left space-y-6">
+            <div className="space-y-2">
+              <span className="text-amber-400 font-mono text-xs font-bold uppercase tracking-wider">
+                📊 Detailed Breakdown
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-white font-heading">
+                Side-by-Side Plan Comparison
+              </h3>
+              <p className="text-xs sm:text-sm text-amber-200/70">
+                Compare one-time charges, recurring fees, security deposits, and maintenance deliverables across all 4 plans.
+              </p>
             </div>
 
+            <div className="glass-gold-card rounded-3xl shadow-2xl overflow-hidden border border-amber-500/30">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-[#1C050E] text-amber-300 uppercase tracking-wider font-bold border-b border-amber-500/30">
+                      <th className="p-4 sm:p-5 font-mono">Plan Feature / Metric</th>
+                      <th className="p-4 sm:p-5 bg-amber-500/5 text-amber-300">
+                        <span className="block font-black text-sm">Plan 1: Monthly Rental</span>
+                        <span className="text-[10px] text-amber-200/60 font-normal">₹599 / month</span>
+                      </th>
+                      <th className="p-4 sm:p-5 bg-amber-500/15 text-amber-400 border-x border-amber-500/30">
+                        <span className="block font-black text-sm">Plan 2: Yearly Rental 👑</span>
+                        <span className="text-[10px] text-amber-300 font-normal">₹5,000 / year (Save ₹2,100+)</span>
+                      </th>
+                      <th className="p-4 sm:p-5 bg-purple-500/5 text-purple-300">
+                        <span className="block font-black text-sm">Plan 3: Rental + Pack</span>
+                        <span className="text-[10px] text-purple-200/60 font-normal">₹748 / month</span>
+                      </th>
+                      <th className="p-4 sm:p-5 bg-emerald-500/5 text-emerald-300">
+                        <span className="block font-black text-sm">Plan 4: Permanent Purchase</span>
+                        <span className="text-[10px] text-emerald-200/60 font-normal">₹10,000 One-Time</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  
+                  <tbody className="divide-y divide-amber-900/30 text-amber-100/90 font-sans">
+                    
+                    {/* Row 1: Plan Arrangement */}
+                    <tr className="hover:bg-amber-500/5 transition-colors">
+                      <td className="p-4 sm:p-5 font-bold text-white">Billing Arrangement</td>
+                      <td className="p-4 sm:p-5">
+                        <span className="bg-cyan-500/10 text-cyan-300 px-2 py-0.5 rounded text-[10px] font-bold border border-cyan-500/30">
+                          Recurring Monthly
+                        </span>
+                      </td>
+                      <td className="p-4 sm:p-5 bg-amber-500/5 border-x border-amber-500/30">
+                        <span className="bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded text-[10px] font-bold border border-amber-500/40">
+                          Recurring Annual
+                        </span>
+                      </td>
+                      <td className="p-4 sm:p-5">
+                        <span className="bg-purple-500/10 text-purple-300 px-2 py-0.5 rounded text-[10px] font-bold border border-purple-500/30">
+                          Monthly + Optional Add-on
+                        </span>
+                      </td>
+                      <td className="p-4 sm:p-5">
+                        <span className="bg-emerald-500/10 text-emerald-300 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-500/30">
+                          One-Time Purchase (Not Rental)
+                        </span>
+                      </td>
+                    </tr>
+
+                    {/* Row 2: Security Deposit */}
+                    <tr className="hover:bg-amber-500/5 transition-colors">
+                      <td className="p-4 sm:p-5 font-bold text-white">One-Time Security Deposit</td>
+                      <td className="p-4 sm:p-5 text-amber-300 font-mono">
+                        ₹599 <span className="text-[10px] block text-amber-200/60">(Reconciled per agreement & law)</span>
+                      </td>
+                      <td className="p-4 sm:p-5 bg-amber-500/5 text-amber-300 font-mono border-x border-amber-500/30">
+                        ₹599 <span className="text-[10px] block text-amber-200/60">(Separate from annual rental)</span>
+                      </td>
+                      <td className="p-4 sm:p-5 text-amber-300 font-mono">
+                        ₹599 <span className="text-[10px] block text-amber-200/60">(Reconciled per agreement & law)</span>
+                      </td>
+                      <td className="p-4 sm:p-5 text-emerald-400 font-mono font-bold">
+                        ₹0 (None required)
+                      </td>
+                    </tr>
+
+                    {/* Row 3: Advance to Start */}
+                    <tr className="hover:bg-amber-500/5 transition-colors">
+                      <td className="p-4 sm:p-5 font-bold text-white">Advance Payment to Start</td>
+                      <td className="p-4 sm:p-5 text-emerald-400 font-bold font-mono">
+                        ₹250 <span className="text-[10px] block text-amber-200/60">(Included in initial total)</span>
+                      </td>
+                      <td className="p-4 sm:p-5 bg-amber-500/5 text-emerald-400 font-bold font-mono border-x border-amber-500/30">
+                        ₹250 <span className="text-[10px] block text-amber-200/60">(Included in initial total)</span>
+                      </td>
+                      <td className="p-4 sm:p-5 text-emerald-400 font-bold font-mono">
+                        ₹250 <span className="text-[10px] block text-amber-200/60">(Included in initial total)</span>
+                      </td>
+                      <td className="p-4 sm:p-5 text-amber-300 font-mono">
+                        Milestone advance per written agreement
+                      </td>
+                    </tr>
+
+                    {/* Row 4: Initial Total Outlay */}
+                    <tr className="hover:bg-amber-500/5 transition-colors">
+                      <td className="p-4 sm:p-5 font-bold text-white">Initial Total Outlay</td>
+                      <td className="p-4 sm:p-5 font-bold font-mono text-white">₹1,198</td>
+                      <td className="p-4 sm:p-5 bg-amber-500/5 font-bold font-mono text-amber-300 border-x border-amber-500/30 text-sm">₹5,599</td>
+                      <td className="p-4 sm:p-5 font-bold font-mono text-white">
+                        ₹1,198 <span className="text-[10px] block text-amber-200/60">(Excluding future recurring)</span>
+                      </td>
+                      <td className="p-4 sm:p-5 font-bold font-mono text-emerald-400 text-sm">₹10,000</td>
+                    </tr>
+
+                    {/* Row 5: Balance on Delivery */}
+                    <tr className="hover:bg-amber-500/5 transition-colors">
+                      <td className="p-4 sm:p-5 font-bold text-white">Balance Due on Delivery</td>
+                      <td className="p-4 sm:p-5 text-amber-200 font-mono">
+                        ₹948 <span className="text-[10px] block text-amber-200/60">(After delivery & agreed access)</span>
+                      </td>
+                      <td className="p-4 sm:p-5 bg-amber-500/5 text-amber-200 font-mono border-x border-amber-500/30">
+                        ₹5,349 <span className="text-[10px] block text-amber-200/60">(After delivery & agreed access)</span>
+                      </td>
+                      <td className="p-4 sm:p-5 text-amber-200 font-mono">
+                        ₹948 <span className="text-[10px] block text-amber-200/60">(After delivery & agreed access)</span>
+                      </td>
+                      <td className="p-4 sm:p-5 text-amber-200 font-mono">
+                        Agreed milestone balance per contract
+                      </td>
+                    </tr>
+
+                    {/* Row 6: Ongoing Renewals */}
+                    <tr className="hover:bg-amber-500/5 transition-colors">
+                      <td className="p-4 sm:p-5 font-bold text-white">Subsequent Renewals</td>
+                      <td className="p-4 sm:p-5 font-mono text-white">₹599 / month</td>
+                      <td className="p-4 sm:p-5 bg-amber-500/5 font-mono text-amber-300 border-x border-amber-500/30">
+                        ₹5,000 / year (Agreed terms)
+                      </td>
+                      <td className="p-4 sm:p-5 font-mono text-purple-300">
+                        ₹748 / month (₹599 + ₹149 pack)
+                      </td>
+                      <td className="p-4 sm:p-5 font-mono text-emerald-400 font-bold">
+                        ₹0 (Zero recurring fees to Nexosia)
+                      </td>
+                    </tr>
+
+                    {/* Row 7: Maintenance Scope */}
+                    <tr className="hover:bg-amber-500/5 transition-colors">
+                      <td className="p-4 sm:p-5 font-bold text-white">Maintenance Scope</td>
+                      <td className="p-4 sm:p-5">1st month basic maintenance included from activation</td>
+                      <td className="p-4 sm:p-5 bg-amber-500/5 border-x border-amber-500/30">
+                        1st month basic maintenance included (extra arranged separately)
+                      </td>
+                      <td className="p-4 sm:p-5 text-purple-200 font-medium">
+                        Up to 10 minor edits/month (fair-use policy; explicit consent required)
+                      </td>
+                      <td className="p-4 sm:p-5">
+                        Defined in written agreement (No lifetime claims)
+                      </td>
+                    </tr>
+
+                    {/* Row 8: Domain & Hosting */}
+                    <tr className="hover:bg-amber-500/5 transition-colors">
+                      <td className="p-4 sm:p-5 font-bold text-white">Domain & Hosting</td>
+                      <td className="p-4 sm:p-5">Subdomain incl. / Custom domain & renewal charged separate</td>
+                      <td className="p-4 sm:p-5 bg-amber-500/5 border-x border-amber-500/30">
+                        Subdomain incl. / Custom domain & renewal charged separate
+                      </td>
+                      <td className="p-4 sm:p-5">Subdomain incl. / Custom domain & renewal charged separate</td>
+                      <td className="p-4 sm:p-5">Source-code handover; self-hostable anywhere per agreement</td>
+                    </tr>
+
+                    {/* Row 9: Source Code Handover */}
+                    <tr className="hover:bg-amber-500/5 transition-colors">
+                      <td className="p-4 sm:p-5 font-bold text-white">Source Code & IP Rights</td>
+                      <td className="p-4 sm:p-5 text-amber-300/70">Retained by Nexosia during rental</td>
+                      <td className="p-4 sm:p-5 bg-amber-500/5 text-amber-300/70 border-x border-amber-500/30">Retained by Nexosia during rental</td>
+                      <td className="p-4 sm:p-5 text-amber-300/70">Retained by Nexosia during rental</td>
+                      <td className="p-4 sm:p-5 text-emerald-400 font-bold">
+                        100% Source-Code Handover & IP Rights per contract
+                      </td>
+                    </tr>
+
+                    {/* Row 10: Legal Agreement */}
+                    <tr className="hover:bg-amber-500/5 transition-colors">
+                      <td className="p-4 sm:p-5 font-bold text-white">Agreement & Legal Scope</td>
+                      <td className="p-4 sm:p-5">Standard digital rental agreement</td>
+                      <td className="p-4 sm:p-5 bg-amber-500/5 border-x border-amber-500/30">Yearly rental agreement with renewal clauses</td>
+                      <td className="p-4 sm:p-5">Monthly rental agreement with optional maintenance add-on</td>
+                      <td className="p-4 sm:p-5">Written purchase agreement defining IP, deliverables & exclusions</td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -4174,22 +4725,48 @@ function App() {
             {checkoutStep === 'form' && (
               <div className="space-y-4">
                 <div>
-                  <span className="bg-cyan-500/10 text-cyan-accent text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                    🔒 Sandbox Simulator
+                  <span className="bg-amber-500/10 text-amber-400 text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-wider font-mono">
+                    🔒 Sandbox Payment Simulator
                   </span>
-                  <h3 className="text-xl font-bold font-heading text-white mt-2">Secure Checkout</h3>
+                  <h3 className="text-xl font-bold font-heading text-white mt-2">Simulated Booking Checkout</h3>
                   <p className="text-slate-400 text-xs mt-1">
-                    You have selected **The {checkoutPlan === 'scale' ? 'Scale' : 'Growth'} Package**.
+                    Select a plan to test simulated payment:
                   </p>
+                  
+                  {/* Plan pills */}
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    {[
+                      { id: 'plan1', name: 'Plan 1: Monthly Rental', price: '₹250 Adv • ₹599/mo' },
+                      { id: 'plan2', name: 'Plan 2: Yearly Rental', price: '₹250 Adv • ₹5,000/yr' },
+                      { id: 'plan3', name: 'Plan 3: Rental + Pack', price: '₹250 Adv • ₹748/mo' },
+                      { id: 'plan4', name: 'Plan 4: Purchase', price: '₹10,000 One-time' }
+                    ].map(p => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setCheckoutPlan(p.id)}
+                        className={`p-2 rounded-xl border text-[11px] text-left transition-all cursor-pointer ${
+                          (checkoutPlan === p.id || (!checkoutPlan && p.id === 'plan1'))
+                            ? 'border-amber-400 bg-amber-500/15 text-amber-300 font-bold'
+                            : 'border-slate-800 text-slate-400 hover:bg-slate-800/40'
+                        }`}
+                      >
+                        <div className="leading-tight">{p.name}</div>
+                        <div className="text-[10px] text-amber-400/80 mt-0.5">{p.price}</div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl flex justify-between items-center text-xs">
                   <div>
-                    <p className="font-bold text-white">Setup Fee:</p>
-                    <p className="text-slate-400 text-[10px]">One-time development</p>
+                    <p className="font-bold text-white">Amount Due Now (Simulated):</p>
+                    <p className="text-slate-400 text-[10px]">
+                      {checkoutPlan === 'plan4' ? 'Full one-time purchase' : 'Advance token (Balance due on delivery)'}
+                    </p>
                   </div>
-                  <p className="font-bold text-lg text-cyan-accent">
-                    {checkoutPlan === 'scale' ? (currency === 'INR' ? '₹25,000' : '$299') : (currency === 'INR' ? '₹12,000' : '$149')}
+                  <p className="font-bold text-lg text-amber-400 font-mono">
+                    {checkoutPlan === 'plan4' ? (currency === 'INR' ? '₹10,000' : '$130') : (currency === 'INR' ? '₹250' : '$5')}
                   </p>
                 </div>
 
