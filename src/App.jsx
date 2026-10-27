@@ -300,6 +300,8 @@ function App() {
   const [authPassword, setAuthPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [termsActiveTab, setTermsActiveTab] = useState('all');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [page, setPage] = useState('landing'); // 'landing' | 'admin' | 'demo'
   const [adminTab, setAdminTab] = useState('leads'); // 'leads' | 'trials' | 'ai-agent' | 'subscribers' | 'settings'
@@ -3615,7 +3617,7 @@ function App() {
                   ⚖️ Transparent Contract & Deposit Policy
                 </p>
                 <p className="text-amber-100/80 leading-relaxed">
-                  The one-time <strong>₹599 security deposit</strong> on rental plans is held separately from rental fees. It is neither a service fee nor a guaranteed unconditional refund; its reconciliation strictly follows the signed agreement and applicable law upon termination or conversion.
+                  The one-time <strong>₹599 security deposit</strong> on rental plans is held separately from rental fees. It is neither a service fee nor a guaranteed unconditional refund; its reconciliation strictly follows the signed agreement and applicable law upon termination or conversion. <button type="button" onClick={() => setIsTermsModalOpen(true)} className="text-amber-300 hover:text-white underline font-bold ml-1 cursor-pointer">Read Full Terms & Service Agreement (17 Sections) ➔</button>
                 </p>
               </div>
             </div>
@@ -4575,12 +4577,29 @@ function App() {
 
           </div>
 
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-505 font-medium">
-            <p>© {new Date().getFullYear()} Nexosia. All rights reserved.</p>
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 font-medium">
+            <p>© {new Date().getFullYear()} Nexosia Tech. All rights reserved. • UDYAM-UP-73-0045216</p>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-slate-300 transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-slate-300 transition-colors">Terms of Service</a>
-              <a href="#" className="hover:text-slate-300 transition-colors">Contact Support</a>
+              <button 
+                onClick={() => { setTermsActiveTab('all'); setIsTermsModalOpen(true); }}
+                className="hover:text-amber-300 transition-colors cursor-pointer text-xs"
+              >
+                Terms of Service
+              </button>
+              <button 
+                onClick={() => { setTermsActiveTab('legal'); setIsTermsModalOpen(true); }}
+                className="hover:text-amber-300 transition-colors cursor-pointer text-xs"
+              >
+                Privacy & Legal (20 Clauses)
+              </button>
+              <a 
+                href="https://wa.me/917860716837?text=Hi%20Devesh!%20I%20need%20support%20regarding%20Nexosia%20Tech%20services."
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="hover:text-amber-300 transition-colors"
+              >
+                Contact Support (+91 7860716837)
+              </a>
             </div>
           </div>
 
@@ -5575,6 +5594,573 @@ function App() {
           </div>
         </div>
       )}
+
+
+      {/* ========================================================================= */}
+      {/* 📜 OFFICIAL TERMS & CONDITIONS / SERVICE AGREEMENT FULL MODAL */}
+      {/* ========================================================================= */}
+      {isTermsModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200 font-sans">
+          <div className="bg-[#0e0207] border border-amber-500/40 text-amber-50 rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl relative overflow-hidden ring-1 ring-amber-500/30">
+            
+            {/* Modal Header */}
+            <div className="p-5 sm:p-6 border-b border-amber-900/40 bg-[#16040d] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest font-mono">Official Legal & Business Policy</span>
+                  <span className="bg-amber-500/10 text-amber-300 text-[10px] px-2 py-0.5 rounded border border-amber-500/30 font-mono">UDYAM-UP-73-0045216</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black font-heading text-white">
+                  Nexosia Tech — Website Rental Plans, Pricing & Terms of Service
+                </h3>
+                <p className="text-xs text-amber-200/70">
+                  Comprehensive legal policy, payment schedules, security deposit terms, maintenance fair-use limits & customer agreements.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                  title="Print or Save as PDF"
+                >
+                  <span>🖨️ Print / PDF</span>
+                </button>
+                <button 
+                  onClick={() => setIsTermsModalOpen(false)}
+                  className="p-2 text-amber-400 hover:text-white hover:bg-amber-500/10 rounded-xl transition-all cursor-pointer"
+                  title="Close Modal"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Section Tabs */}
+            <div className="px-5 py-2.5 bg-[#120308] border-b border-amber-900/30 flex gap-2 overflow-x-auto scrollbar-none text-xs shrink-0">
+              {[
+                { id: 'all', label: '📋 All 17 Sections' },
+                { id: 'pricing', label: '💰 Pricing & Deposits (Sec 1-5, 11)' },
+                { id: 'maintenance', label: '🛠️ Maintenance & Fair-Use (Sec 6-8)' },
+                { id: 'domain', label: '🌐 Domain, Storage & Renewal (Sec 3, 9, 10)' },
+                { id: 'legal', label: '⚖️ Legal Clauses 1–20 (Sec 15)' },
+                { id: 'company', label: '🏢 Registration & Company Info (Sec 16)' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setTermsActiveTab(tab.id)}
+                  className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all font-semibold cursor-pointer ${
+                    termsActiveTab === tab.id
+                      ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                      : 'text-amber-200/70 hover:text-white hover:bg-amber-500/10'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Scrollable Content Body */}
+            <div className="p-6 sm:p-8 overflow-y-auto space-y-8 text-xs sm:text-sm text-amber-100/90 leading-relaxed font-sans">
+              
+              {/* Document Overview Banner */}
+              <div className="bg-[#1a050f] border border-amber-500/30 rounded-2xl p-5 space-y-2">
+                <div className="flex justify-between items-start gap-4">
+                  <div>
+                    <h4 className="text-base font-extrabold text-white font-heading">NEXOSIA TECH — Your Business. Your Website. Made Simple.</h4>
+                    <p className="text-xs text-amber-200/80 mt-0.5">“Get Your Business Online Without a Large Upfront Investment.”</p>
+                  </div>
+                  <span className="text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/30 shrink-0">
+                    Official Document
+                  </span>
+                </div>
+                <p className="text-xs text-amber-100/70 pt-1 border-t border-amber-900/40">
+                  Prepared for small business owners across India: clinics, salons, cafes & restaurants, kirana and general stores, retail shops, coaching centres and professional service providers.
+                </p>
+              </div>
+
+              {/* ---------------- SECTION 1 ---------------- */}
+              {(termsActiveTab === 'all' || termsActiveTab === 'pricing') && (
+                <div className="space-y-3 border-b border-amber-900/30 pb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">1</span>
+                    <h4 className="text-base font-bold text-white font-heading">Basic Website Rental — ₹599/Month</h4>
+                  </div>
+                  <p className="text-amber-100/80">
+                    Nexosia Tech creates a basic business website and provides access to it under a monthly rental agreement.
+                  </p>
+                  <div className="bg-[#140309] border border-amber-900/40 rounded-xl p-4 space-y-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-300 block">What Your Rental Website Includes:</span>
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-amber-100/90">
+                      <li>✓ Business name and logo, if supplied by the customer.</li>
+                      <li>✓ Shop photographs and a basic business introduction.</li>
+                      <li>✓ Business address and opening hours.</li>
+                      <li>✓ Contact number and official WhatsApp button.</li>
+                      <li>✓ Basic product/service catalogue with agreed product limits.</li>
+                      <li>✓ Product names, photographs, prices and short descriptions.</li>
+                      <li>✓ Basic WhatsApp ordering or enquiry functionality.</li>
+                      <li>✓ Mobile-friendly responsive website layout.</li>
+                      <li>✓ Initial website setup, deployment and cloud hosting.</li>
+                      <li>✓ Admin access and password delivered according to agreed conditions (see Section 4).</li>
+                      <li>✓ Basic technical monitoring within agreed service scope.</li>
+                    </ul>
+                  </div>
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-xs text-amber-200">
+                    <strong>Important:</strong> The exact number of products, photographs, pages and included support is written in your customer agreement before development begins. The basic rental plan does not include unlimited products, unlimited content changes, e-commerce functionality or unlimited engineering support.
+                  </div>
+                </div>
+              )}
+
+              {/* ---------------- SECTION 3 ---------------- */}
+              {(termsActiveTab === 'all' || termsActiveTab === 'domain') && (
+                <div className="space-y-3 border-b border-amber-900/30 pb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">3</span>
+                    <h4 className="text-base font-bold text-white font-heading">Website Address and Domain Policy</h4>
+                  </div>
+                  <p className="text-amber-100/80">
+                    The standard rental website uses a fast Vercel subdomain, for example <code className="bg-[#1c050e] px-2 py-0.5 rounded text-amber-300 font-mono">yourshop.vercel.app</code>.
+                  </p>
+                  <p className="text-xs text-amber-200/70 italic">
+                    “This is the default web address provided with your rental website. You do not need to purchase a separate custom domain to start using the standard plan.”
+                  </p>
+                  <ul className="space-y-1.5 text-xs text-amber-100/90 list-disc pl-5">
+                    <li>Customers may request a professional custom domain, such as <strong>.in</strong> or <strong>.com</strong>, at an additional cost.</li>
+                    <li>Domain registration fees and annual renewal fees are separate unless otherwise agreed.</li>
+                    <li>Any third-party domain or hosting charges are disclosed to you before purchase.</li>
+                    <li>Custom domain connection is subject to technical compatibility and the provider’s terms.</li>
+                    <li>The standard plan does not automatically include a custom domain.</li>
+                    <li>Nexosia Tech does not promise permanently free third-party hosting, unlimited bandwidth, or uninterrupted availability.</li>
+                  </ul>
+                </div>
+              )}
+
+              {/* ---------------- SECTION 4 ---------------- */}
+              {(termsActiveTab === 'all' || termsActiveTab === 'pricing') && (
+                <div className="space-y-3 border-b border-amber-900/30 pb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">4</span>
+                    <h4 className="text-base font-bold text-white font-heading">Pricing and Initial Payment Schedule</h4>
+                  </div>
+                  
+                  <div className="overflow-x-auto border border-amber-900/50 rounded-xl">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-[#1c050e] text-amber-300 border-b border-amber-900/40">
+                          <th className="p-3">Particulars</th>
+                          <th className="p-3 text-right">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-amber-900/30">
+                        <tr><td className="p-3">First Month’s Website Rental</td><td className="p-3 text-right font-mono">₹599</td></tr>
+                        <tr><td className="p-3">Adjustable Security Deposit</td><td className="p-3 text-right font-mono">₹599</td></tr>
+                        <tr className="bg-amber-500/10 font-bold text-white"><td className="p-3">Total Initial Contract Value</td><td className="p-3 text-right font-mono text-amber-300">₹1,198</td></tr>
+                        <tr className="text-emerald-400 font-semibold"><td className="p-3">Advance Payment to Start Work</td><td className="p-3 text-right font-mono">₹250</td></tr>
+                        <tr className="text-amber-200"><td className="p-3">Remaining Payment After Delivery & Admin Access</td><td className="p-3 text-right font-mono">₹948</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="space-y-1.5 text-xs text-amber-100/90 pt-2">
+                    <h5 className="font-bold text-white uppercase tracking-wider text-[11px]">Payment Terms:</h5>
+                    <ol className="list-decimal pl-5 space-y-1">
+                      <li>The total initial contract value is ₹1,198.</li>
+                      <li>This consists of ₹599 for the first month’s rental and ₹599 as an adjustable security deposit.</li>
+                      <li>The customer pays <strong>₹250 in advance</strong> to start the project.</li>
+                      <li>The ₹250 advance is included in the ₹1,198 total. It is not an additional fee.</li>
+                      <li>The advance is non-refundable if the customer cancels after booking or after development has started, subject to applicable law and the agreed cancellation policy.</li>
+                      <li>The remaining ₹948 is payable after the agreed website has been delivered and admin access/password has been provided.</li>
+                      <li>The first month’s rental is included in the initial contract value and is never charged twice.</li>
+                      <li>From the second billing month onward, the rental is ₹599 per month.</li>
+                      <li>Optional maintenance, engineer work, custom domain registration and other approved services are billed separately.</li>
+                      <li>Nexosia Tech issues a payment receipt or invoice for every payment received.</li>
+                    </ol>
+                  </div>
+                </div>
+              )}
+
+              {/* ---------------- SECTION 5 ---------------- */}
+              {(termsActiveTab === 'all' || termsActiveTab === 'pricing') && (
+                <div className="space-y-3 border-b border-amber-900/30 pb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">5</span>
+                    <h4 className="text-base font-bold text-white font-heading">Security Deposit and Refund Policy</h4>
+                  </div>
+                  <ul className="space-y-1.5 text-xs text-amber-100/90 list-disc pl-5">
+                    <li>The ₹599 deposit is a one-time security deposit, not a recurring monthly fee.</li>
+                    <li>It may be adjusted only against permitted, documented outstanding rental or other charges that were expressly agreed in writing.</li>
+                    <li>Any adjustment must follow the agreement and applicable law.</li>
+                    <li>The deposit is not unlimited security for liabilities that exceed its available balance.</li>
+                    <li>At cancellation or termination, your account is reconciled.</li>
+                    <li>The remaining deposit balance, after permitted deductions, is refunded within the agreed refund period, where applicable.</li>
+                    <li>Nexosia Tech communicates all deductions and the final reconciliation to you.</li>
+                    <li>The deposit cannot be arbitrarily forfeited.</li>
+                  </ul>
+                  <div className="bg-[#140309] border border-amber-500/20 rounded-xl p-3 text-xs text-amber-200">
+                    <strong>Illustrative Example:</strong> If a customer has a refundable deposit of ₹599 and ₹300 in permitted outstanding dues, ₹300 may be deducted and the remaining ₹299 refunded, subject to the agreement and applicable law. The deposit does not automatically settle outstanding rental obligations that exceed the available deposit balance.
+                  </div>
+                </div>
+              )}
+
+              {/* ---------------- SECTION 6 & 7 ---------------- */}
+              {(termsActiveTab === 'all' || termsActiveTab === 'maintenance') && (
+                <div className="space-y-3 border-b border-amber-900/30 pb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">6</span>
+                    <h4 className="text-base font-bold text-white font-heading">First Month — Basic Maintenance Included</h4>
+                  </div>
+                  <p className="text-amber-100/80">
+                    The first month from the website activation date includes basic maintenance without an additional maintenance fee.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div className="bg-emerald-950/20 border border-emerald-500/30 p-3.5 rounded-xl space-y-1.5">
+                      <span className="font-bold text-emerald-400 block">✓ Included Assistance:</span>
+                      <ul className="space-y-1 text-emerald-200/90">
+                        <li>• Minor corrections to the delivered website.</li>
+                        <li>• Basic technical troubleshooting within the agreed scope.</li>
+                        <li>• Corrections to initial business information supplied during setup.</li>
+                        <li>• Assistance with basic website operation.</li>
+                      </ul>
+                    </div>
+                    <div className="bg-rose-950/20 border border-rose-500/30 p-3.5 rounded-xl space-y-1.5">
+                      <span className="font-bold text-rose-400 block">✕ Not Included:</span>
+                      <ul className="space-y-1 text-rose-200/90">
+                        <li>• Unlimited revisions.</li>
+                        <li>• Major redesigns or new pages.</li>
+                        <li>• Advanced integrations.</li>
+                        <li>• Additional paid third-party services.</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Section 7 */}
+                  <div className="pt-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">7</span>
+                      <h4 className="text-base font-bold text-white font-heading">Pay-As-You-Go Engineer Support — ₹50 per Request</h4>
+                    </div>
+                    <p className="text-xs text-amber-100/80">
+                      For customers who do not subscribe to the optional maintenance pack, minor approved changes after the first month may be charged at <strong>₹50 per request</strong>.
+                    </p>
+                    <div className="bg-[#140309] border border-amber-900/40 p-3 rounded-xl text-xs space-y-1 text-amber-100/90">
+                      <p><strong>What counts as one request:</strong> One clearly specified small task, or a reasonable group of closely related changes normally needing about 15 minutes or less of engineering work. You are told the charge and must approve it before work begins. Related edits are never split artificially.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ---------------- SECTION 8 ---------------- */}
+              {(termsActiveTab === 'all' || termsActiveTab === 'maintenance') && (
+                <div className="space-y-3 border-b border-amber-900/30 pb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">8</span>
+                    <h4 className="text-base font-bold text-white font-heading">Optional Monthly Maintenance Pack — ₹149/Month</h4>
+                  </div>
+                  <p className="text-amber-100/80">
+                    You may optionally subscribe to the Nexosia Tech Monthly Maintenance Pack for <strong>₹149 per month</strong>, in addition to the ₹599 monthly rental (Total: ₹748/month). It is never charged unless you explicitly opt in.
+                  </p>
+                  
+                  <div className="space-y-2 text-xs pt-1">
+                    <span className="font-bold text-amber-300 block uppercase tracking-wider text-[11px]">Fair-Use Policy (8 Rules):</span>
+                    <ol className="list-decimal pl-5 space-y-1 text-amber-100/90">
+                      <li>Up to 10 minor edit requests per billing month.</li>
+                      <li>Each request may include up to 3 closely related minor changes, such as updating the price, name and description of one existing product.</li>
+                      <li>Each request must relate to the existing website structure and functionality.</li>
+                      <li>Each request should normally need about 15 minutes or less of engineering work.</li>
+                      <li>Unused requests do not carry forward to the next billing month.</li>
+                      <li>Requests must be sent through the officially designated support channel.</li>
+                      <li>Routine requests are normally processed within 2–3 business days, subject to workload and receipt of complete information.</li>
+                      <li>If a request goes beyond the defined scope, Nexosia Tech explains the extra work and obtains your approval before charging for it. Extra minor requests are billed at ₹50 each with approval.</li>
+                    </ol>
+                  </div>
+                </div>
+              )}
+
+              {/* ---------------- SECTION 9 & 10 ---------------- */}
+              {(termsActiveTab === 'all' || termsActiveTab === 'domain') && (
+                <div className="space-y-3 border-b border-amber-900/30 pb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">9</span>
+                    <h4 className="text-base font-bold text-white font-heading">Website Images, Storage and Performance</h4>
+                  </div>
+                  <ul className="space-y-1 text-xs text-amber-100/90 list-disc pl-5">
+                    <li>Practical image optimization and compression is used to ensure fast load times.</li>
+                    <li>You must provide images and videos that you own or are authorized to use.</li>
+                    <li>Large video libraries and extensive media hosting are not included by default.</li>
+                    <li>Customers must keep backups of their original photographs, videos and business content.</li>
+                    <li>Nexosia Tech does not promise unlimited storage, unlimited uploads or guaranteed permanent retention of customer files.</li>
+                  </ul>
+
+                  <div className="pt-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">10</span>
+                      <h4 className="text-base font-bold text-white font-heading">Monthly Renewal and Website Suspension Policy</h4>
+                    </div>
+                    <ul className="space-y-1 text-xs text-amber-100/90 list-disc pl-5">
+                      <li>The monthly website rental is ₹599, due on the agreed monthly billing date.</li>
+                      <li>A reasonable grace period applies (7 calendar days after the due date).</li>
+                      <li>If payment remains unpaid after the grace period and notice, Nexosia Tech may temporarily suspend the website.</li>
+                      <li>Suspension does not mean website files or business data are immediately deleted.</li>
+                      <li>Restoring the website may require payment of documented overdue charges.</li>
+                      <li>Permanent deletion is never immediate or automatic on suspension and follows disclosed policy.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* ---------------- SECTION 11: PERMANENT PURCHASE ---------------- */}
+              {(termsActiveTab === 'all' || termsActiveTab === 'pricing') && (
+                <div className="space-y-3 border-b border-amber-900/30 pb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">11</span>
+                    <h4 className="text-base font-bold text-white font-heading">Own Your Website — One-Time Purchase (Rs. 10,000)</h4>
+                  </div>
+                  <p className="text-amber-100/80">
+                    A choice for customers who prefer a one-time development purchase instead of monthly rental.
+                  </p>
+                  
+                  <div className="bg-[#1C050E] border border-amber-500/30 rounded-xl p-4 space-y-2 text-xs">
+                    <span className="font-bold text-white block uppercase tracking-wider text-[11px]">The Written Purchase Agreement Specifies:</span>
+                    <ul className="space-y-1 text-amber-100/90 list-disc pl-5">
+                      <li>Exact website deliverables and technical specifications.</li>
+                      <li>Whether source code is included, and whether transferable intellectual property rights are included.</li>
+                      <li>Exclusions for third-party libraries, templates, fonts and licensed assets.</li>
+                      <li>Whether the website will be transferred to the customer’s own hosting account.</li>
+                      <li>Whether domain registration is included, and whether first-year hosting is included (only if expressly agreed).</li>
+                      <li>Who pays the subsequent annual domain and hosting renewal fees.</li>
+                      <li>Whether maintenance and engineer support are included.</li>
+                      <li>Delivery timeline and acceptance criteria.</li>
+                      <li>How the rental agreement, security deposit and outstanding amounts are reconciled if you switch from rental to permanent purchase.</li>
+                    </ul>
+                    <div className="pt-2 text-amber-300 font-semibold border-t border-amber-900/40">
+                      ⚠️ Note: The Rs. 10,000 package is not lifetime hosting, lifetime domain renewal or lifetime support, unless this is explicitly contracted in writing.
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ---------------- SECTION 13 & 14 ---------------- */}
+              {(termsActiveTab === 'all' || termsActiveTab === 'legal') && (
+                <div className="space-y-3 border-b border-amber-900/30 pb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">13</span>
+                    <h4 className="text-base font-bold text-white font-heading">Cancellation and Customer Responsibilities</h4>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div className="bg-[#140309] border border-amber-900/40 p-3.5 rounded-xl space-y-1.5">
+                      <span className="font-bold text-amber-400 block">Cancellation Policy:</span>
+                      <ul className="space-y-1 text-amber-100/90">
+                        <li>• Request cancellation through official support channel.</li>
+                        <li>• ₹250 advance is non-refundable if cancellation occurs after booking or after development starts.</li>
+                        <li>• Security deposit balance reconciled after permitted deductions.</li>
+                        <li>• No blanket waiver of statutory consumer rights applies.</li>
+                      </ul>
+                    </div>
+                    <div className="bg-[#140309] border border-amber-900/40 p-3.5 rounded-xl space-y-1.5">
+                      <span className="font-bold text-amber-400 block">Customer Responsibilities:</span>
+                      <ul className="space-y-1 text-amber-100/90">
+                        <li>• Provide accurate business information & authorized photos.</li>
+                        <li>• Review product names, descriptions and prices before publication.</li>
+                        <li>• Keep admin passwords secure.</li>
+                        <li>• Maintain independent backups of important business data.</li>
+                        <li>• Use website for lawful business purposes and obtain user consent.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ---------------- SECTION 15: COMPLETE 20 LEGAL CLAUSES ---------------- */}
+              {(termsActiveTab === 'all' || termsActiveTab === 'legal') && (
+                <div className="space-y-4 border-b border-amber-900/30 pb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">15</span>
+                    <h4 className="text-base font-bold text-white font-heading">Complete Legal Terms and Conditions (Clauses 1 to 20)</h4>
+                  </div>
+                  <p className="text-[11px] text-amber-300 font-mono">
+                    Legal review notice: This document is formulated under the governing laws of India.
+                  </p>
+
+                  <div className="space-y-3 text-xs divide-y divide-amber-900/30">
+                    
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">1. Scope of Service and Deliverables</strong>
+                      <p className="text-amber-100/80">Nexosia Tech will create and deliver the website described in the customer agreement. The number of products, photographs, pages and included support are stated in the agreement before development begins. Anything not listed is outside the standard scope and is quoted separately.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">2. Monthly Rental, Billing and Renewal</strong>
+                      <p className="text-amber-100/80">The website rental is ₹599 per month. The first month’s rental is part of the ₹1,198 initial contract value and is not charged twice. From the second billing month, rental is ₹599 per month, due on the agreed billing date. Nexosia Tech issues a receipt or invoice for payments received.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">3. Security Deposit and Permitted Deductions</strong>
+                      <p className="text-amber-100/80">The ₹599 deposit is a one-time deposit, not monthly rent. It may be adjusted only against documented outstanding rental or other charges expressly agreed in writing, in line with applicable law. Deductions and final reconciliation are communicated to the customer. The balance remaining after permitted deductions is refunded within the agreed refund period. The deposit is not arbitrarily forfeited.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">4. Advance Payment and Cancellation</strong>
+                      <p className="text-amber-100/80">The ₹250 advance starts the project and is part of the ₹1,198 total. It is non-refundable if the customer cancels after booking or after development has started, subject to applicable law and agreed cancellation terms. Cancellation requests are made through the official communication channel. Approved outstanding invoices must be settled before account closure.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">5. First-Month Basic Maintenance</strong>
+                      <p className="text-amber-100/80">The first month from the activation date includes basic maintenance without an additional fee: minor corrections, basic troubleshooting within agreed scope, corrections to initial business info and help with basic operation. It does not include unlimited revisions, major redesigns, new pages, advanced integrations or paid third-party services.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">6. Engineer Support Charges (₹50)</strong>
+                      <p className="text-amber-100/80">After the first month, customers without the maintenance pack may request minor changes at ₹50 per approved request. One request is one clearly specified small task, or a reasonable group of closely related changes (~15 mins or less). The customer is told the charge and approves it before work begins.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">7. Optional ₹149 Maintenance Pack and Fair-Use Limits</strong>
+                      <p className="text-amber-100/80">The pack costs ₹149 per month in addition to rental and applies only if customer expressly opts in; it is never added automatically. Includes up to 10 minor edit requests per billing month under fair use. Routine requests processed within 2–3 business days. Extra requests cost ₹50 each with prior approval.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">8. Major Development Quotations</strong>
+                      <p className="text-amber-100/80">Work beyond minor edits, such as new pages, redesigns, payment gateway integration, advanced booking or inventory systems, is quoted separately in writing and starts only after customer approval.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">9. Vercel Subdomain and Custom Domain Policy</strong>
+                      <p className="text-amber-100/80">The standard website uses a Vercel subdomain. A custom domain is optional and costs extra. Registration and renewal fees are separate unless otherwise agreed. Third-party domain/hosting charges are disclosed before purchase.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">10. Image Optimization and Storage Limitations</strong>
+                      <p className="text-amber-100/80">Nexosia Tech uses practical image optimization to improve speed. The standard plan includes agreed quantity and size of assets. Large video libraries and extensive media hosting are not included by default.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">11. Third-Party Hosting Availability and Outages</strong>
+                      <p className="text-amber-100/80">The website runs on third-party cloud hosting infrastructure. Nexosia Tech uses reasonable efforts to keep it available but cannot guarantee uninterrupted availability, or control outages, policy changes or pricing changes of third-party providers.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">12. Website Suspension, Restoration and Termination</strong>
+                      <p className="text-amber-100/80">A 7-day grace period applies after due date. If payment remains unpaid after notice, website may be temporarily suspended. Suspension does not mean immediate deletion. Restoration may require payment of documented overdue charges.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">13. Data Backup, Export, Retention and Deletion</strong>
+                      <p className="text-amber-100/80">Customers should keep their own backups of original photographs, videos and business content. Permanent deletion is never immediate or automatic on suspension, and follows disclosed policy.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">14. Website Ownership and Intellectual Property</strong>
+                      <p className="text-amber-100/80">Under the rental plan, website software, design and source code remain the property of Nexosia Tech or its licensors, and customer receives right to use website during active rental term. Customer retains full ownership of its own content, logo, photographs and business information.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">15. Permanent Purchase and Annual Renewals</strong>
+                      <p className="text-amber-100/80">The Rs. 10,000 one-time option is governed by a written purchase agreement specifying deliverables, source-code transfer, IP rights, 3rd-party exclusions, hosting transfer, domain and renewal responsibilities, maintenance and delivery criteria. Yearly website rental is Rs. 5,000/year plus a one-time Rs. 599 security deposit; annual renewal is Rs. 5,000/year.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">16. Customer Responsibilities</strong>
+                      <p className="text-amber-100/80">Customer provides accurate business information and authorized media, reviews content before publication, maintains password security, pays charges on time, keeps backups and complies with lawful business use.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">17. Confidentiality and Privacy</strong>
+                      <p className="text-amber-100/80">Nexosia Tech uses reasonable security practices and handles customer information according to its privacy policy and applicable law. Each party keeps the other's confidential information private.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">18. Limitation of Liability</strong>
+                      <p className="text-amber-100/80">To the extent permitted by law, Nexosia Tech is not liable for indirect or consequential losses, such as lost profits or lost business, arising from downtime or third-party outages. Total liability for a claim is limited to the amount customer paid for affected service.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">19. Dispute Resolution and Governing Law</strong>
+                      <p className="text-amber-100/80">These terms are governed by the laws of India. Parties will first attempt good-faith written resolution. Unresolved disputes may be taken to courts with proper jurisdiction in India. Statutory consumer forum rights are not affected.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <strong className="text-white block mb-0.5">20. Customer Approval of Additional Work and Charges</strong>
+                      <p className="text-amber-100/80">No additional charge applies unless it has been disclosed to the customer and approved before work begins. Approval can be given in writing, including by WhatsApp on the official support channel (+91 7860716837). Zero hidden fees.</p>
+                    </div>
+
+                  </div>
+                </div>
+              )}
+
+              {/* ---------------- SECTION 16: COMPANY INFORMATION ---------------- */}
+              {(termsActiveTab === 'all' || termsActiveTab === 'company') && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">16</span>
+                    <h4 className="text-base font-bold text-white font-heading">Company Information and Government Registration</h4>
+                  </div>
+
+                  <div className="bg-[#140309] border border-amber-500/30 rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-amber-300/70 uppercase">Company Name</span>
+                      <p className="font-bold text-white text-sm">Nexosia Tech</p>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-amber-300/70 uppercase">Industry / Business</span>
+                      <p className="font-bold text-white">Website Development & Technology Services</p>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-amber-300/70 uppercase">Udyam Registration Number (Govt of India)</span>
+                      <p className="font-bold text-amber-400 text-sm">UDYAM-UP-73-0045216</p>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-amber-300/70 uppercase">Official Live Web Domain</span>
+                      <p className="font-bold text-white">nexosia.vercel.app</p>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-amber-300/70 uppercase">Official Founder Phone / WhatsApp</span>
+                      <p className="font-bold text-emerald-400 text-sm">+91 7860716837</p>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-amber-300/70 uppercase">Founder & Technical Lead</span>
+                      <p className="font-bold text-white">Devesh Tripathi</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-amber-500/10 border border-amber-500/25 p-4 rounded-xl text-xs text-amber-200">
+                    <strong>Declaration:</strong> By paying the ₹250 initial advance token or engaging Nexosia Tech, the customer confirms having reviewed and accepted the pricing, payment schedule, security deposit terms, advance policy, engineer charges, maintenance limits, storage policy, cancellation conditions, and website ownership terms described in this document.
+                  </div>
+                </div>
+              )}
+
+            </div>
+
+            {/* Modal Sticky Footer */}
+            <div className="p-4 sm:p-5 bg-[#140309] border-t border-amber-900/40 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+              <span className="text-xs text-amber-200/70">
+                Have questions regarding the terms? Chat directly on WhatsApp: <strong className="text-amber-400">+91 7860716837</strong>
+              </span>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <a
+                  href={`https://wa.me/917860716837?text=${encodeURIComponent("Hi Devesh! I reviewed the Nexosia Tech Terms of Service & Pricing Document. I have a question regarding the terms.")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold text-xs py-2.5 px-4 rounded-xl transition-all shadow-md text-center"
+                >
+                  💬 Inquire on WhatsApp
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setIsTermsModalOpen(false)}
+                  className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 text-slate-950 font-black text-xs py-2.5 px-6 rounded-xl transition-all shadow-md cursor-pointer text-center"
+                >
+                  I Understand & Close
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
 
       {/* --- Admin Sign-in Modal --- */}
       {isLoginModalOpen && (
