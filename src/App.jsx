@@ -815,49 +815,52 @@ function App() {
     }
   };
 
-  const startAiGenerationSequence = async (demoPayload) => {
+  const startAiGenerationSequence = (demoPayload) => {
     setIsAiGenerating(true);
     setIsAiModalOpen(false);
-    setAiGenProgress(15);
+    setAiGenProgress(20);
     setAiGenStatusText('⚡ Initializing Nexosia Neural Design Core...');
 
+    // Non-blocking background telemetry / lead save (never freeze the UI)
     try {
-      // Save lead to Firestore backup
-      await addDoc(collection(db, 'leads'), {
-        name: demoPayload.businessName,
-        businessName: demoPayload.businessName,
+      addDoc(collection(db, 'leads'), {
+        name: demoPayload.businessName || 'AI Generated Demo',
+        businessName: demoPayload.businessName || 'Business Demo',
         phone: demoPayload.phone || 'AI Generated Demo',
         businessType: demoPayload.businessType || 'clinic',
         city: demoPayload.city || 'India',
         source: 'ai_demo_generator',
         status: 'Demo Generated',
         createdAt: serverTimestamp()
+      }).catch(err => {
+        console.warn("Firestore logging (offline fallback active)", err);
       });
     } catch (err) {
-      console.warn("Firestore logging (offline fallback active)", err);
+      console.warn("Firestore logging error", err);
     }
 
     setTimeout(() => {
-      setAiGenProgress(45);
-      setAiGenStatusText(`🔍 Analyzing business niche: "${demoPayload.businessName}"...`);
-    }, 700);
+      setAiGenProgress(50);
+      setAiGenStatusText(`🔍 Analyzing business niche: "${demoPayload.businessName || 'Your Business'}"...`);
+    }, 500);
 
     setTimeout(() => {
-      setAiGenProgress(75);
+      setAiGenProgress(78);
       setAiGenStatusText('🎨 Synthesizing responsive UI components & branding palette...');
-    }, 1400);
+    }, 1100);
 
     setTimeout(() => {
       setAiGenProgress(95);
       setAiGenStatusText('💬 Initializing 24/7 WhatsApp AI booking simulator...');
-    }, 2100);
+    }, 1700);
 
     setTimeout(() => {
+      setAiGenProgress(100);
       setIsAiGenerating(false);
       setActiveDemoData(demoPayload);
       setPage('demo');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 2800);
+    }, 2300);
   };
 
   const handleQuickAiGenerate = (customPrompt) => {
